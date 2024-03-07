@@ -1,13 +1,9 @@
-import type {
-  ConvertedFile,
-  SupportFileExtensions,
-  SupportedFileTypes,
-} from "../../types/index.js";
+import type { ConvertedFile, SupportedFileTypes } from "../../types/index.js";
 import { readFile, writeFile } from "fs/promises";
 import path from "path";
-import ffmpeg from "fluent-ffmpeg";
+import ffmpeg, { type FfprobeData } from "fluent-ffmpeg";
 import sharp from "sharp";
-import fileType from "file-type";
+import fileType, { type FileExtension } from "file-type";
 import { StatusCodes } from "http-status-codes";
 
 import imageExtensions from "image-extensions/image-extensions.json" assert { type: "json" };
@@ -18,14 +14,18 @@ import { APIError } from "../../error/index.js";
 class FileTmp {
   constructor() {}
 
-  private async bufferToFile(file: Buffer, ext: string) {
-    const randomName = Math.round(Date.now() * Math.random());
-    const filePath = path.join(global.tmp.path, `${randomName}.${ext}`);
+  protected randomFileName() {
+    return Math.round(Date.now() * Math.random());
+  }
+
+  protected async bufferToFile(file: Buffer, ext: FileExtension) {
+    const randomName = this.randomFileName();
+    const filePath = path.join(tmp.path, `${randomName}.${ext}`);
     await writeFile(filePath, file);
     return filePath;
   }
 
-  private async fileToBuffer(path: string) {
+  protected async fileToBuffer(path: string) {
     return readFile(path);
   }
 }
@@ -42,35 +42,106 @@ export default class FileConverter extends FileTmp {
     return (await fileType.fromBuffer(file))?.ext ?? "";
   }
 
+  private async ffprobeMetadata(path: string) {
+    return new Promise<FfprobeData>((resolve, reject) => {
+      ffmpeg.ffprobe(path, (err, metadata) => {
+        if (err) reject(err);
+        else resolve(metadata);
+      });
+    });
+  }
+
   private async toWebp(image: Buffer) {
-    return await sharp(image)
-      .webp({ quality: 100 })
-      // .resize({ width: 1280, height: 720, fit: "cover" })
-      .toBuffer();
+    return (
+      sharp(image)
+        .webp({ quality: 100 })
+        // .resize({ width: 1280, height: 720, fit: "cover" })
+        .toBuffer()
+    );
   }
 
-  private async toMp4(video: Buffer) {
-    return video;
+  private async initFfmpeg() {
+    const [{ path: ffmpegPath }, { path: ffprobePath }] = await Promise.all([
+      import("@ffmpeg-installer/ffmpeg"),
+      import("@ffprobe-installer/ffprobe"),
+    ]);
+    ffmpeg.setFfmpegPath(ffmpegPath);
+    ffmpeg.setFfprobePath(ffprobePath);
   }
 
-  private async toMp3(audio: Buffer) {
-    return audio;
+  private async toMp4(video: Buffer, ext: FileExtension) {
+    const input = await this.bufferToFile(video, ext);
+    const output = path.join(tmp.path, `${this.randomFileName()}.mp4`);
+
+    return new Promise<Buffer>((resolve, reject) => {
+      ffmpeg(input)
+        .fps(30)
+        .videoCodec("libx264")
+        .audioCodec("aac")
+        .audioQuality(0) // Set audio quality to 0 for default compression
+        .addOption("-preset", "slow") // Use the 'slow' preset for better compression
+        .addOption("-crf", "23") // Constant Rate Factor (0-51, where lower is better quality. 23 is default.)
+        .format("mp4")
+        .output(output)
+        .on("end", () => {
+          this.fileToBuffer(output)
+            .then((buffer) => resolve(buffer))
+            .catch(reject);
+        })
+        .on("error", reject)
+        .run();
+    });
+  }
+
+  private async toMp3(audio: Buffer, ext: FileExtension) {
+    const input = await this.bufferToFile(audio, ext);
+    const output = path.join(tmp.path, `${this.randomFileName()}.mp3`);
+
+    return new Promise<Buffer>((resolve, reject) => {
+      ffmpeg(input)
+        .audioCodec("libmp3lame") // MP3 audio codec
+        .audioBitrate("128k") // Audio bitrate: 128 kbps
+        .format("mp3")
+        .output(output)
+        .on("end", () => {
+          this.fileToBuffer(output)
+            .then((buffer) => resolve(buffer))
+            .catch(reject);
+        })
+        .on("error", reject)
+        .run();
+    });
   }
 
   private async toGlb(model: Buffer) {
     return model;
   }
 
-  private async fileType(buffer: Buffer) {
+  private async fileType(buffer: Buffer): Promise<ConvertedFile | null> {
     const ext = await this.format(buffer);
-    let type: SupportedFileTypes | null = null;
+    let type: SupportedFileTypes;
 
     if (imageExtensions.includes(ext)) type = "image";
-    else if (videoExtensions.includes(ext)) type = "video";
-    else if (audioExtensions.includes(ext)) type = "audio";
     else if (ext === "glb") type = "model";
+    else if (videoExtensions.includes(ext)) {
+      type = "video";
+      const input = await this.bufferToFile(buffer, ext as FileExtension);
+      const metadata = await this.ffprobeMetadata(input);
+      const duration = Math.floor(metadata.format.duration ?? Infinity);
+      if (duration > 60) return null;
+    } else if (audioExtensions.includes(ext)) {
+      type = "audio";
+      const input = await this.bufferToFile(buffer, ext as FileExtension);
+      const metadata = await this.ffprobeMetadata(input);
+      const duration = Math.floor(metadata.format.duration ?? Infinity);
+      if (duration > 60) return null;
+    } else return null;
 
-    return { buffer, type };
+    return {
+      buffer,
+      type,
+      originalExt: ext as FileExtension,
+    };
   }
 
   private async fileConvert(files: ConvertedFile[]) {
@@ -80,10 +151,12 @@ export default class FileConverter extends FileTmp {
           file.buffer = await this.toWebp(file.buffer);
           break;
         case "video":
-          file.buffer = await this.toMp4(file.buffer);
+          await this.initFfmpeg();
+          file.buffer = await this.toMp4(file.buffer, file.originalExt);
           break;
         case "audio":
-          file.buffer = await this.toMp3(file.buffer);
+          await this.initFfmpeg();
+          file.buffer = await this.toMp3(file.buffer, file.originalExt);
           break;
         case "model":
           file.buffer = await this.toGlb(file.buffer);
@@ -103,7 +176,7 @@ export default class FileConverter extends FileTmp {
     const typePromises = this.files.map((file) => this.fileType(file));
     const types = await Promise.all(typePromises);
     const filterTypes = types.filter(
-      (file) => file.type !== null
+      (file) => file !== null
     ) as ConvertedFile[];
 
     const converted = await this.fileConvert(filterTypes);

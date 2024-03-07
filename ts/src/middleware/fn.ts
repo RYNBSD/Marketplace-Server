@@ -1,4 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
+import type { TResponse } from "../types/index.js";
 import { StatusCodes } from "http-status-codes";
 import { APIError } from "../error/index.js";
 import { schema } from "../schema/index.js";
@@ -10,7 +11,7 @@ const {
 
 export async function isAuthorize(
   req: Request,
-  res: Response,
+  res: Response<never, TResponse["Locals"]["User"]>,
   next: NextFunction
 ) {
   const parse = isUUID.safeParse(req.session.user?.id ?? "");
@@ -24,13 +25,16 @@ export async function isAuthorize(
   if (user === null)
     throw APIError.middleware(StatusCodes.UNAUTHORIZED, "User not found");
 
-  res.locals.user = user;
+  res.locals = {
+    user,
+    seller: null,
+  };
   return next();
 }
 
 export async function isUnauthorize(
   req: Request,
-  res: Response,
+  res: Response<never, TResponse["Locals"]["User"]>,
   next: NextFunction
 ) {
   const parse = isUUID.safeParse(req.session.user?.id ?? "");
@@ -45,6 +49,9 @@ export async function isUnauthorize(
   if (user === null)
     throw APIError.middleware(StatusCodes.UNAUTHORIZED, "User not found");
 
-  res.locals.user = user;
+  res.locals = {
+    user,
+    seller: null,
+  };
   return next();
 }

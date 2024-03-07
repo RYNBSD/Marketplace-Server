@@ -13,7 +13,11 @@ export default {
   GLOBAL: {
     PUBLIC: "public",
     UPLOAD: "upload",
+  },
+  UPLOAD: {
     IMAGE: "image",
+    IMAGES: "images",
+    VIDEOS: "videos",
   },
   ERROR: {
     HANDLERS: ["controller", "middleware", "socket", "server"]

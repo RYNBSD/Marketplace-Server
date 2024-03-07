@@ -7,7 +7,7 @@ import { KEYS } from "../../constant/index.js";
 
 const { upload } = config;
 const { handleAsync } = util.fn;
-const { GLOBAL } = KEYS;
+const { UPLOAD } = KEYS;
 const {
   fn: { isAuthorize, isUnauthorize },
   security: { csrf },
@@ -21,7 +21,7 @@ auth.post(
   "/sign-up",
   handleAsync(csrf),
   handleAsync(isUnauthorize),
-  upload.single(GLOBAL.IMAGE),
+  upload.single(UPLOAD.IMAGE),
   handleAsync(signUp)
 );
 

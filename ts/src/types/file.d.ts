@@ -1,3 +1,5 @@
+import type { FileExtension } from "file-type";
+
 export type FileConvertMap = {
   image: "webp";
   video: "mp4";
@@ -9,6 +11,7 @@ export type SupportedFileTypes = keyof FileConvertMap;
 export type SupportFileExtensions = FileConvertMap[SupportedFileTypes];
 
 export type ConvertedFile = {
-  type: SupportedFileTypes;
   buffer: Buffer;
+  originalExt: FileExtension;
+  type: SupportedFileTypes;
 };

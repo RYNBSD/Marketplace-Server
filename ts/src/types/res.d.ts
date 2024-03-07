@@ -3,6 +3,7 @@ import { Tables } from "./db.js";
 type Locals = {
   User: {
     user: Tables["User"];
+    seller: Tables["Seller"] | null;
   };
 };
 

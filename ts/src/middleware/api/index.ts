@@ -1,5 +1,5 @@
-
+const [{ default: user }] = await Promise.all([import("./user.js")]);
 
 export default {
-
-} as const
+  user,
+} as const;

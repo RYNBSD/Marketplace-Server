@@ -2,11 +2,18 @@ import { Router } from "express";
 import { util } from "../../util/index.js";
 import { middleware } from "../../middleware/index.js";
 import { controller } from "../../controller/index.js";
+import { config } from "../../config/index.js";
+import { KEYS } from "../../constant/index.js";
 
+const { UPLOAD } = KEYS;
+const { upload } = config;
 const { handleAsync } = util.fn;
 const {
   fn: { isAuthorize },
   security: { csrf },
+  api: {
+    user: { isSeller },
+  },
 } = middleware;
 const {
   profile,
@@ -26,9 +33,21 @@ user.post(
   "/become-seller",
   handleAsync(csrf),
   handleAsync(isAuthorize),
+  upload.single(UPLOAD.IMAGE),
   handleAsync(becomeSeller)
 );
 
-user.put("/", handleAsync(csrf), handleAsync(isAuthorize), handleAsync(update));
+user.put(
+  "/",
+  handleAsync(csrf),
+  handleAsync(isAuthorize),
+  upload.single(UPLOAD.IMAGE),
+  handleAsync(update)
+);
 
-user.delete("/", handleAsync(isAuthorize), handleAsync(deleteUser));
+user.delete(
+  "/",
+  handleAsync(isAuthorize),
+  handleAsync(isSeller),
+  handleAsync(deleteUser)
+);
