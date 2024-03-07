@@ -10,7 +10,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "code:check": "yarn lint && tsc",
-    "code:push": "yarn code:check && git push -u origin main",
+    "code:push": "git push -u origin master:server",
     "build": "node esbuild.config.js"
   },
   "engines": {
