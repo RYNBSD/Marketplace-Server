@@ -23,4 +23,4 @@ passport.deserializeUser((id: string, done) => {
 passport.use(localStrategy);
 passport.use(bearerStrategy);
 
-export default passport;
+export { passport };

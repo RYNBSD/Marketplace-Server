@@ -1,6 +1,6 @@
 {
-    "ignore": ["README", "./**/*.json"],
-    "events": {
-        "start": "clear || cls"
-    }
+  "ignore": ["README", "./**/*.json"],
+  "events": {
+    "start": "clear || cls"
+  }
 }

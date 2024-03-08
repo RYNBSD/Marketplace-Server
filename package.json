@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "cross-env NODE_ENV=\"production\" node ./js/index.js",
+    "start": "cross-env NODE_ENV=\"production\" node ./build/index.js",
     "dev": "cross-env NODE_ENV=\"development\" concurrently \"npx tsc --watch\" \"nodemon ./js/index.js\"",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -99,6 +99,7 @@
     "eslint": "^8.57.0",
     "eslint-plugin-security": "^2.1.1",
     "nodemon": "^3.1.0",
+    "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
   }
 }

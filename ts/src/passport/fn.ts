@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import type { Strategy } from "passport";
-import passport from "./index.js";
+import {passport} from "./index.js";
 import { APIError } from "../error/index.js";
 import { StatusCodes } from "http-status-codes";
 
@@ -19,7 +19,7 @@ export async function authenticate(
           return reject(
             APIError.passport(
               StatusCodes.BAD_REQUEST,
-              info?.message ?? "User not found"
+              info?.message ?? "Invalid info"
             )
           );
 

@@ -1,6 +1,8 @@
 import { DataTypes } from "sequelize";
 import type { Tables } from "../types/index.js";
-import { ENUM } from "../constant/index.js";
+import { ENUM, VALUES } from "../constant/index.js";
+
+const { MAX } = VALUES.LENGTH;
 
 export const User = sequelize.define<Tables["User"]>(
   "user",
@@ -11,11 +13,11 @@ export const User = sequelize.define<Tables["User"]>(
       defaultValue: DataTypes.UUIDV4,
     },
     username: {
-      type: DataTypes.STRING(50),
+      type: DataTypes.STRING(MAX.USER.USERNAME),
       allowNull: false,
     },
     email: {
-      type: DataTypes.STRING(100),
+      type: DataTypes.STRING(MAX.USER.EMAIL),
       allowNull: false,
       unique: true,
     },
@@ -24,11 +26,11 @@ export const User = sequelize.define<Tables["User"]>(
       allowNull: true,
     },
     password: {
-      type: DataTypes.STRING(72),
+      type: DataTypes.STRING(MAX.USER.PASSWORD),
       allowNull: false,
     },
     image: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.STRING(MAX.IMAGE),
       allowNull: false,
       unique: true,
     },
@@ -87,11 +89,12 @@ export const Seller = sequelize.define<Tables["Seller"]>(
       defaultValue: DataTypes.UUIDV4,
     },
     storeName: {
-      type: DataTypes.STRING(20),
+      type: DataTypes.STRING(MAX.SELLER.STORE_NAME),
+      unique: true,
       allowNull: false,
     },
     image: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.STRING(MAX.IMAGE),
       allowNull: false,
     },
     userId: {
@@ -143,7 +146,7 @@ export const SellerLinks = sequelize.define<Tables["SellerLinks"]>(
       allowNull: false,
     },
     link: {
-      type: DataTypes.STRING(75),
+      type: DataTypes.STRING(MAX.SELLER.LINK),
       allowNull: false,
     },
     sellerId: {
@@ -162,6 +165,34 @@ export const SellerLinks = sequelize.define<Tables["SellerLinks"]>(
   }
 );
 
+export const SellerViewers = sequelize.define<Tables["SellerViewers"]>(
+  "seller-viewer",
+  {
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true,
+    },
+    userId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: {
+        model: User,
+        key: "id",
+      },
+    },
+    sellerId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: {
+        model: Seller,
+        key: "id",
+      },
+    },
+  },
+  { tableName: "SellerViewer", createdAt: true, updatedAt: false }
+);
+
 export const Category = sequelize.define<Tables["Category"]>(
   "category",
   {
@@ -171,15 +202,15 @@ export const Category = sequelize.define<Tables["Category"]>(
       defaultValue: DataTypes.UUIDV4,
     },
     name: {
-      type: DataTypes.STRING(30),
+      type: DataTypes.STRING(MAX.CATEGORY.NAME),
       allowNull: false,
     },
     nameAr: {
-      type: DataTypes.STRING(30),
+      type: DataTypes.STRING(MAX.CATEGORY.NAME),
       allowNull: false,
     },
     image: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.STRING(MAX.IMAGE),
       allowNull: false,
     },
     sellerId: {
@@ -198,6 +229,34 @@ export const Category = sequelize.define<Tables["Category"]>(
   }
 );
 
+export const CategoryViewers = sequelize.define<Tables["CategoryViewers"]>(
+  "category-viewer",
+  {
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true,
+    },
+    userId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: {
+        model: User,
+        key: "id",
+      },
+    },
+    categoryId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: {
+        model: Category,
+        key: "id",
+      },
+    },
+  },
+  { tableName: "CategoryViewer", createdAt: true, updatedAt: false }
+);
+
 export const Product = sequelize.define<Tables["Product"]>(
   "product",
   {
@@ -207,19 +266,19 @@ export const Product = sequelize.define<Tables["Product"]>(
       defaultValue: DataTypes.UUIDV4,
     },
     title: {
-      type: DataTypes.STRING(50),
+      type: DataTypes.STRING(MAX.PRODUCT.TITLE),
       allowNull: false,
     },
     titleAr: {
-      type: DataTypes.STRING(50),
+      type: DataTypes.STRING(MAX.PRODUCT.TITLE),
       allowNull: false,
     },
     description: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.STRING(MAX.PRODUCT.DESCRIPTION),
       allowNull: true,
     },
     descriptionAr: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.STRING(MAX.PRODUCT.DESCRIPTION),
       allowNull: true,
     },
     stock: {
@@ -227,7 +286,7 @@ export const Product = sequelize.define<Tables["Product"]>(
       allowNull: false,
     },
     model: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.STRING(MAX.PRODUCT.MODEL),
       allowNull: true,
     },
     price: {
@@ -264,11 +323,11 @@ export const ProductInfo = sequelize.define<Tables["ProductInfo"]>(
       defaultValue: DataTypes.UUIDV4,
     },
     info: {
-      type: DataTypes.STRING(50),
+      type: DataTypes.STRING(MAX.PRODUCT.INFO),
       allowNull: false,
     },
     infoAr: {
-      type: DataTypes.STRING(50),
+      type: DataTypes.STRING(MAX.PRODUCT.INFO),
       allowNull: false,
     },
     productId: {
@@ -287,6 +346,30 @@ export const ProductInfo = sequelize.define<Tables["ProductInfo"]>(
   }
 );
 
+export const ProductQuality = sequelize.define<Tables["ProductQuality"]>(
+  "product-quality",
+  {
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true,
+    },
+    quality: {
+      type: DataTypes.ENUM(...ENUM.QUALITY),
+      allowNull: false,
+    },
+    productId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: {
+        model: Product,
+        key: "id"
+      }
+    }
+  },
+  { tableName: "ProductQuality", timestamps: true }
+);
+
 export const ProductImages = sequelize.define<Tables["ProductImages"]>(
   "product-image",
   {
@@ -296,7 +379,7 @@ export const ProductImages = sequelize.define<Tables["ProductImages"]>(
       defaultValue: DataTypes.UUIDV4,
     },
     image: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.STRING(MAX.IMAGE),
       allowNull: false,
     },
     productId: {
@@ -342,7 +425,7 @@ export const ProductRatings = sequelize.define<Tables["ProductRatings"]>(
       allowNull: false,
     },
     comment: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.STRING(MAX.PRODUCT.COMMENT),
       allowNull: true,
     },
   },
@@ -362,7 +445,7 @@ export const ProductSizes = sequelize.define<Tables["ProductSizes"]>(
       defaultValue: DataTypes.UUIDV4,
     },
     size: {
-      type: DataTypes.STRING(10),
+      type: DataTypes.STRING(MAX.PRODUCT.SIZE),
       allowNull: false,
     },
     productId: {
@@ -391,7 +474,7 @@ export const ProductColors = sequelize.define<Tables["ProductColors"]>(
       defaultValue: DataTypes.UUIDV4,
     },
     color: {
-      type: DataTypes.STRING(7),
+      type: DataTypes.STRING(MAX.PRODUCT.COLOR),
       allowNull: false,
     },
     productId: {
@@ -411,6 +494,34 @@ export const ProductColors = sequelize.define<Tables["ProductColors"]>(
   }
 );
 
+export const ProductViewers = sequelize.define<Tables["ProductViewers"]>(
+  "product-viewer",
+  {
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true,
+    },
+    userId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: {
+        model: User,
+        key: "id",
+      },
+    },
+    productId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: {
+        model: Product,
+        key: "id",
+      },
+    },
+  },
+  { tableName: "ProductViewer", createdAt: true, updatedAt: false }
+);
+
 export const Tag = sequelize.define<Tables["Tag"]>(
   "tag",
   {
@@ -420,14 +531,14 @@ export const Tag = sequelize.define<Tables["Tag"]>(
       defaultValue: DataTypes.UUIDV4,
     },
     tag: {
-      type: DataTypes.STRING(20),
+      type: DataTypes.STRING(MAX.TAG),
       allowNull: false,
     },
-    userId: {
+    sellerId: {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
-        model: User,
+        model: Seller,
         key: "id",
       },
     },

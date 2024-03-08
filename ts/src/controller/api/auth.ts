@@ -10,11 +10,17 @@ import { util } from "../../util/index.js";
 import { lib } from "../../lib/index.js";
 import { KEYS, VALUES } from "../../constant/index.js";
 
-const { COOKIE, HTTP } = KEYS;
+const { COOKIE } = KEYS;
 const { SignUp, VerifyEmail, ForgotPassword } = schema.req.api.auth;
 
 export default {
-  async signUp(req: Request, res: Response<TResponse["Body"]["Success"]>) {
+  async signUp(
+    req: Request,
+    res: Response<
+      TResponse["Body"]["Success"],
+      Partial<TResponse["Locals"]["User"]>
+    >
+  ) {
     const { Body } = SignUp;
     const { username, email, password, theme, locale } = Body.parse(req.body);
 
@@ -64,7 +70,10 @@ export default {
   },
   async signIn(
     req: Request,
-    res: Response<TResponse["Body"]["Success"]>,
+    res: Response<
+      TResponse["Body"]["Success"],
+      Partial<TResponse["Locals"]["User"]>
+    >,
     next: NextFunction
   ) {
     const user = (await authenticate("local", req, res, next)) as {
@@ -86,7 +95,10 @@ export default {
       )
       .json({ success: true, data: { user } });
   },
-  async signOut(req: Request, res: Response<TResponse["Body"]["Success"]>) {
+  async signOut(
+    req: Request,
+    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]["User"]>
+  ) {
     req.logOut((err) => {
       if (err) throw err;
 
@@ -97,7 +109,10 @@ export default {
   },
   async me(
     req: Request,
-    res: Response<TResponse["Body"]["Success"]>,
+    res: Response<
+      TResponse["Body"]["Success"],
+      Partial<TResponse["Locals"]["User"]>
+    >,
     next: NextFunction
   ) {
     const user = (await authenticate("bearer", req, res, next)) as {
@@ -119,7 +134,13 @@ export default {
       )
       .json({ success: true, data: { user } });
   },
-  async verifyEmail(req: Request, res: Response<TResponse["Body"]["Success"]>) {
+  async verifyEmail(
+    req: Request,
+    res: Response<
+      TResponse["Body"]["Success"],
+      Partial<TResponse["Locals"]["User"]>
+    >
+  ) {
     const { Query } = VerifyEmail;
     const { token } = Query.parse(req.query);
     const { verify } = util.jwt;
@@ -144,32 +165,26 @@ export default {
   },
   async forgotPassword(
     req: Request,
-    res: Response<TResponse["Body"]["Success"]>
+    res: Response<
+      TResponse["Body"]["Success"],
+      Partial<TResponse["Locals"]["User"]>
+    >
   ) {
+    const { user } = res.locals;
+    if (typeof user === "undefined")
+      throw APIError.server(
+        StatusCodes.INTERNAL_SERVER_ERROR,
+        "Unprovided user by access middleware (auth:forgot-password)"
+      );
+
     const { Body } = ForgotPassword;
-    const { code, password, confirmPassword } = Body.parse(req.body);
-
-    if (password !== confirmPassword)
-      throw APIError.controller(StatusCodes.CONFLICT, "Passwords not equal");
-
-    const { getHeader } = util.fn;
-    const access = getHeader(req.headers, HTTP.HEADERS.ACCESS_TOKEN);
-    if (access instanceof Array)
-      throw APIError.controller(StatusCodes.CONFLICT, "Too many access tokens");
-    if (access.length === 0)
-      throw APIError.controller(StatusCodes.BAD_REQUEST, "Empty access token");
-
-    const { verify } = util.access;
-    const key = req.session.access?.key ?? "";
-    const iv = req.session.access?.iv ?? "";
-    const { valid, id } = verify("", key, iv, code);
-
-    if (!valid)
-      throw APIError.controller(StatusCodes.BAD_REQUEST, "Invalid token");
+    const { password } = Body.parse(req.body);
 
     const { hash } = util.bcrypt;
-    const { User } = model.db;
-    await User.update({ password: hash(password) }, { where: { id } });
+    await user.update({ password: hash(password) });
+
+    if (user.dataValues.emailVerified === null)
+      await user.update({ emailVerified: new Date() });
 
     res.status(StatusCodes.OK).json({ success: true });
   },

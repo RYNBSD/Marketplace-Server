@@ -52,6 +52,10 @@ export default {
     req;
     res.status(StatusCodes.OK).json({ success: true });
   },
+  async order(req: Request, res: Response<TResponse["Body"]["Success"]>) {
+    req;
+    res.status(StatusCodes.OK).json({ success: true });
+  },
   async becomeSeller(
     req: Request,
     res: Response<TResponse["Body"]["Success"], TResponse["Locals"]["User"]>
@@ -93,7 +97,7 @@ export default {
       sellerId: seller.dataValues.id,
     });
 
-    res.status(StatusCodes.OK).json({
+    res.status(StatusCodes.CREATED).json({
       success: true,
       data: {
         seller: {

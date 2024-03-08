@@ -10,7 +10,7 @@ const { handleAsync } = util.fn;
 const { UPLOAD } = KEYS;
 const {
   fn: { isAuthorize, isUnauthorize },
-  security: { csrf },
+  security: { csrf, access },
 } = middleware;
 const { signUp, signIn, signOut, me, verifyEmail, forgotPassword } =
   controller.api.auth;
@@ -43,5 +43,6 @@ auth.put(
   "/forgot-password",
   handleAsync(csrf),
   handleAsync(isUnauthorize),
+  handleAsync(access),
   handleAsync(forgotPassword)
 );

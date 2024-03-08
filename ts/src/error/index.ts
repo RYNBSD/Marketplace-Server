@@ -105,7 +105,7 @@ export class APIError {
     }
 
     static passport(statusCode: StatusCodes, message: string = "") {
-        return new BaseError(statusCode, message, "passport", false);
+        return new BaseError(statusCode, message, "passport", true);
     }
 
     static server(statusCode: StatusCodes, message: string = "") {

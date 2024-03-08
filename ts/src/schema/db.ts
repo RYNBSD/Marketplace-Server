@@ -56,6 +56,13 @@ export const SellerLinks = z
   .merge(SellerId)
   .strict();
 
+export const SellerViewers = z
+  .object({})
+  .merge(Id)
+  .merge(SellerId)
+  .merge(UserId)
+  .strict();
+
 export const Category = z
   .object({
     name: z.string(),
@@ -64,6 +71,13 @@ export const Category = z
   })
   .merge(Id)
   .merge(SellerId)
+  .strict();
+
+export const CategoryViewers = z
+  .object({})
+  .merge(Id)
+  .merge(CategoryId)
+  .merge(UserId)
   .strict();
 
 export const Product = z
@@ -85,6 +99,14 @@ export const ProductInfo = z
   .object({
     info: z.string(),
     infoAr: z.string(),
+  })
+  .merge(Id)
+  .merge(ProductId)
+  .strict();
+
+export const ProductQuality = z
+  .object({
+    quality: z.enum(ENUM.QUALITY),
   })
   .merge(Id)
   .merge(ProductId)
@@ -123,12 +145,19 @@ export const ProductColors = z
   .merge(ProductId)
   .strict();
 
+export const ProductViewers = z
+  .object({})
+  .merge(Id)
+  .merge(ProductId)
+  .merge(UserId)
+  .strict();
+
 export const Tag = z
   .object({
     tag: z.string(),
   })
   .merge(Id)
-  .merge(UserId)
+  .merge(SellerId)
   .strict();
 
 export const ProductTags = z.object({}).merge(ProductId).merge(TagId).strict();

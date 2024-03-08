@@ -13,7 +13,6 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import responseTime from "response-time";
 import { StatusCodes } from "http-status-codes";
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import cookieEncrypt from "cookie-encrypter";
 import { ENV, KEYS, VALUES } from "./src/constant/index.js";
@@ -74,7 +73,7 @@ if (!IS_PRODUCTION) {
 const { db, tmp } = config;
 await tmp.initTmpDir();
 await db.connect();
-const { default: passport } = await import("./src/passport/index.js")
+const { passport } = await import("./src/passport/index.js")
 const { router } = await import("./src/router/index.js");
 await db.init();
 
@@ -104,7 +103,6 @@ app.use(
 );
 app.use(passport.initialize());
 app.use(passport.session());
-
 
 app.use(`/v${ENV.API.VERSION}`, router);
 app.use(express.static(path.join(__root, KEYS.GLOBAL.PUBLIC)));

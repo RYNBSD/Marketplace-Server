@@ -11,13 +11,11 @@ const { handleAsync } = util.fn;
 const {
   fn: { isAuthorize },
   security: { csrf },
-  api: {
-    user: { isSeller },
-  },
 } = middleware;
 const {
   profile,
   orders,
+  order,
   becomeSeller,
   update,
   delete: deleteUser,
@@ -28,6 +26,8 @@ export const user = Router();
 user.get("/", handleAsync(isAuthorize), handleAsync(profile));
 
 user.get("/orders", handleAsync(isAuthorize), handleAsync(orders));
+
+user.get("/orders/:id", handleAsync(isAuthorize), handleAsync(order));
 
 user.post(
   "/become-seller",
@@ -45,9 +45,4 @@ user.put(
   handleAsync(update)
 );
 
-user.delete(
-  "/",
-  handleAsync(isAuthorize),
-  handleAsync(isSeller),
-  handleAsync(deleteUser)
-);
+user.delete("/", handleAsync(isAuthorize), handleAsync(deleteUser));
