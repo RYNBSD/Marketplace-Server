@@ -5,6 +5,7 @@ export default {
       JWT: "X-JWT-Token",
       ACCESS_TOKEN: "Access-Token",
       METHOD_OVERRIDE: "X-HTTP-Method-Override",
+      NO_COMPRESSION: "No-Compression",
     },
   },
   COOKIE: {
@@ -20,6 +21,6 @@ export default {
     VIDEOS: "videos",
   },
   ERROR: {
-    HANDLERS: ["controller", "middleware", "socket", "server"]
+    HANDLERS: ["controller", "middleware", "socket", "server", "passport"]
   }
 } as const;

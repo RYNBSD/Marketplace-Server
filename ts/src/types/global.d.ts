@@ -1,6 +1,6 @@
 /* eslint-disable no-var */
 import type { Sequelize } from "sequelize";
-import { DirectoryResult } from "tmp-promise"
+import { DirectoryResult } from "tmp-promise";
 
 declare global {
   var IS_PRODUCTION: boolean;
@@ -10,8 +10,10 @@ declare global {
 
   namespace NodeJS {
     interface ProcessEnv {
-      PORT: number | `${number}`;
       NODE_ENV: "production" | "development";
+      PORT: number | `${number}`;
+
+      API_VERSION: number | `${number}`;
 
       COOKIE_PARSER: string;
       COOKIE_SECRET: string;
@@ -27,6 +29,12 @@ declare global {
 
       MAIL_USER: string;
       MAIL_PASS: string;
+    }
+  }
+
+  namespace Express {
+    interface User {
+      id: string;
     }
   }
 }

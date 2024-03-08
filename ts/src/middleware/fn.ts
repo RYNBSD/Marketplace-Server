@@ -2,23 +2,18 @@ import type { Request, Response, NextFunction } from "express";
 import type { TResponse } from "../types/index.js";
 import { StatusCodes } from "http-status-codes";
 import { APIError } from "../error/index.js";
-import { schema } from "../schema/index.js";
 import { model } from "../model/index.js";
-
-const {
-  validators: { isUUID },
-} = schema;
 
 export async function isAuthorize(
   req: Request,
   res: Response<never, TResponse["Locals"]["User"]>,
   next: NextFunction
 ) {
-  const parse = isUUID.safeParse(req.session.user?.id ?? "");
-  if (!parse.success)
-    throw APIError.middleware(StatusCodes.UNAUTHORIZED, parse.error.message);
+  const authenticate = req.isAuthenticated();
 
-  const id = parse.data;
+  if (!authenticate) throw APIError.middleware(StatusCodes.UNAUTHORIZED);
+
+  const { user: id } = req.session.passport!;
   const { User } = model.db;
 
   const user = await User.findOne({ where: { id }, limit: 1, plain: true });
@@ -37,12 +32,14 @@ export async function isUnauthorize(
   res: Response<never, TResponse["Locals"]["User"]>,
   next: NextFunction
 ) {
-  const parse = isUUID.safeParse(req.session.user?.id ?? "");
-  if (!parse.success) return next();
+  const unauthenticated = req.isUnauthenticated();
+  if (unauthenticated) return next();
 
+  const { user: id } = req.session.passport!;
   const { User } = model.db;
+
   const user = await User.findOne({
-    where: { id: parse.data },
+    where: { id },
     limit: 1,
     plain: true,
   });

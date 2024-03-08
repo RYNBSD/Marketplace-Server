@@ -104,6 +104,10 @@ export class APIError {
         return new BaseError(statusCode, message, "socket", true);
     }
 
+    static passport(statusCode: StatusCodes, message: string = "") {
+        return new BaseError(statusCode, message, "passport", false);
+    }
+
     static server(statusCode: StatusCodes, message: string = "") {
         return new BaseError(statusCode, message, "server", false);
     }

@@ -20,6 +20,9 @@ import { ENV, KEYS, VALUES } from "./src/constant/index.js";
 import { config } from "./src/config/index.js";
 import { fileURLToPath } from "url";
 import path from "path";
+import { randomUUID } from "crypto";
+import { z } from "zod";
+import { util } from "./src/util/index.js";
 
 const app = express();
 app.set("env", ENV.NODE.ENV);
@@ -30,7 +33,11 @@ app.enable("json escape");
 
 app.use(timeout(VALUES.TIME.MINUTE));
 app.use(responseTime());
-app.use(cors());
+app.use(cors({
+  origin: "http://localhost:3000",
+  exposedHeaders: "*",
+  credentials: true,
+}));
 app.use(
   rateLimit({
     windowMs: VALUES.TIME.MINUTE,
@@ -41,7 +48,13 @@ app.use(
   compression({
     level: 9,
     filter(req, res) {
-      return compression.filter(req, res);
+      const { getHeader } = util.fn;
+      const { NO_COMPRESSION } = KEYS.HTTP.HEADERS;
+      const noCompressionHeader = getHeader(req.headers, NO_COMPRESSION);
+
+      const toBoolean = z.coerce.boolean();
+      const noCompression = toBoolean.parse(noCompressionHeader);
+      return noCompression ? false : compression.filter(req, res);
     },
   })
 );
@@ -58,6 +71,13 @@ if (!IS_PRODUCTION) {
   await import("colors");
 }
 
+const { db, tmp } = config;
+await tmp.initTmpDir();
+await db.connect();
+const { default: passport } = await import("./src/passport/index.js")
+const { router } = await import("./src/router/index.js");
+await db.init();
+
 app.use(methodOverride(KEYS.HTTP.HEADERS.METHOD_OVERRIDE));
 app.use(morgan(IS_PRODUCTION ? "combined" : "dev"));
 app.use(express.urlencoded({ extended: true }));
@@ -69,29 +89,30 @@ app.use(helmet());
 app.use(hpp());
 app.use(
   session({
+    genid: () => randomUUID(),
     secret: ENV.SESSION.SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: {
       maxAge: VALUES.TIME.MINUTE * 15,
-      httpOnly: IS_PRODUCTION,
       sameSite: IS_PRODUCTION,
+      httpOnly: IS_PRODUCTION,
       secure: IS_PRODUCTION,
       path: "/",
     },
   })
 );
+app.use(passport.initialize());
+app.use(passport.session());
 
-const { db, tmp } = config;
-await tmp.initTmpDir();
-await db.connect();
-const { router } = await import("./src/router/index.js");
-await db.init();
 
-app.use("/", router);
+app.use(`/v${ENV.API.VERSION}`, router);
 app.use(express.static(path.join(__root, KEYS.GLOBAL.PUBLIC)));
-app.use("*", (_, res) => res.status(StatusCodes.NOT_FOUND).end());
+app.use("*", (_, res) => res.sendStatus(StatusCodes.NOT_FOUND));
 app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
+  if (!IS_PRODUCTION) {
+    console.error(error);
+  }
   res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
     message: error instanceof Error ? error.message : error,
   });

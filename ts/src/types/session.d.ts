@@ -6,9 +6,9 @@ import type { schema } from "../schema/index.js";
 const { session } = schema;
 
 type Csrf = { csrf: z.infer<typeof session.Csrf> };
-type User = { user: z.infer<typeof session.User> };
+type Passport = { passport: z.infer<typeof session.Passport> };
 type Access = { access: z.infer<typeof session.Access> };
 
 declare module "express-session" {
-  interface SessionData extends Csrf, User, Access {}
+  interface SessionData extends Csrf, Passport, Access {}
 }

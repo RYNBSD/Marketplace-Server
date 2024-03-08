@@ -45,8 +45,8 @@ export default class FileConverter extends FileTmp {
   private async ffprobeMetadata(path: string) {
     return new Promise<FfprobeData>((resolve, reject) => {
       ffmpeg.ffprobe(path, (err, metadata) => {
-        if (err) reject(err);
-        else resolve(metadata);
+        if (err) return reject(err);
+        return resolve(metadata);
       });
     });
   }

@@ -29,6 +29,7 @@ auth.post(
   "/sign-in",
   handleAsync(csrf),
   handleAsync(isUnauthorize),
+  upload.any(),
   handleAsync(signIn)
 );
 
