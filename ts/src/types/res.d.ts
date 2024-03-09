@@ -1,9 +1,10 @@
 import { Tables } from "./db.js";
 
 type Locals = {
-  User: {
-    user: Tables["User"];
-    seller: Tables["Seller"] | null;
+  seller: {
+    profile: Tables["Seller"] | null;
+    category: Tables["Category"] | null;
+    product: Tables["Product"] | null;
   };
 };
 
@@ -22,5 +23,5 @@ type Body = {
 
 export type TResponse = {
   Body: Body;
-  Locals: Locals;
+  Locals: Partial<Locals>;
 };

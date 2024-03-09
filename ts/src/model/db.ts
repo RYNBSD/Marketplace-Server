@@ -281,6 +281,11 @@ export const Product = sequelize.define<Tables["Product"]>(
       type: DataTypes.STRING(MAX.PRODUCT.DESCRIPTION),
       allowNull: true,
     },
+    
+    quality: {
+      type: DataTypes.ENUM(...ENUM.QUALITY),
+      allowNull: false,
+    },
     stock: {
       type: DataTypes.SMALLINT.UNSIGNED,
       allowNull: false,
@@ -344,30 +349,6 @@ export const ProductInfo = sequelize.define<Tables["ProductInfo"]>(
     timestamps: true,
     paranoid: true,
   }
-);
-
-export const ProductQuality = sequelize.define<Tables["ProductQuality"]>(
-  "product-quality",
-  {
-    id: {
-      type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4,
-      primaryKey: true,
-    },
-    quality: {
-      type: DataTypes.ENUM(...ENUM.QUALITY),
-      allowNull: false,
-    },
-    productId: {
-      type: DataTypes.UUID,
-      allowNull: false,
-      references: {
-        model: Product,
-        key: "id"
-      }
-    }
-  },
-  { tableName: "ProductQuality", timestamps: true }
 );
 
 export const ProductImages = sequelize.define<Tables["ProductImages"]>(

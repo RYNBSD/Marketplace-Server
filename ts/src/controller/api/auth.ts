@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
-import type { TResponse } from "../../types/index.js";
+import type { TResponse, Tables } from "../../types/index.js";
 import { StatusCodes } from "http-status-codes";
 import { serialize } from "cookie";
 import { APIError } from "../../error/index.js";
@@ -16,10 +16,7 @@ const { SignUp, VerifyEmail, ForgotPassword } = schema.req.api.auth;
 export default {
   async signUp(
     req: Request,
-    res: Response<
-      TResponse["Body"]["Success"],
-      Partial<TResponse["Locals"]["User"]>
-    >
+    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
   ) {
     const { Body } = SignUp;
     const { username, email, password, theme, locale } = Body.parse(req.body);
@@ -70,22 +67,22 @@ export default {
   },
   async signIn(
     req: Request,
-    res: Response<
-      TResponse["Body"]["Success"],
-      Partial<TResponse["Locals"]["User"]>
-    >,
+    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>,
     next: NextFunction
   ) {
-    const user = (await authenticate("local", req, res, next)) as {
-      id: string;
-    };
+    const user = (await authenticate(
+      "local",
+      req,
+      res,
+      next
+    )) as Tables["User"];
     const { sign } = util.jwt;
 
     res
       .status(StatusCodes.OK)
       .setHeader(
         "Set-Cookie",
-        serialize(COOKIE.JWT, sign(user.id), {
+        serialize(COOKIE.JWT, sign(user.dataValues.id), {
           maxAge: VALUES.TIME.MONTH,
           httpOnly: IS_PRODUCTION,
           sameSite: IS_PRODUCTION,
@@ -93,11 +90,11 @@ export default {
           path: "/",
         })
       )
-      .json({ success: true, data: { user } });
+      .json({ success: true, data: { user: user.dataValues } });
   },
   async signOut(
     req: Request,
-    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]["User"]>
+    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
   ) {
     req.logOut((err) => {
       if (err) throw err;
@@ -109,22 +106,22 @@ export default {
   },
   async me(
     req: Request,
-    res: Response<
-      TResponse["Body"]["Success"],
-      Partial<TResponse["Locals"]["User"]>
-    >,
+    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>,
     next: NextFunction
   ) {
-    const user = (await authenticate("bearer", req, res, next)) as {
-      id: string;
-    };
+    const user = (await authenticate(
+      "bearer",
+      req,
+      res,
+      next
+    )) as Tables["User"];
     const { sign } = util.jwt;
 
     res
       .status(StatusCodes.OK)
       .setHeader(
         "Set-Cookie",
-        serialize(COOKIE.JWT, sign(user.id), {
+        serialize(COOKIE.JWT, sign(user.dataValues.id), {
           maxAge: VALUES.TIME.MONTH,
           httpOnly: IS_PRODUCTION,
           sameSite: IS_PRODUCTION,
@@ -132,14 +129,11 @@ export default {
           path: "/",
         })
       )
-      .json({ success: true, data: { user } });
+      .json({ success: true, data: { user: user.dataValues } });
   },
   async verifyEmail(
     req: Request,
-    res: Response<
-      TResponse["Body"]["Success"],
-      Partial<TResponse["Locals"]["User"]>
-    >
+    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
   ) {
     const { Query } = VerifyEmail;
     const { token } = Query.parse(req.query);
@@ -151,6 +145,8 @@ export default {
 
     const { isUUID } = schema.validators;
     const parsedId = isUUID.parse(id);
+
+    
 
     const { User } = model.db;
     await User.update(
@@ -165,16 +161,13 @@ export default {
   },
   async forgotPassword(
     req: Request,
-    res: Response<
-      TResponse["Body"]["Success"],
-      Partial<TResponse["Locals"]["User"]>
-    >
+    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
   ) {
-    const { user } = res.locals;
-    if (typeof user === "undefined")
+    const { user } = req;
+    if (user === undefined)
       throw APIError.server(
         StatusCodes.INTERNAL_SERVER_ERROR,
-        "Unprovided user by access middleware (auth:forgot-password)"
+        "Unprovided user is req controller (auth:forgot-password)"
       );
 
     const { Body } = ForgotPassword;

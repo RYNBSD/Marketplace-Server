@@ -86,6 +86,7 @@ export const Product = z
     titleAr: z.string(),
     description: z.string().nullable(),
     descriptionAr: z.string().nullable(),
+    quality: z.enum(ENUM.QUALITY),
     stock: z.number(),
     model: z.string().nullable(),
     price: z.number(),
@@ -99,14 +100,6 @@ export const ProductInfo = z
   .object({
     info: z.string(),
     infoAr: z.string(),
-  })
-  .merge(Id)
-  .merge(ProductId)
-  .strict();
-
-export const ProductQuality = z
-  .object({
-    quality: z.enum(ENUM.QUALITY),
   })
   .merge(Id)
   .merge(ProductId)

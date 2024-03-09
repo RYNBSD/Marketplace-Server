@@ -28,7 +28,7 @@ export const bearerStrategy = new BearerStrategy((token, done) => {
     .then((user) => {
       if (user === null)
         return done(APIError.passport(StatusCodes.NOT_FOUND, "User not found"));
-      return done(null, user.dataValues);
+      return done(null, user);
     })
     .catch(done);
 });

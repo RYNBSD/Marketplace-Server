@@ -1,6 +1,9 @@
 /* eslint-disable no-var */
 import type { Sequelize } from "sequelize";
 import { DirectoryResult } from "tmp-promise";
+import type { Tables } from "./db.js";
+
+type PassportUser = Tables["User"];
 
 declare global {
   var IS_PRODUCTION: boolean;
@@ -33,9 +36,7 @@ declare global {
   }
 
   namespace Express {
-    interface User {
-      id: string;
-    }
+    interface User extends PassportUser {}
   }
 }
 

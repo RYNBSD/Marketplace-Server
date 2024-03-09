@@ -1,8 +1,9 @@
 import type { Request, Response, NextFunction } from "express";
 import type { Strategy } from "passport";
-import {passport} from "./index.js";
-import { APIError } from "../error/index.js";
+import type { Tables } from "../types/index.js";
 import { StatusCodes } from "http-status-codes";
+import { APIError } from "../error/index.js";
+import { passport } from "./index.js";
 
 export async function authenticate(
   strategy: Strategy | string | string[],
@@ -13,7 +14,7 @@ export async function authenticate(
   return new Promise((resolve, reject) => {
     passport.authenticate(
       strategy,
-      (err: unknown, user: { id: string }, info: { message: string }) => {
+      (err: unknown, user: Tables["User"], info: { message: string }) => {
         if (err) return reject(err);
         if (!user)
           return reject(

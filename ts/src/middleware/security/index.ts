@@ -10,7 +10,7 @@ import { APIError } from "../../error/index.js";
 export default {
   async csrf(
     req: Request,
-    _res: Response<never, Partial<TResponse["Locals"]["User"]>>,
+    _res: Response<never, TResponse["Locals"]>,
     next: NextFunction
   ) {
     const {
@@ -34,7 +34,7 @@ export default {
   },
   async access(
     req: Request,
-    res: Response<never, Partial<TResponse["Locals"]["User"]>>,
+    _res: Response<never, TResponse["Locals"]>,
     next: NextFunction
   ) {
     const { getHeader } = util.fn;
@@ -49,10 +49,12 @@ export default {
       );
 
     const key = req.session.access?.key ?? "";
-    if (key.length === 0) return next("Unsaved access key");
+    if (key.length === 0)
+      throw APIError.server(StatusCodes.FORBIDDEN, "Unsaved access key");
 
     const iv = req.session.access?.iv ?? "";
-    if (iv.length === 0) return next("Unsaved access iv");
+    if (iv.length === 0)
+      throw APIError.server(StatusCodes.FORBIDDEN, "Unsaved access iv");
 
     const { Body } = schema.req.security.access.Email.Middleware;
     const { code, password, confirmPassword } = Body.parse(req.body);
@@ -73,6 +75,7 @@ export default {
 
     const { User } = model.db;
     const user = await User.findOne({
+      attributes: ["id"],
       where: { id: hasAccess.id },
       plain: true,
       limit: 1,
@@ -83,7 +86,6 @@ export default {
     delete req.body.code;
     delete req.body.confirmPassword;
 
-    res.locals.user = user;
     return next();
   },
 } as const;

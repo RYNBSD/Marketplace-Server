@@ -10,10 +10,7 @@ const { upload } = config;
 const { handleAsync } = util.fn;
 const {
   security: { csrf },
-  fn: { isAuthorize, isUnauthorize },
-  api: {
-    seller: { isSeller },
-  },
+  fn: { isAuthenticated, isSeller },
 } = middleware;
 const {
   all,
@@ -26,26 +23,18 @@ const {
 
 export const seller = Router();
 
-seller.get("/all", handleAsync(isUnauthorize), handleAsync(all));
+seller.get("/all", handleAsync(all));
 
-seller.get("/:sellerId", handleAsync(isUnauthorize), handleAsync(profile));
+seller.get("/:sellerId", handleAsync(profile));
 
-seller.get(
-  "/:sellerId/:categoryId",
-  handleAsync(isUnauthorize),
-  handleAsync(category)
-);
+seller.get("/:sellerId/:categoryId", handleAsync(category));
 
-seller.get(
-  "/:sellerId/:categoryId/:productId",
-  handleAsync(isUnauthorize),
-  handleAsync(product)
-);
+seller.get("/:sellerId/:categoryId/:productId", handleAsync(product));
 
 seller.put(
   "/",
   handleAsync(csrf),
-  handleAsync(isAuthorize),
+  handleAsync(isAuthenticated),
   handleAsync(isSeller),
   upload.single(IMAGE),
   handleAsync(update)
@@ -53,7 +42,7 @@ seller.put(
 
 seller.delete(
   "/",
-  handleAsync(isAuthorize),
+  handleAsync(isAuthenticated),
   handleAsync(isSeller),
   handleAsync(deleteSeller)
 );

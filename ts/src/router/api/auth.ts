@@ -9,7 +9,7 @@ const { upload } = config;
 const { handleAsync } = util.fn;
 const { UPLOAD } = KEYS;
 const {
-  fn: { isAuthorize, isUnauthorize },
+  fn: { isAuthenticated, notAuthenticated },
   security: { csrf, access },
 } = middleware;
 const { signUp, signIn, signOut, me, verifyEmail, forgotPassword } =
@@ -20,7 +20,7 @@ export const auth = Router();
 auth.post(
   "/sign-up",
   handleAsync(csrf),
-  handleAsync(isUnauthorize),
+  handleAsync(notAuthenticated),
   upload.single(UPLOAD.IMAGE),
   handleAsync(signUp)
 );
@@ -28,21 +28,21 @@ auth.post(
 auth.post(
   "/sign-in",
   handleAsync(csrf),
-  handleAsync(isUnauthorize),
+  handleAsync(notAuthenticated),
   upload.any(),
   handleAsync(signIn)
 );
 
-auth.post("/sign-out", handleAsync(isAuthorize), handleAsync(signOut));
+auth.post("/sign-out", handleAsync(isAuthenticated), handleAsync(signOut));
 
-auth.post("/me", handleAsync(isUnauthorize), handleAsync(me));
+auth.post("/me", handleAsync(notAuthenticated), handleAsync(me));
 
-auth.put("/verify-email", handleAsync(isUnauthorize), handleAsync(verifyEmail));
+auth.put("/verify-email", handleAsync(verifyEmail));
 
 auth.put(
   "/forgot-password",
   handleAsync(csrf),
-  handleAsync(isUnauthorize),
+  handleAsync(notAuthenticated),
   handleAsync(access),
   handleAsync(forgotPassword)
 );

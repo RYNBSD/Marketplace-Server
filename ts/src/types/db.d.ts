@@ -26,8 +26,6 @@ type CategoryViewers = z.infer<typeof schema.db.CategoryViewers> &
 type Product = z.infer<typeof schema.db.Product> & CreateOptionalIdString;
 type ProductInfo = z.infer<typeof schema.db.ProductInfo> &
   CreateOptionalIdString;
-type ProductQuality = z.infer<typeof schema.db.ProductQuality> &
-  CreateOptionalIdString;
 type ProductImages = z.infer<typeof schema.db.ProductImages> &
   CreateOptionalIdString;
 type ProductRatings = z.infer<typeof schema.db.ProductRatings>;
@@ -71,10 +69,6 @@ export type Tables = {
   ProductInfo: Model<
     InferAttributes<ProductInfo>,
     InferCreationAttributes<ProductInfo>
-  >;
-  ProductQuality: Model<
-    InferAttributes<ProductQuality>,
-    InferCreationAttributes<ProductQuality>
   >;
   ProductImages: Model<
     InferAttributes<ProductImages>,

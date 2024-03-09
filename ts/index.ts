@@ -32,11 +32,13 @@ app.enable("json escape");
 
 app.use(timeout(VALUES.TIME.MINUTE));
 app.use(responseTime());
-app.use(cors({
-  origin: "http://localhost:3000",
-  exposedHeaders: "*",
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    exposedHeaders: "*",
+    credentials: true,
+  })
+);
 app.use(
   rateLimit({
     windowMs: VALUES.TIME.MINUTE,
@@ -68,12 +70,14 @@ if (!IS_PRODUCTION) {
   const errorhandler = (await import("errorhandler")).default;
   app.use(errorhandler({ log: true }));
   await import("colors");
+} else {
+  app.use(cache("5 minutes"));
 }
 
 const { db, tmp } = config;
 await tmp.initTmpDir();
 await db.connect();
-const { passport } = await import("./src/passport/index.js")
+const { passport } = await import("./src/passport/index.js");
 const { router } = await import("./src/router/index.js");
 await db.init();
 
@@ -83,7 +87,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser(ENV.COOKIE.PARSER));
 app.use(cookieEncrypt(ENV.COOKIE.SECRET));
-app.use(cache("5 minutes"));
 app.use(helmet());
 app.use(hpp());
 app.use(

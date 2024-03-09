@@ -4,51 +4,85 @@ import { StatusCodes } from "http-status-codes";
 import { APIError } from "../error/index.js";
 import { model } from "../model/index.js";
 
-export async function isAuthorize(
+/** Check if user has registered */
+export async function isAuthenticated(
   req: Request,
-  res: Response<never, TResponse["Locals"]["User"]>,
+  _res: Response<never, TResponse["Locals"]>,
   next: NextFunction
 ) {
   const authenticate = req.isAuthenticated();
+  if (!authenticate)
+    throw APIError.middleware(StatusCodes.UNAUTHORIZED, "Unauthenticated user");
 
-  if (!authenticate) throw APIError.middleware(StatusCodes.UNAUTHORIZED);
-
-  const { user: id } = req.session.passport!;
-  const { User } = model.db;
-
-  const user = await User.findOne({ where: { id }, limit: 1, plain: true });
-  if (user === null)
-    throw APIError.middleware(StatusCodes.UNAUTHORIZED, "User not found");
-
-  res.locals = {
-    user,
-    seller: null,
-  };
   return next();
 }
 
-export async function isUnauthorize(
+/** Block any authenticated user */
+export async function notAuthenticated(
   req: Request,
-  res: Response<never, TResponse["Locals"]["User"]>,
+  _res: Response<never, TResponse["Locals"]>,
   next: NextFunction
 ) {
-  const unauthenticated = req.isUnauthenticated();
-  if (unauthenticated) return next();
+  const authenticated = req.isAuthenticated();
+  if (authenticated)
+    throw APIError.middleware(
+      StatusCodes.NOT_ACCEPTABLE,
+      "User already authenticated"
+    );
 
-  const { user: id } = req.session.passport!;
-  const { User } = model.db;
+  return next();
+}
 
-  const user = await User.findOne({
-    where: { id },
+/** Check if user is seller */
+export async function isSeller(
+  req: Request,
+  res: Response<never, TResponse["Locals"]>,
+  next: NextFunction
+) {
+  const { user } = req;
+  if (user === undefined)
+    throw APIError.server(
+      StatusCodes.INTERNAL_SERVER_ERROR,
+      "Unprovided user in isSeller middleware"
+    );
+
+  const { Seller } = model.db;
+  const seller = await Seller.findOne({
+    where: { userId: user!.dataValues.id },
     limit: 1,
     plain: true,
   });
-  if (user === null)
-    throw APIError.middleware(StatusCodes.UNAUTHORIZED, "User not found");
+  if (seller === null)
+    throw APIError.middleware(StatusCodes.NOT_FOUND, "Seller bot found");
 
-  res.locals = {
-    user,
-    seller: null,
+  res.locals.seller = {
+    profile: seller,
+    category: null,
+    product: null,
   };
   return next();
 }
+
+/** Check if user is not seller */
+// export async function isNotSeller(
+//   _req: Request,
+//   res: Response<never, TResponse["Locals"]>,
+//   next: NextFunction
+// ) {
+//   const { user } = res.locals;
+
+//   const { Seller } = model.db;
+//   const seller = await Seller.findOne({
+//     where: { userId: user!.dataValues.id },
+//     limit: 1,
+//     plain: true,
+//   });
+//   if (seller !== null)
+//     throw APIError.middleware(
+//       StatusCodes.FORBIDDEN,
+//       "User already has an account"
+//     );
+
+//   res.locals.seller = seller;
+//   return next();
+// }

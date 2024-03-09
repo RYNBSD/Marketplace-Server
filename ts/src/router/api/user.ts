@@ -9,7 +9,7 @@ const { UPLOAD } = KEYS;
 const { upload } = config;
 const { handleAsync } = util.fn;
 const {
-  fn: { isAuthorize },
+  fn: { isAuthenticated },
   security: { csrf },
 } = middleware;
 const {
@@ -23,16 +23,16 @@ const {
 
 export const user = Router();
 
-user.get("/", handleAsync(isAuthorize), handleAsync(profile));
+user.get("/", handleAsync(isAuthenticated), handleAsync(profile));
 
-user.get("/orders", handleAsync(isAuthorize), handleAsync(orders));
+user.get("/orders", handleAsync(isAuthenticated), handleAsync(orders));
 
-user.get("/orders/:id", handleAsync(isAuthorize), handleAsync(order));
+user.get("/orders/:id", handleAsync(isAuthenticated), handleAsync(order));
 
 user.post(
   "/become-seller",
   handleAsync(csrf),
-  handleAsync(isAuthorize),
+  handleAsync(isAuthenticated),
   upload.single(UPLOAD.IMAGE),
   handleAsync(becomeSeller)
 );
@@ -40,9 +40,13 @@ user.post(
 user.put(
   "/",
   handleAsync(csrf),
-  handleAsync(isAuthorize),
+  handleAsync(isAuthenticated),
   upload.single(UPLOAD.IMAGE),
   handleAsync(update)
 );
 
-user.delete("/", handleAsync(isAuthorize), handleAsync(deleteUser));
+user.delete(
+  "/",
+  handleAsync(isAuthenticated),
+  handleAsync(deleteUser)
+);

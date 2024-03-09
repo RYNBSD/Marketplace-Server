@@ -27,7 +27,7 @@ export const localStrategy = new LocalStrategy(
             APIError.passport(StatusCodes.UNAUTHORIZED, "Invalid password")
           );
 
-        return done(null, user.dataValues);
+        return done(null, user);
       })
       .catch(done);
   }
