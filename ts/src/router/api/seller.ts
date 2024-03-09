@@ -5,7 +5,10 @@ import { middleware } from "../../middleware/index.js";
 import { KEYS } from "../../constant/index.js";
 import { controller } from "../../controller/index.js";
 
-const { IMAGE } = KEYS.UPLOAD;
+const {
+  UPLOAD: { IMAGE },
+  REQUEST: { PARAMS },
+} = KEYS;
 const { upload } = config;
 const { handleAsync } = util.fn;
 const {
@@ -25,11 +28,30 @@ export const seller = Router();
 
 seller.get("/all", handleAsync(all));
 
-seller.get("/:sellerId", handleAsync(profile));
+seller.get(
+  `/:${PARAMS.ID.SELLER}`,
+  handleAsync(isAuthenticated),
+  handleAsync(profile)
+);
 
-seller.get("/:sellerId/:categoryId", handleAsync(category));
+seller.get(
+  `/:${PARAMS.ID.SELLER}/:${PARAMS.ID.CATEGORY}`,
+  handleAsync(isAuthenticated),
+  handleAsync(category)
+);
 
-seller.get("/:sellerId/:categoryId/:productId", handleAsync(product));
+seller.get(
+  `/:${PARAMS.ID.SELLER}/:${PARAMS.ID.CATEGORY}/:${PARAMS.ID.PRODUCT}`,
+  handleAsync(isAuthenticated),
+  handleAsync(product)
+);
+
+seller.get(
+  "/",
+  handleAsync(isAuthenticated),
+  handleAsync(isSeller),
+  handleAsync(profile)
+);
 
 seller.put(
   "/",

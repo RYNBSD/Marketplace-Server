@@ -1,9 +1,8 @@
 import type { Request, Response } from "express";
 import type { TResponse } from "../../types/index.js";
 import { StatusCodes } from "http-status-codes";
-import { schema } from "../../schema/index.js";
 import { APIError } from "../../error/index.js";
-import { model } from "../../model/index.js";
+import { schema } from "../../schema/index.js";
 import { lib } from "../../lib/index.js";
 
 const { All, Profile, Category, Product, Update } = schema.req.api.seller;
@@ -11,24 +10,22 @@ const { All, Profile, Category, Product, Update } = schema.req.api.seller;
 export default {
   async all(
     req: Request,
-    res: Response<TResponse["Body"]["Success"], Partial<TResponse["Locals"]["User"]>>
+    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
   ) {
     const { Query } = All;
     const { lastSellerId = "", limit = 25 } = Query.parse(req.query);
 
     res.status(StatusCodes.OK).json({ success: true });
   },
-  async profile(
+  async seller(
     req: Request,
-    res: Response<TResponse["Body"]["Success"], Partial<TResponse["Locals"]["User"]>>
+    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
   ) {
-    const { Params } = Profile;
-    const { sellerId } = Params.parse(req.params);
     res.status(StatusCodes.OK).json({ success: true });
   },
   async category(
     req: Request,
-    res: Response<TResponse["Body"]["Success"], Partial<TResponse["Locals"]["User"]>>
+    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
   ) {
     const { Params } = Category;
     const { sellerId, categoryId } = Params.parse(req.params);
@@ -37,16 +34,24 @@ export default {
   },
   async product(
     req: Request,
-    res: Response<TResponse["Body"]["Success"], Partial<TResponse["Locals"]["User"]>>
+    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
   ) {
     const { Params } = Product;
     const { sellerId, categoryId, productId } = Params.parse(req.params);
 
     res.status(StatusCodes.OK).json({ success: true });
   },
+  async profile(
+    req: Request,
+    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
+  ) {
+    const { Params } = Profile;
+    const { sellerId } = Params.parse(req.params);
+    res.status(StatusCodes.OK).json({ success: true });
+  },
   async update(
     req: Request,
-    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]["User"]>
+    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
   ) {
     const { Body } = Update;
     const { storeName } = Body.parse(req.body);
@@ -86,7 +91,7 @@ export default {
   },
   async delete(
     _: Request,
-    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]["User"]>
+    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
   ) {
     const { seller } = res.locals;
     if (seller === null)

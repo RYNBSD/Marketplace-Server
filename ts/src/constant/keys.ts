@@ -21,6 +21,17 @@ export default {
     VIDEOS: "videos",
   },
   ERROR: {
-    HANDLERS: ["controller", "middleware", "socket", "server", "passport"]
-  }
+    HANDLERS: ["controller", "middleware", "socket", "server", "passport"],
+  },
+  REQUEST: {
+    PARAMS: {
+      ID: {
+        USER: "userId",
+        SELLER: "sellerId",
+        CATEGORY: "categoryId",
+        PRODUCT: "productId",
+        ORDER: "orderId"
+      },
+    },
+  },
 } as const;

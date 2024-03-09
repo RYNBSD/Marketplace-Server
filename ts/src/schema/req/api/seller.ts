@@ -1,16 +1,19 @@
 import { z } from "zod";
-import { VALUES } from "../../../constant/index.js";
+import { KEYS, VALUES } from "../../../constant/index.js";
 
+const {
+  REQUEST: { PARAMS },
+} = KEYS;
 const { MIN, MAX } = VALUES.LENGTH;
 
 const SellerId = z
-  .object({ sellerId: z.string().trim().min(MIN.REQUIRED).uuid() })
+  .object({ [PARAMS.ID.SELLER]: z.string().trim().min(MIN.REQUIRED).uuid() })
   .strict();
 const CategoryId = z
-  .object({ categoryId: z.string().trim().min(MIN.REQUIRED).uuid() })
+  .object({ [PARAMS.ID.CATEGORY]: z.string().trim().min(MIN.REQUIRED).uuid() })
   .strict();
 const ProductId = z
-  .object({ productId: z.string().trim().min(MIN.REQUIRED).uuid() })
+  .object({ [PARAMS.ID.PRODUCT]: z.string().trim().min(MIN.REQUIRED).uuid() })
   .strict();
 
 export default {

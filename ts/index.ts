@@ -6,7 +6,6 @@ import session from "express-session";
 import morgan from "morgan";
 import helmet from "helmet";
 import timeout from "connect-timeout";
-import apicache from "apicache";
 import methodOverride from "method-override";
 import { rateLimit } from "express-rate-limit";
 import cors from "cors";
@@ -60,7 +59,6 @@ app.use(
   })
 );
 
-const cache = apicache.middleware;
 global.IS_PRODUCTION = ENV.NODE.ENV === "production";
 global.__filename = fileURLToPath(import.meta.url);
 global.__dirname = path.dirname(__filename);
@@ -70,8 +68,6 @@ if (!IS_PRODUCTION) {
   const errorhandler = (await import("errorhandler")).default;
   app.use(errorhandler({ log: true }));
   await import("colors");
-} else {
-  app.use(cache("5 minutes"));
 }
 
 const { db, tmp } = config;

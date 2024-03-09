@@ -15,8 +15,8 @@ export default {
       username: z.string().trim().min(MIN.REQUIRED).max(MAX.USER.USERNAME),
       theme: z.enum(ENUM.THEMES),
       locale: z.enum(ENUM.LOCALE),
-      forceTheme: z.boolean(),
-      disableAnimations: z.boolean(),
+      forceTheme: z.coerce.boolean(),
+      disableAnimations: z.coerce.boolean(),
     }),
   },
   Delete: {

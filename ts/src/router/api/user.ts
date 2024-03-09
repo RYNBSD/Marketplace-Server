@@ -5,7 +5,10 @@ import { controller } from "../../controller/index.js";
 import { config } from "../../config/index.js";
 import { KEYS } from "../../constant/index.js";
 
-const { UPLOAD } = KEYS;
+const {
+  UPLOAD: { IMAGE },
+  REQUEST: { PARAMS },
+} = KEYS;
 const { upload } = config;
 const { handleAsync } = util.fn;
 const {
@@ -27,13 +30,17 @@ user.get("/", handleAsync(isAuthenticated), handleAsync(profile));
 
 user.get("/orders", handleAsync(isAuthenticated), handleAsync(orders));
 
-user.get("/orders/:id", handleAsync(isAuthenticated), handleAsync(order));
+user.get(
+  `/orders/:${PARAMS.ID.ORDER}`,
+  handleAsync(isAuthenticated),
+  handleAsync(order)
+);
 
 user.post(
   "/become-seller",
   handleAsync(csrf),
   handleAsync(isAuthenticated),
-  upload.single(UPLOAD.IMAGE),
+  upload.single(IMAGE),
   handleAsync(becomeSeller)
 );
 
@@ -41,12 +48,8 @@ user.put(
   "/",
   handleAsync(csrf),
   handleAsync(isAuthenticated),
-  upload.single(UPLOAD.IMAGE),
+  upload.single(IMAGE),
   handleAsync(update)
 );
 
-user.delete(
-  "/",
-  handleAsync(isAuthenticated),
-  handleAsync(deleteUser)
-);
+user.delete("/", handleAsync(isAuthenticated), handleAsync(deleteUser));

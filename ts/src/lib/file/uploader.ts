@@ -59,11 +59,10 @@ export default class FileUploader {
 
   static async remove(...uris: string[]) {
     await Promise.all(
-      uris.map(
-        async (uri) =>
-          await rm(path.join(__root, PUBLIC, uri), {
-            force: true,
-          })
+      uris.map((uri) =>
+        rm(path.join(__root, PUBLIC, uri), {
+          force: true,
+        })
       )
     );
   }

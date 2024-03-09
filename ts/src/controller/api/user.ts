@@ -164,6 +164,7 @@ export default {
           "Can't upload your image"
         );
 
+      await FileUploader.remove(user.dataValues.image)
       newImage = uploaded[0]!;
     }
 
