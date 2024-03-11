@@ -151,8 +151,6 @@ export default {
 
     const image = req.file ?? null;
     let newImage = "";
-    console.log(image);
-
     if (image !== null) {
       const { FileConverter, FileUploader } = lib.file;
 

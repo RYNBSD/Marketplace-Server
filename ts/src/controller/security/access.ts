@@ -34,15 +34,12 @@ export default {
     req.session.access = { key, iv };
     res.setHeader(HTTP.HEADERS.ACCESS_TOKEN, token);
 
-    if (IS_PRODUCTION) {
-      //TODO: Send code in email (template)
-      const { Mail } = lib;
-      await new Mail(email, "access code", `Code: ${code}`).send();
-    }
+    //TODO: Send code in email (template)
+    const { Mail } = lib;
+    await new Mail(email, "access code", `Code: ${code}`).send();
 
     res.status(StatusCodes.CREATED).json({
       success: true,
-      data: { code: IS_PRODUCTION ? null : code },
     });
   },
 } as const;

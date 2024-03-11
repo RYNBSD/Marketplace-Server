@@ -6,11 +6,13 @@ import { model } from "../model/index.js";
 import { schema } from "../schema/index.js";
 
 export const bearerStrategy = new BearerStrategy((token, done) => {
+  console.log("Token:", token);
   const { verify } = util.jwt;
   const userId = verify(token) as string | null;
   if (userId === null)
     return done(APIError.passport(StatusCodes.BAD_REQUEST, "Invalid token"));
 
+    
   const { isUUID } = schema.validators;
   const parsedId = isUUID.safeParse(userId);
   if (!parsedId.success)

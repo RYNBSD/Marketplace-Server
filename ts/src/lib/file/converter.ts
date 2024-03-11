@@ -36,6 +36,7 @@ class FileTmp {
 export default class FileConverter extends FileTmp {
   private readonly files: Buffer[] = [];
   private isFfmpegInit = false;
+  private cleanTmp = false;
 
   constructor(...files: Buffer[]) {
     super();
@@ -76,6 +77,7 @@ export default class FileConverter extends FileTmp {
   }
 
   private async toMp4(video: Buffer, ext: FileExtension) {
+    this.cleanTmp = true;
     const input = await this.bufferToFile(video, ext);
     const output = path.join(tmp.path, `${this.randomFileName()}.mp4`);
 
@@ -100,6 +102,7 @@ export default class FileConverter extends FileTmp {
   }
 
   private async toMp3(audio: Buffer, ext: FileExtension) {
+    this.cleanTmp = true;
     const input = await this.bufferToFile(audio, ext);
     const output = path.join(tmp.path, `${this.randomFileName()}.mp3`);
 
@@ -186,7 +189,7 @@ export default class FileConverter extends FileTmp {
     ) as ConvertedFile[];
 
     const converted = await this.fileConvert(filterTypes);
-    await tmp.cleanup();
+    if (this.cleanTmp) await tmp.cleanup();
 
     return converted;
   }

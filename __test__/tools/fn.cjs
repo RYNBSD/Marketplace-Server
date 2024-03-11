@@ -1,11 +1,12 @@
 const { TestError } = require("../error.cjs");
+const { host } = require("../config.cjs")
 
 function random(v1, v2) {
   return Math.round(Math.random()) ? v1 : v2;
 }
 
 async function getCsrf(session) {
-  const res = await fetch("", {
+  const res = await fetch(`${host}/security/csrf`, {
     headers: {
       cookie: session,
     },
@@ -17,13 +18,13 @@ async function getCsrf(session) {
     throw new TestError(json?.message ?? "No csrf in getCsrf", res.status);
   }
 
-  const session = getSession(headers);
-  if (!session) {
+  const newSession = await getSession(res.headers);
+  if (!newSession) {
     const json = await res.json();
     throw new TestError(json?.message ?? "No session in getCsrf", res.status);
   }
 
-  return { csrf, session };
+  return { csrf, session: newSession };
 }
 
 /**
