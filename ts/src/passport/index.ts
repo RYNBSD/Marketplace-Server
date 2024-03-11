@@ -14,13 +14,13 @@ passport.deserializeUser((id: string, done) => {
 
   const { User } = model.db;
   User.findOne({
+    attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
     where: { id: userId.data },
     limit: 1,
-    plain: true,
   })
     .then((user) => {
       if (user === null) return done(null, false);
-      done(null, user);
+      return done(null, user);
     })
     .catch(done);
 });

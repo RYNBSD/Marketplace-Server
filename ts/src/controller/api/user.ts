@@ -20,13 +20,12 @@ export default {
         "Unauthenticated user (user:profile)"
       );
 
-    const { UserSettings, Seller } = model.db;
+    const { UserSetting, Seller } = model.db;
 
-    const setting = await UserSettings.findOne({
+    const setting = await UserSetting.findOne({
       attributes: ["theme", "locale", "forceTheme", "disableAnimations"],
       where: { userId: user.dataValues.id },
       limit: 1,
-      plain: true,
     });
     if (setting === null)
       throw APIError.server(
@@ -38,7 +37,6 @@ export default {
       attributes: ["id", "storeName", "image"],
       where: { userId: user.dataValues.id },
       limit: 1,
-      plain: true,
     });
 
     res.status(StatusCodes.OK).json({
@@ -73,7 +71,6 @@ export default {
       attributes: ["storeName"],
       where: { storeName },
       limit: 1,
-      plain: true,
     });
     if (checkStoreName !== null)
       throw APIError.controller(
@@ -110,16 +107,22 @@ export default {
         "Unauthenticated user (user:become-seller)"
       );
 
-    const { SellerSettings } = model.db;
-    const seller = await Seller.create({
-      storeName,
-      image: uploaded[0]!,
-      userId: user.dataValues.id,
-    });
-    const setting = await SellerSettings.create({
-      theme,
-      sellerId: seller.dataValues.id,
-    });
+    const { SellerSetting } = model.db;
+    const seller = await Seller.create(
+      {
+        storeName,
+        image: uploaded[0]!,
+        userId: user.dataValues.id,
+      },
+      { fields: ["storeName", "image", "userId"] }
+    );
+    const setting = await SellerSetting.create(
+      {
+        theme,
+        sellerId: seller.dataValues.id,
+      },
+      { fields: ["theme", "sellerId"] }
+    );
 
     res.status(StatusCodes.CREATED).json({
       success: true,
@@ -148,8 +151,11 @@ export default {
 
     const image = req.file ?? null;
     let newImage = "";
+    console.log(image);
+
     if (image !== null) {
       const { FileConverter, FileUploader } = lib.file;
+
       const converted = await new FileConverter(image.buffer).convert();
       if (converted.length === 0)
         throw APIError.controller(
@@ -164,15 +170,18 @@ export default {
           "Can't upload your image"
         );
 
-      await FileUploader.remove(user.dataValues.image)
+      await FileUploader.remove(user.dataValues.image);
       newImage = uploaded[0]!;
     }
 
-    const { UserSettings } = model.db;
+    const { UserSetting } = model.db;
     await Promise.all([
-      UserSettings.update(
+      UserSetting.update(
         { theme, locale, forceTheme, disableAnimations },
-        { where: { userId: user.dataValues.id } }
+        {
+          fields: ["theme", "locale", "forceTheme", "disableAnimations"],
+          where: { userId: user.dataValues.id },
+        }
       ),
       user.update({ username, image: newImage || user.dataValues.image }),
     ]);
@@ -214,7 +223,6 @@ export default {
       seller = await Seller.findOne({
         where: { userId: user.dataValues.id },
         limit: 1,
-        plain: true,
       });
     }
 

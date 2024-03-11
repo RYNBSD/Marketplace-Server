@@ -4,6 +4,7 @@ import type { Tables } from "../types/index.js";
 import { StatusCodes } from "http-status-codes";
 import { APIError } from "../error/index.js";
 import { passport } from "./index.js";
+import { schema } from "../schema/index.js";
 
 export async function authenticate(
   strategy: Strategy | string | string[],
@@ -15,8 +16,9 @@ export async function authenticate(
     passport.authenticate(
       strategy,
       (err: unknown, user: Tables["User"], info: { message: string }) => {
-        if (err) return reject(err);
-        if (!user)
+        const { toBoolean } = schema.validators;
+        if (toBoolean.parse(err)) return reject(err);
+        if (!toBoolean.parse(user))
           return reject(
             APIError.passport(
               StatusCodes.BAD_REQUEST,
@@ -25,7 +27,7 @@ export async function authenticate(
           );
 
         req.logIn(user, (err) => {
-          if (err) return reject(err);
+          if (toBoolean.parse(err)) return reject(err);
           return resolve(user);
         });
       }

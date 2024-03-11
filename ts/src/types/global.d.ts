@@ -13,7 +13,7 @@ declare global {
 
   namespace NodeJS {
     interface ProcessEnv {
-      NODE_ENV: "production" | "development";
+      NODE_ENV: "production" | "development" | "test";
       PORT: number | `${number}`;
 
       API_VERSION: number | `${number}`;

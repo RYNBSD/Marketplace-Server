@@ -13,7 +13,6 @@ export const localStrategy = new LocalStrategy(
       attributes: ["id", "password", "image", "username"],
       where: { email },
       limit: 1,
-      plain: true,
     })
       .then((user) => {
         if (user === null)

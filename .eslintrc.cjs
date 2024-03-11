@@ -26,5 +26,5 @@ module.exports = {
     "@typescript-eslint/no-unused-vars": "warn",
     "@typescript-eslint/strict-boolean-expressions": "error",
   },
-  "ignorePatterns": ["js/**/*", "node_modules", "public"]
+  "ignorePatterns": ["js", "node_modules", "public", "build"]
 };

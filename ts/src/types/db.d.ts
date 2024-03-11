@@ -10,90 +10,90 @@ import type { schema } from "../schema/index.js";
 type CreateOptionalIdString = { id: CreationOptional<string> };
 
 type User = z.infer<typeof schema.db.User> & CreateOptionalIdString;
-type UserSettings = z.infer<typeof schema.db.UserSettings>;
+type UserSetting = z.infer<typeof schema.db.UserSetting>;
 
 type Seller = z.infer<typeof schema.db.Seller> & CreateOptionalIdString;
-type SellerSettings = z.infer<typeof schema.db.SellerSettings>;
-type SellerLinks = z.infer<typeof schema.db.SellerLinks> &
+type SellerSetting = z.infer<typeof schema.db.SellerSetting>;
+type SellerLink = z.infer<typeof schema.db.SellerLink> &
   CreateOptionalIdString;
-type SellerViewers = z.infer<typeof schema.db.SellerViewers> &
+type SellerViewer = z.infer<typeof schema.db.SellerViewer> &
   CreateOptionalIdString;
 
 type Category = z.infer<typeof schema.db.Category> & CreateOptionalIdString;
-type CategoryViewers = z.infer<typeof schema.db.CategoryViewers> &
+type CategoryViewer = z.infer<typeof schema.db.CategoryViewer> &
   CreateOptionalIdString;
 
 type Product = z.infer<typeof schema.db.Product> & CreateOptionalIdString;
 type ProductInfo = z.infer<typeof schema.db.ProductInfo> &
   CreateOptionalIdString;
-type ProductImages = z.infer<typeof schema.db.ProductImages> &
+type ProductImage = z.infer<typeof schema.db.ProductImage> &
   CreateOptionalIdString;
-type ProductRatings = z.infer<typeof schema.db.ProductRatings>;
-type ProductSizes = z.infer<typeof schema.db.ProductSizes> &
+type ProductRating = z.infer<typeof schema.db.ProductRating>;
+type ProductSizes = z.infer<typeof schema.db.ProductSize> &
   CreateOptionalIdString;
-type ProductColors = z.infer<typeof schema.db.ProductColors> &
+type ProductColor = z.infer<typeof schema.db.ProductColor> &
   CreateOptionalIdString;
-type ProductViewers = z.infer<typeof schema.db.ProductViewers> &
+type ProductViewer = z.infer<typeof schema.db.ProductViewer> &
   CreateOptionalIdString;
 
 type Tag = z.infer<typeof schema.db.Tag> & CreateOptionalIdString;
-type ProductTags = z.infer<typeof schema.db.ProductTags>;
+type ProductTag = z.infer<typeof schema.db.ProductTag>;
 
-type Orders = z.infer<typeof schema.db.Orders> & CreateOptionalIdString;
+type Order = z.infer<typeof schema.db.Order> & CreateOptionalIdString;
 
 export type Tables = {
   User: Model<InferAttributes<User>, InferCreationAttributes<User>>;
-  UserSettings: Model<
-    InferAttributes<UserSettings>,
-    InferCreationAttributes<UserSettings>
+  UserSetting: Model<
+    InferAttributes<UserSetting>,
+    InferCreationAttributes<UserSetting>
   >;
   Seller: Model<InferAttributes<Seller>, InferCreationAttributes<Seller>>;
-  SellerSettings: Model<
-    InferAttributes<SellerSettings>,
-    InferCreationAttributes<SellerSettings>
+  SellerSetting: Model<
+    InferAttributes<SellerSetting>,
+    InferCreationAttributes<SellerSetting>
   >;
-  SellerLinks: Model<
-    InferAttributes<SellerLinks>,
-    InferCreationAttributes<SellerLinks>
+  SellerLink: Model<
+    InferAttributes<SellerLink>,
+    InferCreationAttributes<SellerLink>
   >;
-  SellerViewers: Model<
-    InferAttributes<SellerViewers>,
-    InferCreationAttributes<SellerViewers>
+  SellerViewer: Model<
+    InferAttributes<SellerViewer>,
+    InferCreationAttributes<SellerViewer>
   >;
   Category: Model<InferAttributes<Category>, InferCreationAttributes<Category>>;
-  CategoryViewers: Model<
-    InferAttributes<CategoryViewers>,
-    InferCreationAttributes<CategoryViewers>
+  CategoryViewer: Model<
+    InferAttributes<CategoryViewer>,
+    InferCreationAttributes<CategoryViewer>
   >;
   Product: Model<InferAttributes<Product>, InferCreationAttributes<Product>>;
   ProductInfo: Model<
     InferAttributes<ProductInfo>,
     InferCreationAttributes<ProductInfo>
   >;
-  ProductImages: Model<
-    InferAttributes<ProductImages>,
-    InferCreationAttributes<ProductImages>
+  ProductImage: Model<
+    InferAttributes<ProductImage>,
+    InferCreationAttributes<ProductImage>
   >;
-  ProductRatings: Model<
-    InferAttributes<ProductRatings>,
-    InferCreationAttributes<ProductRatings>
+  ProductRating: Model<
+    InferAttributes<ProductRating>,
+    InferCreationAttributes<ProductRating>
   >;
-  ProductSizes: Model<
-    InferAttributes<ProductSizes>,
-    InferCreationAttributes<ProductSizes>
+  ProductSize: Model<
+    InferAttributes<ProductSize>,
+    InferCreationAttributes<ProductSize>
   >;
-  ProductColors: Model<
-    InferAttributes<ProductColors>,
-    InferCreationAttributes<ProductColors>
+  ProductColor: Model<
+    InferAttributes<ProductColor>,
+    InferCreationAttributes<ProductColor>
   >;
-  ProductViewers: Model<
-    InferAttributes<ProductViewers>,
-    InferCreationAttributes<ProductViewers>
+  ProductViewer: Model<
+    InferAttributes<ProductViewer>,
+    InferCreationAttributes<ProductViewer>
   >;
   Tag: Model<InferAttributes<Tag>, InferCreationAttributes<Tag>>;
-  ProductTags: Model<
-    InferAttributes<ProductTags>,
-    InferCreationAttributes<ProductTags>
+  ProductTag: Model<
+    InferAttributes<ProductTag>,
+    InferCreationAttributes<ProductTag>
   >;
-  Orders: Model<InferAttributes<Orders>, InferCreationAttributes<Orders>>;
+  Order: Model<InferAttributes<Order>, InferCreationAttributes<Order>>;
 };

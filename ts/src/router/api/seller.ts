@@ -26,6 +26,8 @@ const {
 
 export const seller = Router();
 
+seller.get("/search")
+
 seller.get("/all", handleAsync(all));
 
 seller.get(

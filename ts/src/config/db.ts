@@ -26,6 +26,6 @@ export default {
     await global.sequelize.close();
   },
   async init() {
-    await global.sequelize.sync({ alter: !IS_PRODUCTION });
+    await global.sequelize.sync({ force: !IS_PRODUCTION });
   },
 } as const;

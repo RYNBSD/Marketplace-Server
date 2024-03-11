@@ -21,7 +21,7 @@ export const User = z
   .merge(Id)
   .strict();
 
-export const UserSettings = z
+export const UserSetting = z
   .object({
     theme: z.enum(ENUM.THEMES),
     locale: z.enum(ENUM.LOCALE),
@@ -40,14 +40,14 @@ export const Seller = z
   .merge(UserId)
   .strict();
 
-export const SellerSettings = z
+export const SellerSetting = z
   .object({
     theme: z.enum(ENUM.THEMES),
   })
   .merge(SellerId)
   .strict();
 
-export const SellerLinks = z
+export const SellerLink = z
   .object({
     platform: z.enum(ENUM.PLATFORMS),
     link: z.string().url(),
@@ -56,7 +56,7 @@ export const SellerLinks = z
   .merge(SellerId)
   .strict();
 
-export const SellerViewers = z
+export const SellerViewer = z
   .object({})
   .merge(Id)
   .merge(SellerId)
@@ -73,7 +73,7 @@ export const Category = z
   .merge(SellerId)
   .strict();
 
-export const CategoryViewers = z
+export const CategoryViewer = z
   .object({})
   .merge(Id)
   .merge(CategoryId)
@@ -105,7 +105,7 @@ export const ProductInfo = z
   .merge(ProductId)
   .strict();
 
-export const ProductImages = z
+export const ProductImage = z
   .object({
     image: z.string(),
   })
@@ -113,7 +113,7 @@ export const ProductImages = z
   .merge(ProductId)
   .strict();
 
-export const ProductRatings = z
+export const ProductRating = z
   .object({
     rate: z.enum(ENUM.RATING_STARS),
     comment: z.string(),
@@ -122,7 +122,7 @@ export const ProductRatings = z
   .merge(ProductId)
   .strict();
 
-export const ProductSizes = z
+export const ProductSize = z
   .object({
     size: z.string(),
   })
@@ -130,7 +130,7 @@ export const ProductSizes = z
   .merge(ProductId)
   .strict();
 
-export const ProductColors = z
+export const ProductColor = z
   .object({
     color: z.string(),
   })
@@ -138,7 +138,7 @@ export const ProductColors = z
   .merge(ProductId)
   .strict();
 
-export const ProductViewers = z
+export const ProductViewer = z
   .object({})
   .merge(Id)
   .merge(ProductId)
@@ -153,9 +153,9 @@ export const Tag = z
   .merge(SellerId)
   .strict();
 
-export const ProductTags = z.object({}).merge(ProductId).merge(TagId).strict();
+export const ProductTag = z.object({}).merge(ProductId).merge(TagId).strict();
 
-export const Orders = z
+export const Order = z
   .object({
     quantity: z.number(),
     totalPrice: z.number(),

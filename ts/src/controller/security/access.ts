@@ -5,7 +5,7 @@ import { schema } from "../../schema/index.js";
 import { model } from "../../model/index.js";
 import { APIError } from "../../error/index.js";
 import { util } from "../../util/index.js";
-import { KEYS } from "../../constant/index.js";
+import { ENV, KEYS } from "../../constant/index.js";
 import { lib } from "../../lib/index.js";
 
 const { HTTP } = KEYS;
@@ -24,7 +24,6 @@ export default {
       attributes: ["id"],
       where: { email },
       limit: 1,
-      plain: true,
     });
     if (user === null)
       throw APIError.controller(StatusCodes.NOT_FOUND, "user not found");
@@ -35,10 +34,15 @@ export default {
     req.session.access = { key, iv };
     res.setHeader(HTTP.HEADERS.ACCESS_TOKEN, token);
 
-    //TODO: Send code in email (template)
-    const { Mail } = lib;
-    await new Mail(email, "access code", `Code: ${code}`).send();
+    if (IS_PRODUCTION) {
+      //TODO: Send code in email (template)
+      const { Mail } = lib;
+      await new Mail(email, "access code", `Code: ${code}`).send();
+    }
 
-    res.status(StatusCodes.CREATED).json({ success: true });
+    res.status(StatusCodes.CREATED).json({
+      success: true,
+      data: { code: IS_PRODUCTION ? null : code },
+    });
   },
 } as const;

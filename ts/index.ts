@@ -19,8 +19,8 @@ import { config } from "./src/config/index.js";
 import { fileURLToPath } from "url";
 import path from "path";
 import { randomUUID } from "crypto";
-import { z } from "zod";
 import { util } from "./src/util/index.js";
+import { schema } from "./src/schema/index.js";
 
 const app = express();
 app.set("env", ENV.NODE.ENV);
@@ -28,36 +28,6 @@ app.disable("x-powered-by");
 app.disable("trust proxy");
 app.disable("view cache");
 app.enable("json escape");
-
-app.use(timeout(VALUES.TIME.MINUTE));
-app.use(responseTime());
-app.use(
-  cors({
-    origin: "http://localhost:3000",
-    exposedHeaders: "*",
-    credentials: true,
-  })
-);
-app.use(
-  rateLimit({
-    windowMs: VALUES.TIME.MINUTE,
-    limit: 100,
-  })
-);
-app.use(
-  compression({
-    level: 9,
-    filter(req, res) {
-      const { getHeader } = util.fn;
-      const { NO_COMPRESSION } = KEYS.HTTP.HEADERS;
-      const noCompressionHeader = getHeader(req.headers, NO_COMPRESSION);
-
-      const toBoolean = z.coerce.boolean();
-      const noCompression = toBoolean.parse(noCompressionHeader);
-      return noCompression ? false : compression.filter(req, res);
-    },
-  })
-);
 
 global.IS_PRODUCTION = ENV.NODE.ENV === "production";
 global.__filename = fileURLToPath(import.meta.url);
@@ -76,6 +46,40 @@ await db.connect();
 const { passport } = await import("./src/passport/index.js");
 const { router } = await import("./src/router/index.js");
 await db.init();
+
+app.use(timeout(VALUES.TIME.MINUTE));
+app.use(responseTime(async (req: Request, res: Response, time: number) => {
+  const { RESPONSE_TIME } = KEYS.HTTP.HEADERS
+  res.setHeader(RESPONSE_TIME, time)
+
+  const { model } = await import("./src/model/index.js")
+  const {  } = model.db
+}));
+app.use(
+  cors({
+    credentials: true,
+  })
+);
+app.use(
+  rateLimit({
+    windowMs: VALUES.TIME.MINUTE,
+    limit: 100,
+  })
+);
+app.use(
+  compression({
+    level: 9,
+    filter(req, res) {
+      const { getHeader } = util.fn;
+      const { NO_COMPRESSION } = KEYS.HTTP.HEADERS;
+      const noCompressionHeader = getHeader(req.headers, NO_COMPRESSION);
+
+      const { toBoolean } = schema.validators
+      const noCompression = toBoolean.parse(noCompressionHeader);
+      return noCompression ? false : compression.filter(req, res);
+    },
+  })
+);
 
 app.use(methodOverride(KEYS.HTTP.HEADERS.METHOD_OVERRIDE));
 app.use(morgan(IS_PRODUCTION ? "combined" : "dev"));
@@ -124,6 +128,6 @@ process.on("uncaughtException", async (error) => {
   process.exit(1);
 });
 
-app.listen(ENV.NODE.PORT, () => {
+app.listen(ENV.NODE.PORT, async () => {
   if (!IS_PRODUCTION) console.log("Starting".bgGreen.white);
 });

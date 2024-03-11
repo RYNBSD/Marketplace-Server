@@ -5,11 +5,14 @@ import ffmpeg, { type FfprobeData } from "fluent-ffmpeg";
 import sharp from "sharp";
 import fileType, { type FileExtension } from "file-type";
 import { StatusCodes } from "http-status-codes";
+import { APIError } from "../../error/index.js";
+import { schema } from "../../schema/index.js";
 
 import imageExtensions from "image-extensions/image-extensions.json" assert { type: "json" };
 import videoExtensions from "video-extensions/video-extensions.json" assert { type: "json" };
 import audioExtensions from "audio-extensions/audioExtensions.json" assert { type: "json" };
-import { APIError } from "../../error/index.js";
+
+const { toBoolean } = schema.validators;
 
 class FileTmp {
   constructor() {}
@@ -32,6 +35,7 @@ class FileTmp {
 
 export default class FileConverter extends FileTmp {
   private readonly files: Buffer[] = [];
+  private isFfmpegInit = false;
 
   constructor(...files: Buffer[]) {
     super();
@@ -45,7 +49,7 @@ export default class FileConverter extends FileTmp {
   private async ffprobeMetadata(path: string) {
     return new Promise<FfprobeData>((resolve, reject) => {
       ffmpeg.ffprobe(path, (err, metadata) => {
-        if (err) return reject(err);
+        if (toBoolean.parse(err)) return reject(err);
         return resolve(metadata);
       });
     });
@@ -61,6 +65,8 @@ export default class FileConverter extends FileTmp {
   }
 
   private async initFfmpeg() {
+    if (this.isFfmpegInit) return;
+
     const [{ path: ffmpegPath }, { path: ffprobePath }] = await Promise.all([
       import("@ffmpeg-installer/ffmpeg"),
       import("@ffprobe-installer/ffprobe"),
@@ -79,8 +85,8 @@ export default class FileConverter extends FileTmp {
         .videoCodec("libx264")
         .audioCodec("aac")
         .audioQuality(0) // Set audio quality to 0 for default compression
-        .addOption("-preset", "slow") // Use the 'slow' preset for better compression
-        .addOption("-crf", "23") // Constant Rate Factor (0-51, where lower is better quality. 23 is default.)
+        // .addOption("-preset", "slow") // Use the 'slow' preset for better compression
+        // .addOption("-crf", "23") // Constant Rate Factor (0-51, where lower is better quality. 23 is default.)
         .format("mp4")
         .output(output)
         .on("end", () => {

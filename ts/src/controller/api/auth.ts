@@ -44,22 +44,36 @@ export default {
         "Can't upload your image"
       );
 
-    const { User, UserSettings } = model.db;
+    const { User, UserSetting } = model.db;
     const { hash } = util.bcrypt;
 
-    const user = await User.create({
-      username,
-      email,
-      password: hash(password),
-      image: uploaded[0]!,
-    });
-    await UserSettings.create({
-      userId: user.dataValues.id,
-      theme,
-      locale,
-      forceTheme: false,
-      disableAnimations: false,
-    });
+    const user = await User.create(
+      {
+        username,
+        email,
+        password: hash(password),
+        image: uploaded[0]!,
+      },
+      { fields: ["username", "email", "password", "image"] }
+    );
+    await UserSetting.create(
+      {
+        userId: user.dataValues.id,
+        theme,
+        locale,
+        forceTheme: false,
+        disableAnimations: false,
+      },
+      {
+        fields: [
+          "userId",
+          "theme",
+          "locale",
+          "forceTheme",
+          "disableAnimations",
+        ],
+      }
+    );
 
     // TODO: send email verification
 
@@ -97,7 +111,8 @@ export default {
     res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
   ) {
     req.logOut((err) => {
-      if (err) throw err;
+      const { toBoolean } = schema.validators;
+      if (toBoolean.parse(err)) throw err;
 
       req.session.csrf = { secret: "" };
       req.session.access = { key: "", iv: "" };
@@ -146,16 +161,18 @@ export default {
     const { isUUID } = schema.validators;
     const parsedId = isUUID.parse(id);
 
-    
-
     const { User } = model.db;
-    await User.update(
+    const [_, user] = await User.update(
       { emailVerified: new Date() },
       {
+        fields: ["emailVerified"],
         where: { id: parsedId },
         limit: 1,
+        returning: true,
       }
     );
+    if (user.length === 0)
+      throw APIError.controller(StatusCodes.NOT_FOUND, "User not found");
 
     res.status(StatusCodes.OK).json({ success: true });
   },

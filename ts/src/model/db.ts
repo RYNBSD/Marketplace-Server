@@ -1,7 +1,8 @@
 import { DataTypes } from "sequelize";
 import type { Tables } from "../types/index.js";
-import { ENUM, VALUES } from "../constant/index.js";
+import { ENUM, KEYS, VALUES } from "../constant/index.js";
 
+const { DB } = KEYS;
 const { MAX } = VALUES.LENGTH;
 
 export const User = sequelize.define<Tables["User"]>(
@@ -36,13 +37,13 @@ export const User = sequelize.define<Tables["User"]>(
     },
   },
   {
-    tableName: "User",
+    tableName: DB.TABLES.USER.TABLE,
     timestamps: true,
     paranoid: true,
   }
 );
 
-export const UserSettings = sequelize.define<Tables["UserSettings"]>(
+export const UserSetting = sequelize.define<Tables["UserSetting"]>(
   "user-setting",
   {
     userId: {
@@ -75,7 +76,7 @@ export const UserSettings = sequelize.define<Tables["UserSettings"]>(
     },
   },
   {
-    tableName: "UserSetting",
+    tableName: DB.TABLES.USER.SETTING,
     timestamps: true,
   }
 );
@@ -107,10 +108,10 @@ export const Seller = sequelize.define<Tables["Seller"]>(
       },
     },
   },
-  { tableName: "Seller", timestamps: true, paranoid: true }
+  { tableName: DB.TABLES.SELLER.TABLE, timestamps: true, paranoid: true }
 );
 
-export const SellerSettings = sequelize.define<Tables["SellerSettings"]>(
+export const SellerSetting = sequelize.define<Tables["SellerSetting"]>(
   "seller-setting",
   {
     sellerId: {
@@ -128,12 +129,12 @@ export const SellerSettings = sequelize.define<Tables["SellerSettings"]>(
     },
   },
   {
-    tableName: "SellerSetting",
+    tableName: DB.TABLES.SELLER.SETTING,
     timestamps: true,
   }
 );
 
-export const SellerLinks = sequelize.define<Tables["SellerLinks"]>(
+export const SellerLink = sequelize.define<Tables["SellerLink"]>(
   "seller-link",
   {
     id: {
@@ -159,13 +160,13 @@ export const SellerLinks = sequelize.define<Tables["SellerLinks"]>(
     },
   },
   {
-    tableName: "SellerLink",
+    tableName: DB.TABLES.SELLER.LINK,
     timestamps: true,
     paranoid: true,
   }
 );
 
-export const SellerViewers = sequelize.define<Tables["SellerViewers"]>(
+export const SellerViewer = sequelize.define<Tables["SellerViewer"]>(
   "seller-viewer",
   {
     id: {
@@ -190,7 +191,7 @@ export const SellerViewers = sequelize.define<Tables["SellerViewers"]>(
       },
     },
   },
-  { tableName: "SellerViewer", createdAt: true, updatedAt: false }
+  { tableName: DB.TABLES.SELLER.VIEWER, createdAt: true, updatedAt: false }
 );
 
 export const Category = sequelize.define<Tables["Category"]>(
@@ -223,13 +224,13 @@ export const Category = sequelize.define<Tables["Category"]>(
     },
   },
   {
-    tableName: "Category",
+    tableName: DB.TABLES.CATEGORY.TABLE,
     timestamps: true,
     paranoid: true,
   }
 );
 
-export const CategoryViewers = sequelize.define<Tables["CategoryViewers"]>(
+export const CategoryViewer = sequelize.define<Tables["CategoryViewer"]>(
   "category-viewer",
   {
     id: {
@@ -254,7 +255,7 @@ export const CategoryViewers = sequelize.define<Tables["CategoryViewers"]>(
       },
     },
   },
-  { tableName: "CategoryViewer", createdAt: true, updatedAt: false }
+  { tableName: DB.TABLES.CATEGORY.VIEWER, createdAt: true, updatedAt: false }
 );
 
 export const Product = sequelize.define<Tables["Product"]>(
@@ -281,7 +282,6 @@ export const Product = sequelize.define<Tables["Product"]>(
       type: DataTypes.STRING(MAX.PRODUCT.DESCRIPTION),
       allowNull: true,
     },
-    
     quality: {
       type: DataTypes.ENUM(...ENUM.QUALITY),
       allowNull: false,
@@ -313,7 +313,7 @@ export const Product = sequelize.define<Tables["Product"]>(
     },
   },
   {
-    tableName: "Product",
+    tableName: DB.TABLES.PRODUCT.TABLE,
     timestamps: true,
     paranoid: true,
   }
@@ -345,13 +345,13 @@ export const ProductInfo = sequelize.define<Tables["ProductInfo"]>(
     },
   },
   {
-    tableName: "ProductInfo",
+    tableName: DB.TABLES.PRODUCT.INFO,
     timestamps: true,
     paranoid: true,
   }
 );
 
-export const ProductImages = sequelize.define<Tables["ProductImages"]>(
+export const ProductImage = sequelize.define<Tables["ProductImage"]>(
   "product-image",
   {
     id: {
@@ -373,14 +373,14 @@ export const ProductImages = sequelize.define<Tables["ProductImages"]>(
     },
   },
   {
-    tableName: "ProductImage",
+    tableName: DB.TABLES.PRODUCT.IMAGE,
     createdAt: true,
     updatedAt: false,
     paranoid: true,
   }
 );
 
-export const ProductRatings = sequelize.define<Tables["ProductRatings"]>(
+export const ProductRating = sequelize.define<Tables["ProductRating"]>(
   "product-rating",
   {
     userId: {
@@ -411,13 +411,13 @@ export const ProductRatings = sequelize.define<Tables["ProductRatings"]>(
     },
   },
   {
-    tableName: "ProductRating",
+    tableName: DB.TABLES.PRODUCT.RATING,
     timestamps: true,
     paranoid: true,
   }
 );
 
-export const ProductSizes = sequelize.define<Tables["ProductSizes"]>(
+export const ProductSize = sequelize.define<Tables["ProductSize"]>(
   "product-size",
   {
     id: {
@@ -427,6 +427,9 @@ export const ProductSizes = sequelize.define<Tables["ProductSizes"]>(
     },
     size: {
       type: DataTypes.STRING(MAX.PRODUCT.SIZE),
+      validate: {
+        is: /\b((xs|s|m|l|xl)|([2-9](xs|xl)))\b/i,
+      },
       allowNull: false,
     },
     productId: {
@@ -439,14 +442,14 @@ export const ProductSizes = sequelize.define<Tables["ProductSizes"]>(
     },
   },
   {
-    tableName: "ProductSize",
+    tableName: DB.TABLES.PRODUCT.SIZE,
     createdAt: true,
     updatedAt: false,
     paranoid: true,
   }
 );
 
-export const ProductColors = sequelize.define<Tables["ProductColors"]>(
+export const ProductColor = sequelize.define<Tables["ProductColor"]>(
   "product-color",
   {
     id: {
@@ -468,14 +471,14 @@ export const ProductColors = sequelize.define<Tables["ProductColors"]>(
     },
   },
   {
-    tableName: "ProductColor",
+    tableName: DB.TABLES.PRODUCT.COLOR,
     createdAt: true,
     updatedAt: false,
     paranoid: true,
   }
 );
 
-export const ProductViewers = sequelize.define<Tables["ProductViewers"]>(
+export const ProductViewer = sequelize.define<Tables["ProductViewer"]>(
   "product-viewer",
   {
     id: {
@@ -500,7 +503,7 @@ export const ProductViewers = sequelize.define<Tables["ProductViewers"]>(
       },
     },
   },
-  { tableName: "ProductViewer", createdAt: true, updatedAt: false }
+  { tableName: DB.TABLES.PRODUCT.VIEWER, createdAt: true, updatedAt: false }
 );
 
 export const Tag = sequelize.define<Tables["Tag"]>(
@@ -525,13 +528,13 @@ export const Tag = sequelize.define<Tables["Tag"]>(
     },
   },
   {
-    tableName: "Tag",
+    tableName: DB.TABLES.TAG,
     createdAt: true,
     updatedAt: false,
   }
 );
 
-export const ProductTags = sequelize.define<Tables["ProductTags"]>(
+export const ProductTag = sequelize.define<Tables["ProductTag"]>(
   "product-tag",
   {
     tagId: {
@@ -553,10 +556,15 @@ export const ProductTags = sequelize.define<Tables["ProductTags"]>(
       },
     },
   },
-  { tableName: "ProductTag", createdAt: true, updatedAt: false, paranoid: true }
+  {
+    tableName: DB.TABLES.PRODUCT.TAG,
+    createdAt: true,
+    updatedAt: false,
+    paranoid: true,
+  }
 );
 
-export const Orders = sequelize.define<Tables["Orders"]>(
+export const Order = sequelize.define<Tables["Order"]>(
   "order",
   {
     id: {
@@ -607,7 +615,7 @@ export const Orders = sequelize.define<Tables["Orders"]>(
     },
   },
   {
-    tableName: "Order",
+    tableName: DB.TABLES.ORDER,
     timestamps: true,
   }
 );
