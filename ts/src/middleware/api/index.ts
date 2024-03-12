@@ -1,6 +1,6 @@
 const [{ default: user }, { default: seller }] = await Promise.all([
   import("./user.js"),
-  import("./seller.js"),
+  import("./store.js"),
 ]);
 
 export default {

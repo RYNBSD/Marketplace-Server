@@ -213,16 +213,13 @@ export default {
     const { Query } = Delete;
     const { force = false } = Query.parse(req.query);
 
-    let seller: Tables["Seller"] | null;
-    if (res.locals.seller !== undefined && res.locals.seller.profile !== null)
-      seller = res.locals.seller.profile;
-    else {
-      const { Seller } = model.db;
-      seller = await Seller.findOne({
-        where: { userId: user.dataValues.id },
-        limit: 1,
-      });
-    }
+    const { Seller } = model.db;
+    const seller = await Seller.findOne({
+      attributes: ["userId"],
+      where: { userId: user.dataValues.id },
+      plain: true,
+      limit: 1,
+    });
 
     const deletePromises: Promise<unknown>[] = [];
 

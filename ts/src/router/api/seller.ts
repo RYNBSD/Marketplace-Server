@@ -29,26 +29,26 @@ const {
   delete: deleteSeller,
 } = controller.api.seller;
 
-export const seller = Router();
+export const store = Router();
 
-seller.get("/search", handleAsync(search));
+store.get("/search", handleAsync(search));
 
-seller.get("/all", handleAsync(all));
+store.get("/all", handleAsync(all));
 
-seller.get(
+store.get(
   `/:${PARAMS.ID.SELLER}`,
   handleAsync(checkSeller),
   handleAsync(home)
 );
 
-seller.get(
+store.get(
   `/:${PARAMS.ID.SELLER}/:${PARAMS.ID.CATEGORY}`,
   handleAsync(checkSeller),
   handleAsync(checkCategory),
   handleAsync(category)
 );
 
-seller.get(
+store.get(
   `/:${PARAMS.ID.SELLER}/:${PARAMS.ID.CATEGORY}/:${PARAMS.ID.PRODUCT}`,
   handleAsync(checkSeller),
   handleAsync(checkCategory),
@@ -56,14 +56,14 @@ seller.get(
   handleAsync(product)
 );
 
-seller.get(
+store.get(
   "/",
   handleAsync(isAuthenticated),
   handleAsync(isSeller),
   handleAsync(profile)
 );
 
-seller.put(
+store.put(
   "/",
   handleAsync(csrf),
   handleAsync(isAuthenticated),
@@ -72,7 +72,7 @@ seller.put(
   handleAsync(update)
 );
 
-seller.delete(
+store.delete(
   "/",
   handleAsync(isAuthenticated),
   handleAsync(isSeller),

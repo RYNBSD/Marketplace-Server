@@ -12,6 +12,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import responseTime from "response-time";
 import { StatusCodes } from "http-status-codes";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import cookieEncrypt from "cookie-encrypter";
 import { ENV, KEYS, VALUES } from "./src/constant/index.js";
@@ -52,8 +53,8 @@ app.use(responseTime(async (req: Request, res: Response, time: number) => {
   const { RESPONSE_TIME } = KEYS.HTTP.HEADERS
   res.setHeader(RESPONSE_TIME, time)
 
-  const { model } = await import("./src/model/index.js")
-  const {  } = model.db
+  //const { model } = await import("./src/model/index.js")
+  
 }));
 app.use(
   cors({
@@ -109,7 +110,7 @@ app.use(passport.session());
 
 app.use(`/v${ENV.API.VERSION}`, router);
 app.use(express.static(path.join(__root, KEYS.GLOBAL.PUBLIC)));
-app.use("*", (_, res) => res.sendStatus(StatusCodes.NOT_FOUND));
+app.all("*", (_, res) => res.sendStatus(StatusCodes.NOT_FOUND));
 app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
   if (!IS_PRODUCTION) {
     console.error(error);

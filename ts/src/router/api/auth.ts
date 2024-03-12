@@ -43,6 +43,7 @@ auth.put(
   "/forgot-password",
   handleAsync(csrf),
   handleAsync(notAuthenticated),
+  upload.any(),
   handleAsync(access),
   handleAsync(forgotPassword)
 );

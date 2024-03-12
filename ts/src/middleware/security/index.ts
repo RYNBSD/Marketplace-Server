@@ -86,6 +86,7 @@ export default {
     delete req.body.code;
     delete req.body.confirmPassword;
 
+    req.user = user;
     return next();
   },
 } as const;

@@ -8,7 +8,7 @@ import { lib } from "../../lib/index.js";
 import { model } from "../../model/index.js";
 import { KEYS, VALUES } from "../../constant/index.js";
 
-const { Search, All, Home, Product, Update } = schema.req.api.seller;
+const { Search, All, Home, Update } = schema.req.api.seller;
 const { DB } = KEYS;
 const { NULL, LENGTH } = VALUES;
 

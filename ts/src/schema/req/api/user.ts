@@ -21,7 +21,7 @@ export default {
   },
   Delete: {
     Query: z.object({
-      force: z.coerce.boolean().optional(),
+      force: z.coerce.boolean().default(false),
     }),
   },
 } as const;
