@@ -10,6 +10,7 @@ export default {
     YEAR: 1000 * 60 * 60 * 24 * 30 * 12,
   },
   LENGTH: {
+    LIMIT: 25,
     PASSWORD: 8,
     MAX: {
       IMAGE: 255,
@@ -39,5 +40,8 @@ export default {
     MIN: {
       REQUIRED: 1, // Usually used with zod to indicate the this field is required
     },
+  },
+  NULL: {
+    UUID: "00000000-0000-0000-0000-000000000000",
   },
 } as const;

@@ -47,18 +47,17 @@ export async function isSeller(
     );
 
   const { Seller } = model.db;
-  const seller = await Seller.findOne({
-    where: { userId: user!.dataValues.id },
+  const store = await Seller.findOne({
+    where: { userId: user.dataValues.id },
     limit: 1,
     plain: true,
   });
-  if (seller === null)
+  if (store === null)
     throw APIError.middleware(StatusCodes.NOT_FOUND, "Seller bot found");
 
-  res.locals.seller = {
-    profile: seller,
-    category: null,
-    product: null,
+  res.locals = {
+    ...res.locals,
+    store,
   };
   return next();
 }

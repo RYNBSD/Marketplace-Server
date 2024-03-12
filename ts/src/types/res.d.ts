@@ -1,11 +1,9 @@
 import { Tables } from "./db.js";
 
 type Locals = {
-  seller: {
-    profile: Tables["Seller"] | null;
-    category: Tables["Category"] | null;
-    product: Tables["Product"] | null;
-  };
+  store: Tables["Seller"];
+  category: Tables["Category"];
+  product: Tables["Product"];
 };
 
 type BodyData = Record<string, unknown>;

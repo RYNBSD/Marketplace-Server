@@ -1,53 +1,305 @@
 import type { Request, Response } from "express";
 import type { TResponse } from "../../types/index.js";
+import { Op } from "sequelize";
 import { StatusCodes } from "http-status-codes";
 import { APIError } from "../../error/index.js";
 import { schema } from "../../schema/index.js";
 import { lib } from "../../lib/index.js";
+import { model } from "../../model/index.js";
+import { KEYS, VALUES } from "../../constant/index.js";
 
-const { All, Profile, Category, Product, Update } = schema.req.api.seller;
+const { Search, All, Home, Product, Update } = schema.req.api.seller;
+const { DB } = KEYS;
+const { NULL, LENGTH } = VALUES;
 
 export default {
+  async search(
+    req: Request,
+    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
+  ) {
+    const { Query } = Search;
+    const { s, limit } = Query.parse(req.query);
+    const { Seller, Category, Product } = model.db;
+
+    const [sellers, categories, products] = await Promise.all([
+      Seller.findAll({
+        attributes: ["id", "image", "storeName"],
+        where: { storeName: { [Op.iLike]: `%${s}%` } },
+        order: ["createdAt", "DESC"],
+        limit,
+      }),
+      Category.findAll({
+        attributes: ["id", "name", "nameAr", "image"],
+        where: {
+          [Op.or]: {
+            nameAr: { [Op.iLike]: `%${s}%` },
+            name: { [Op.iLike]: `%${s}%` },
+          },
+        },
+        order: ["createdAt", "DESC"],
+        limit,
+      }),
+      Product.findAll({
+        attributes: ["id", "title", "titleAr", "description", "descriptionAr"],
+        where: {
+          [Op.or]: {
+            title: { [Op.iLike]: `%${s}%` },
+            titleAr: { [Op.iLike]: `%${s}%` },
+            description: { [Op.iLike]: `%${s}%` },
+            descriptionAr: { [Op.iLike]: `%${s}%` },
+          },
+        },
+        order: ["createdAt", "DESC"],
+        limit,
+      }),
+    ]);
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      data: {
+        sellers: sellers.map((seller) => seller.dataValues),
+        categories: categories.map((category) => category.dataValues),
+        products: products.map((product) => product.dataValues),
+      },
+    });
+  },
   async all(
     req: Request,
     res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
   ) {
     const { Query } = All;
-    const { lastSellerId = "", limit = 25 } = Query.parse(req.query);
+    const { lastSellerId = NULL.UUID, limit } = Query.parse(req.query);
 
-    res.status(StatusCodes.OK).json({ success: true });
+    const {
+      db: { Seller },
+      fn: { tableIndex },
+    } = model;
+    const { TABLES } = DB;
+
+    const offset = await tableIndex(TABLES.SELLER.TABLE, lastSellerId);
+
+    const sellers = await Seller.findAll({
+      attributes: ["id", "image", "storeName"],
+      offset,
+      limit,
+    });
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      data: { sellers: sellers.map((seller) => seller.dataValues) },
+    });
   },
-  async seller(
+  /** Store home page (landing page) */
+  async home(
     req: Request,
     res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
   ) {
-    res.status(StatusCodes.OK).json({ success: true });
+    const { Params } = Home;
+    const { sellerId } = Params.parse(req.params);
+
+    const { user } = req;
+    if (user !== undefined) {
+      const { SellerViewer } = model.db;
+      await SellerViewer.create(
+        { userId: user.dataValues.id, sellerId },
+        { fields: ["userId", "sellerId"] }
+      );
+    }
+
+    const { store } = res.locals;
+    const {
+      db: { Product, ProductImage },
+      query,
+    } = model;
+
+    const categories = await query.category.withProductsCount(
+      store!.dataValues.id
+    );
+
+    const products = await Product.findAll({
+      attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
+      where: {
+        [Op.or]: {
+          categoryId: categories.map((category) => category.id),
+        },
+      },
+      limit: LENGTH.LIMIT,
+      order: ["createdAt", "DESC"],
+      include: {
+        attributes: ["image"],
+        model: ProductImage,
+        separate: true,
+        required: true,
+        limit: 1,
+      },
+    });
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      data: {
+        store: store!.dataValues,
+        categories,
+        products: products.map((product) => product.dataValues),
+      },
+    });
   },
   async category(
     req: Request,
     res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
   ) {
-    const { Params } = Category;
-    const { sellerId, categoryId } = Params.parse(req.params);
+    const { category } = res.locals;
 
-    res.status(StatusCodes.OK).json({ success: true });
+    const { user } = req;
+    if (user !== undefined) {
+      const { CategoryViewer } = model.db;
+      await CategoryViewer.create(
+        { userId: user.dataValues.id, categoryId: category!.dataValues.id },
+        { fields: ["userId", "categoryId"] }
+      );
+    }
+
+    const { Product, ProductImage } = model.db;
+    const products = await Product.findAll({
+      attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
+      where: { categoryId: category!.dataValues.id },
+      order: ["createdAt", "DESC"],
+      include: {
+        attributes: ["image"],
+        model: ProductImage,
+        required: true,
+        separate: true,
+        limit: 1,
+      },
+    });
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      data: {
+        products: products.map((product) => product.dataValues),
+      },
+    });
   },
   async product(
     req: Request,
     res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
   ) {
-    const { Params } = Product;
-    const { sellerId, categoryId, productId } = Params.parse(req.params);
+    const { product } = res.locals;
+    const { user } = req;
+    if (user !== undefined) {
+      const { ProductViewer } = model.db;
+      await ProductViewer.create(
+        { userId: user.dataValues.id, productId: product!.dataValues.id },
+        { fields: ["userId", "productId"] }
+      );
+    }
 
-    res.status(StatusCodes.OK).json({ success: true });
+    const {
+      User,
+      Tag,
+      Product,
+      ProductImage,
+      ProductColor,
+      ProductInfo,
+      ProductRating,
+      ProductSize,
+      ProductTag,
+    } = model.db;
+
+    const fullProduct = await Product.findOne({
+      attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
+      where: { id: product!.dataValues.id },
+      include: [
+        {
+          attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
+          model: ProductImage,
+          separate: true,
+          required: true,
+        },
+        {
+          attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
+          model: ProductColor,
+          separate: true,
+          required: false,
+        },
+        {
+          attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
+          model: ProductInfo,
+          separate: true,
+          required: false,
+        },
+        {
+          attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
+          model: ProductSize,
+          separate: true,
+          required: false,
+        },
+        {
+          attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
+          model: ProductRating,
+          separate: true,
+          required: false,
+          include: [
+            {
+              attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
+              model: User,
+              separate: true,
+              required: true,
+            },
+          ],
+        },
+        {
+          attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
+          model: ProductTag,
+          separate: true,
+          required: false,
+          include: [
+            {
+              attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
+              model: Tag,
+              separate: true,
+              required: true,
+            },
+          ],
+        },
+      ],
+    });
+
+    res
+      .status(StatusCodes.OK)
+      .json({ success: true, data: { product: fullProduct!.dataValues } });
   },
   async profile(
-    req: Request,
+    _req: Request,
     res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
   ) {
-    const { Params } = Profile;
-    const { sellerId } = Params.parse(req.params);
-    res.status(StatusCodes.OK).json({ success: true });
+    const { store } = res.locals;
+
+    const { Category, Product } = model.db;
+
+    const categories = await Category.findAll({
+      attributes: ["id"],
+      where: { sellerId: store!.dataValues.id },
+    });
+
+    const products = await Product.findAll({
+      attributes: ["categoryId"],
+      where: {
+        [Op.or]: {
+          categoryId: categories.map((category) => category.dataValues.id),
+        },
+      },
+    });
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      data: {
+        store: store!.dataValues,
+        count: {
+          categories: categories.length,
+          products: products.length
+        }
+      },
+    });
   },
   async update(
     req: Request,
@@ -56,14 +308,14 @@ export default {
     const { Body } = Update;
     const { storeName } = Body.parse(req.body);
 
-    const { seller } = res.locals;
-    if (seller === null)
+    const { store } = res.locals;
+    if (store === undefined)
       throw APIError.server(
         StatusCodes.INTERNAL_SERVER_ERROR,
-        "Unprovided local seller (seller:update)"
+        "Unprovided local store (seller:update)"
       );
 
-    let newImage = seller.dataValues.image;
+    let newImage = store.dataValues.image;
     const image = req.file ?? null;
 
     if (image !== null) {
@@ -86,18 +338,18 @@ export default {
       newImage = uploaded[0]!;
     }
 
-    await seller.update({ storeName, image: newImage });
+    await store.update({ storeName, image: newImage });
     res.status(StatusCodes.OK).json({ success: true });
   },
   async delete(
     _: Request,
     res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
   ) {
-    const { seller } = res.locals;
-    if (seller === null)
+    const { store } = res.locals;
+    if (store === null)
       throw APIError.server(
         StatusCodes.INTERNAL_SERVER_ERROR,
-        "Unprovided local seller (seller:update)"
+        "Unprovided local store (seller:update)"
       );
 
     res.status(StatusCodes.OK).json({ success: true });

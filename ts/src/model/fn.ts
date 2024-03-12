@@ -25,5 +25,5 @@ export async function tableIndex(table: string, id: string) {
     }
   );
 
-  return index === null ? 0 : index.row_number;
+  return index?.row_number ?? 0;
 }

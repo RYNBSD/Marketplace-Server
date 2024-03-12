@@ -1,53 +1,35 @@
 import { z } from "zod";
-import { KEYS, VALUES } from "../../../constant/index.js";
+import { VALUES } from "../../../constant/index.js";
+import { SellerId, CategoryId, ProductId } from "../../id.js";
 
-const {
-  REQUEST: { PARAMS },
-} = KEYS;
-const { MIN, MAX } = VALUES.LENGTH;
-
-const SellerId = z
-  .object({ [PARAMS.ID.SELLER]: z.string().trim().min(MIN.REQUIRED).uuid() })
-  .strict();
-const CategoryId = z
-  .object({ [PARAMS.ID.CATEGORY]: z.string().trim().min(MIN.REQUIRED).uuid() })
-  .strict();
-const ProductId = z
-  .object({ [PARAMS.ID.PRODUCT]: z.string().trim().min(MIN.REQUIRED).uuid() })
-  .strict();
+const { MIN, MAX, LIMIT } = VALUES.LENGTH;
 
 export default {
-  All: {
-    Query: z
-      .object({
-        lastSellerId: z.string().trim().min(MIN.REQUIRED).uuid().optional(),
-        limit: z.number().min(MIN.REQUIRED).optional(),
-      })
-      .strict(),
+  Search: {
+    Query: z.object({
+      s: z.string().trim().min(MIN.REQUIRED),
+      limit: z.number().min(MIN.REQUIRED).default(LIMIT),
+    }),
   },
-  Profile: {
+  All: {
+    Query: z.object({
+      lastSellerId: z.string().trim().min(MIN.REQUIRED).uuid().optional(),
+      limit: z.number().min(MIN.REQUIRED).default(LIMIT),
+    }),
+  },
+  Home: {
     Params: SellerId,
   },
   Category: {
-    Params: z.object({}).merge(SellerId).merge(CategoryId).strict(),
+    Params: z.object({}).merge(SellerId).merge(CategoryId),
   },
   Product: {
-    Params: z
-      .object({})
-      .merge(SellerId)
-      .merge(CategoryId)
-      .merge(ProductId)
-      .strict(),
+    Params: z.object({}).merge(SellerId).merge(CategoryId).merge(ProductId),
   },
+  Profile: {},
   Update: {
-    Body: z
-      .object({
-        storeName: z
-          .string()
-          .trim()
-          .min(MIN.REQUIRED)
-          .max(MAX.SELLER.STORE_NAME),
-      })
-      .strict(),
+    Body: z.object({
+      storeName: z.string().trim().min(MIN.REQUIRED).max(MAX.SELLER.STORE_NAME),
+    }),
   },
 } as const;

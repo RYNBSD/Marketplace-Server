@@ -14,37 +14,45 @@ const { handleAsync } = util.fn;
 const {
   security: { csrf },
   fn: { isAuthenticated, isSeller },
+  api: {
+    seller: { checkSeller, checkCategory, checkProduct },
+  },
 } = middleware;
 const {
+  search,
   all,
-  profile,
+  home,
   category,
   product,
+  profile,
   update,
   delete: deleteSeller,
 } = controller.api.seller;
 
 export const seller = Router();
 
-seller.get("/search")
+seller.get("/search", handleAsync(search));
 
 seller.get("/all", handleAsync(all));
 
 seller.get(
   `/:${PARAMS.ID.SELLER}`,
-  handleAsync(isAuthenticated),
-  handleAsync(profile)
+  handleAsync(checkSeller),
+  handleAsync(home)
 );
 
 seller.get(
   `/:${PARAMS.ID.SELLER}/:${PARAMS.ID.CATEGORY}`,
-  handleAsync(isAuthenticated),
+  handleAsync(checkSeller),
+  handleAsync(checkCategory),
   handleAsync(category)
 );
 
 seller.get(
   `/:${PARAMS.ID.SELLER}/:${PARAMS.ID.CATEGORY}/:${PARAMS.ID.PRODUCT}`,
-  handleAsync(isAuthenticated),
+  handleAsync(checkSeller),
+  handleAsync(checkCategory),
+  handleAsync(checkProduct),
   handleAsync(product)
 );
 
