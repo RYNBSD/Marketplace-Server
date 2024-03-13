@@ -6,7 +6,7 @@ const { MIN, MAX } = VALUES.LENGTH
 export default {
   BecomeSeller: {
     Body: z.object({
-      storeName: z.string().trim().min(MIN.REQUIRED).max(MAX.SELLER.STORE_NAME),
+      name: z.string().trim().min(MIN.REQUIRED).max(MAX.SELLER.STORE_NAME),
       theme: z.enum(ENUM.THEMES),
     }),
   },

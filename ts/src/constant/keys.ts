@@ -32,10 +32,10 @@ export default {
         SETTING: "UserSetting",
       },
       SELLER: {
-        TABLE: "Seller",
-        SETTING: "SellerSetting",
-        LINK: "SellerLink",
-        VIEWER: "SellerViewer",
+        TABLE: "Store",
+        SETTING: "StoreSetting",
+        LINK: "StoreLink",
+        VIEWER: "StoreViewer",
       },
       CATEGORY: {
         TABLE: "Category",
@@ -53,6 +53,8 @@ export default {
       },
       TAG: "Tag",
       ORDER: "Order",
+      RESPONSE_TIME: "ResponseTime",
+      SERVER_ERROR: "ServerError",
     },
     // MODELS: {
     //   USER: "user",
@@ -66,7 +68,7 @@ export default {
     PARAMS: {
       ID: {
         USER: "userId",
-        SELLER: "sellerId",
+        STORE: "storeId",
         CATEGORY: "categoryId",
         PRODUCT: "productId",
         ORDER: "orderId",

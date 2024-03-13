@@ -28,9 +28,11 @@ export default {
     if (secret.length === 0)
       throw APIError.middleware(StatusCodes.BAD_REQUEST, "Empty CSRF secret");
 
+    if (!csrf.verify(secret, token))
+      throw APIError.middleware(StatusCodes.BAD_REQUEST, "Invalid CSRF");
+
     req.session.csrf = { secret: "" };
-    if (csrf.verify(secret, token)) return next();
-    throw APIError.middleware(StatusCodes.BAD_REQUEST, "Invalid CSRF");
+    return next();
   },
   async access(
     req: Request,
@@ -75,7 +77,7 @@ export default {
 
     const { User } = model.db;
     const user = await User.findOne({
-      attributes: ["id"],
+      attributes: ["id", "emailVerified"],
       where: { id: hasAccess.id },
       plain: true,
       limit: 1,

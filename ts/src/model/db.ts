@@ -1,5 +1,5 @@
-import { DataTypes } from "sequelize";
 import type { Tables } from "../types/index.js";
+import { DataTypes } from "sequelize";
 import { ENUM, KEYS, VALUES } from "../constant/index.js";
 
 const { DB } = KEYS;
@@ -81,7 +81,7 @@ export const UserSetting = sequelize.define<Tables["UserSetting"]>(
   }
 );
 
-export const Seller = sequelize.define<Tables["Seller"]>(
+export const Store = sequelize.define<Tables["Store"]>(
   "seller",
   {
     id: {
@@ -89,7 +89,7 @@ export const Seller = sequelize.define<Tables["Seller"]>(
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
     },
-    storeName: {
+    name: {
       type: DataTypes.STRING(MAX.SELLER.STORE_NAME),
       unique: true,
       allowNull: false,
@@ -111,14 +111,14 @@ export const Seller = sequelize.define<Tables["Seller"]>(
   { tableName: DB.TABLES.SELLER.TABLE, timestamps: true, paranoid: true }
 );
 
-export const SellerSetting = sequelize.define<Tables["SellerSetting"]>(
+export const StoreSetting = sequelize.define<Tables["StoreSetting"]>(
   "seller-setting",
   {
-    sellerId: {
+    storeId: {
       primaryKey: true,
       type: DataTypes.UUID,
       references: {
-        model: Seller,
+        model: Store,
         key: "id",
       },
     },
@@ -134,7 +134,7 @@ export const SellerSetting = sequelize.define<Tables["SellerSetting"]>(
   }
 );
 
-export const SellerLink = sequelize.define<Tables["SellerLink"]>(
+export const StoreLink = sequelize.define<Tables["StoreLink"]>(
   "seller-link",
   {
     id: {
@@ -150,11 +150,11 @@ export const SellerLink = sequelize.define<Tables["SellerLink"]>(
       type: DataTypes.STRING(MAX.SELLER.LINK),
       allowNull: false,
     },
-    sellerId: {
+    storeId: {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
-        model: Seller,
+        model: Store,
         key: "id",
       },
     },
@@ -166,7 +166,7 @@ export const SellerLink = sequelize.define<Tables["SellerLink"]>(
   }
 );
 
-export const SellerViewer = sequelize.define<Tables["SellerViewer"]>(
+export const StoreViewer = sequelize.define<Tables["StoreViewer"]>(
   "seller-viewer",
   {
     id: {
@@ -182,11 +182,11 @@ export const SellerViewer = sequelize.define<Tables["SellerViewer"]>(
         key: "id",
       },
     },
-    sellerId: {
+    storeId: {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
-        model: Seller,
+        model: Store,
         key: "id",
       },
     },
@@ -214,11 +214,11 @@ export const Category = sequelize.define<Tables["Category"]>(
       type: DataTypes.STRING(MAX.IMAGE),
       allowNull: false,
     },
-    sellerId: {
+    storeId: {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
-        model: Seller,
+        model: Store,
         key: "id",
       },
     },
@@ -518,11 +518,11 @@ export const Tag = sequelize.define<Tables["Tag"]>(
       type: DataTypes.STRING(MAX.TAG),
       allowNull: false,
     },
-    sellerId: {
+    storeId: {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
-        model: Seller,
+        model: Store,
         key: "id",
       },
     },
@@ -618,4 +618,69 @@ export const Order = sequelize.define<Tables["Order"]>(
     tableName: DB.TABLES.ORDER,
     timestamps: true,
   }
+);
+
+export const ResponseTime = sequelize.define<Tables["ResponseTime"]>(
+  "response-time",
+  {
+    id: {
+      type: DataTypes.BIGINT.UNSIGNED,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    date: {
+      // SELECT EXTRACT(epoch FROM CURRENT_TIMESTAMP);
+      type: DataTypes.INTEGER.UNSIGNED,
+      allowNull: false,
+    },
+    time: {
+      type: DataTypes.FLOAT.UNSIGNED,
+      allowNull: false,
+    },
+    method: {
+      type: DataTypes.STRING(10),
+      allowNull: false,
+    },
+    path: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
+    },
+    statusCode: {
+      type: DataTypes.SMALLINT.UNSIGNED,
+      allowNull: false,
+    },
+  },
+  { tableName: DB.TABLES.RESPONSE_TIME, timestamps: false, paranoid: false }
+);
+
+export const ServerError = sequelize.define<Tables["ServerError"]>(
+  "server-error",
+  {
+    id: {
+      type: DataTypes.BIGINT.UNSIGNED,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    message: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
+    },
+    stack: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    statusCode: {
+      type: DataTypes.SMALLINT.UNSIGNED,
+      allowNull: false,
+    },
+    isOperational: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false
+    },
+    handler: {
+      type: DataTypes.ENUM(...KEYS.ERROR.HANDLERS),
+      allowNull: false
+    }
+  },
+  { tableName: DB.TABLES.SERVER_ERROR, timestamps: true }
 );

@@ -5,7 +5,7 @@ import { model } from "../../model/index.js";
 import { APIError } from "../../error/index.js";
 import { schema } from "../../schema/index.js";
 
-const { SellerId, CategoryId, ProductId } = schema.id;
+const { StoreId, CategoryId, ProductId } = schema.id;
 
 export default {
   async checkSeller(
@@ -13,12 +13,12 @@ export default {
     res: Response<never, TResponse["Locals"]>,
     next: NextFunction
   ) {
-    const { sellerId } = SellerId.parse(req.params);
-    const { Seller } = model.db;
+    const { storeId } = StoreId.parse(req.params);
+    const { Store } = model.db;
 
-    const store = await Seller.findOne({
+    const store = await Store.findOne({
       attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
-      where: { id: sellerId },
+      where: { id: storeId },
       limit: 1,
       plain: true,
     });
@@ -48,7 +48,7 @@ export default {
     const { Category } = model.db;
     const category = await Category.findOne({
       attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
-      where: { id: categoryId, sellerId: store.dataValues.id },
+      where: { id: categoryId, storeId: store.dataValues.id },
       limit: 1,
       plain: true,
     });
@@ -100,8 +100,8 @@ export default {
     if (user === undefined)
       throw APIError.middleware(StatusCodes.UNAUTHORIZED, "Unauthorized user");
 
-    const { Seller } = model.db;
-    const store = await Seller.findOne({
+    const { Store } = model.db;
+    const store = await Store.findOne({
       attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
       where: { id: user.dataValues.id },
       limit: 1,
@@ -134,7 +134,7 @@ export default {
     const { Category } = model.db;
     const category = await Category.findOne({
       attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
-      where: { sellerId: store.dataValues.id },
+      where: { storeId: store.dataValues.id },
       plain: true,
       limit: 1,
     });

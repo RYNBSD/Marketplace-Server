@@ -7,16 +7,16 @@ import type {
 import type { z } from "zod";
 import type { schema } from "../schema/index.js";
 
+type CreateOptionalIdNumber = { id: CreationOptional<number> };
 type CreateOptionalIdString = { id: CreationOptional<string> };
 
 type User = z.infer<typeof schema.db.User> & CreateOptionalIdString;
 type UserSetting = z.infer<typeof schema.db.UserSetting>;
 
-type Seller = z.infer<typeof schema.db.Seller> & CreateOptionalIdString;
-type SellerSetting = z.infer<typeof schema.db.SellerSetting>;
-type SellerLink = z.infer<typeof schema.db.SellerLink> &
-  CreateOptionalIdString;
-type SellerViewer = z.infer<typeof schema.db.SellerViewer> &
+type Store = z.infer<typeof schema.db.Store> & CreateOptionalIdString;
+type StoreSetting = z.infer<typeof schema.db.StoreSetting>;
+type StoreLink = z.infer<typeof schema.db.StoreLink> & CreateOptionalIdString;
+type StoreViewer = z.infer<typeof schema.db.StoreViewer> &
   CreateOptionalIdString;
 
 type Category = z.infer<typeof schema.db.Category> & CreateOptionalIdString;
@@ -41,24 +41,30 @@ type ProductTag = z.infer<typeof schema.db.ProductTag>;
 
 type Order = z.infer<typeof schema.db.Order> & CreateOptionalIdString;
 
+type ResponseTime = z.infer<typeof schema.db.ResponseTime> &
+  CreateOptionalIdNumber;
+
+type ServerError = z.infer<typeof schema.db.ServerError> &
+  CreateOptionalIdNumber;
+
 export type Tables = {
   User: Model<InferAttributes<User>, InferCreationAttributes<User>>;
   UserSetting: Model<
     InferAttributes<UserSetting>,
     InferCreationAttributes<UserSetting>
   >;
-  Seller: Model<InferAttributes<Seller>, InferCreationAttributes<Seller>>;
-  SellerSetting: Model<
-    InferAttributes<SellerSetting>,
-    InferCreationAttributes<SellerSetting>
+  Store: Model<InferAttributes<Store>, InferCreationAttributes<Store>>;
+  StoreSetting: Model<
+    InferAttributes<StoreSetting>,
+    InferCreationAttributes<StoreSetting>
   >;
-  SellerLink: Model<
-    InferAttributes<SellerLink>,
-    InferCreationAttributes<SellerLink>
+  StoreLink: Model<
+    InferAttributes<StoreLink>,
+    InferCreationAttributes<StoreLink>
   >;
-  SellerViewer: Model<
-    InferAttributes<SellerViewer>,
-    InferCreationAttributes<SellerViewer>
+  StoreViewer: Model<
+    InferAttributes<StoreViewer>,
+    InferCreationAttributes<StoreViewer>
   >;
   Category: Model<InferAttributes<Category>, InferCreationAttributes<Category>>;
   CategoryViewer: Model<
@@ -96,4 +102,12 @@ export type Tables = {
     InferCreationAttributes<ProductTag>
   >;
   Order: Model<InferAttributes<Order>, InferCreationAttributes<Order>>;
+  ResponseTime: Model<
+    InferAttributes<ResponseTime>,
+    InferCreationAttributes<ResponseTime>
+  >;
+  ServerError: Model<
+    InferAttributes<ServerError>,
+    InferCreationAttributes<ServerError>
+  >;
 };

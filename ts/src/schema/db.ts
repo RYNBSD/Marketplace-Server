@@ -1,11 +1,12 @@
 import { z } from "zod";
-import { ENUM } from "../constant/index.js";
+import { ENUM, KEYS } from "../constant/index.js";
 
 // /(XS|S|M|L|XL)|(^[2-9](XL|XS))/i
 
-const Id = z.object({ id: z.string().uuid() }).strict();
+const IdInt = z.object({ id: z.number() });
+const IdUUID = z.object({ id: z.string().uuid() }).strict();
 const UserId = z.object({ userId: z.string().uuid() }).strict();
-const SellerId = z.object({ sellerId: z.string().uuid() }).strict();
+const StoreId = z.object({ storeId: z.string().uuid() }).strict();
 const CategoryId = z.object({ categoryId: z.string().uuid() }).strict();
 const ProductId = z.object({ productId: z.string().uuid() }).strict();
 const TagId = z.object({ tagId: z.string().uuid() }).strict();
@@ -18,7 +19,7 @@ export const User = z
     password: z.string(),
     image: z.string(),
   })
-  .merge(Id)
+  .merge(IdUUID)
   .strict();
 
 export const UserSetting = z
@@ -31,35 +32,35 @@ export const UserSetting = z
   .merge(UserId)
   .strict();
 
-export const Seller = z
+export const Store = z
   .object({
-    storeName: z.string(),
+    name: z.string(),
     image: z.string(),
   })
-  .merge(Id)
+  .merge(IdUUID)
   .merge(UserId)
   .strict();
 
-export const SellerSetting = z
+export const StoreSetting = z
   .object({
     theme: z.enum(ENUM.THEMES),
   })
-  .merge(SellerId)
+  .merge(StoreId)
   .strict();
 
-export const SellerLink = z
+export const StoreLink = z
   .object({
     platform: z.enum(ENUM.PLATFORMS),
     link: z.string().url(),
   })
-  .merge(Id)
-  .merge(SellerId)
+  .merge(IdUUID)
+  .merge(StoreId)
   .strict();
 
-export const SellerViewer = z
+export const StoreViewer = z
   .object({})
-  .merge(Id)
-  .merge(SellerId)
+  .merge(IdUUID)
+  .merge(StoreId)
   .merge(UserId)
   .strict();
 
@@ -69,13 +70,13 @@ export const Category = z
     nameAr: z.string(),
     image: z.string(),
   })
-  .merge(Id)
-  .merge(SellerId)
+  .merge(IdUUID)
+  .merge(StoreId)
   .strict();
 
 export const CategoryViewer = z
   .object({})
-  .merge(Id)
+  .merge(IdUUID)
   .merge(CategoryId)
   .merge(UserId)
   .strict();
@@ -92,7 +93,7 @@ export const Product = z
     price: z.number(),
     discount: z.number(),
   })
-  .merge(Id)
+  .merge(IdUUID)
   .merge(CategoryId)
   .strict();
 
@@ -101,7 +102,7 @@ export const ProductInfo = z
     info: z.string(),
     infoAr: z.string(),
   })
-  .merge(Id)
+  .merge(IdUUID)
   .merge(ProductId)
   .strict();
 
@@ -109,7 +110,7 @@ export const ProductImage = z
   .object({
     image: z.string(),
   })
-  .merge(Id)
+  .merge(IdUUID)
   .merge(ProductId)
   .strict();
 
@@ -126,7 +127,7 @@ export const ProductSize = z
   .object({
     size: z.string(),
   })
-  .merge(Id)
+  .merge(IdUUID)
   .merge(ProductId)
   .strict();
 
@@ -134,13 +135,13 @@ export const ProductColor = z
   .object({
     color: z.string(),
   })
-  .merge(Id)
+  .merge(IdUUID)
   .merge(ProductId)
   .strict();
 
 export const ProductViewer = z
   .object({})
-  .merge(Id)
+  .merge(IdUUID)
   .merge(ProductId)
   .merge(UserId)
   .strict();
@@ -149,8 +150,8 @@ export const Tag = z
   .object({
     tag: z.string(),
   })
-  .merge(Id)
-  .merge(SellerId)
+  .merge(IdUUID)
+  .merge(StoreId)
   .strict();
 
 export const ProductTag = z.object({}).merge(ProductId).merge(TagId).strict();
@@ -164,7 +165,25 @@ export const Order = z
     doneAt: z.date().nullable(),
     canceledAt: z.date().nullable(),
   })
-  .merge(Id)
+  .merge(IdUUID)
   .merge(UserId)
   .merge(ProductId)
   .strict();
+
+export const ResponseTime = z
+  .object({
+    date: z.number(),
+    time: z.number(),
+    method: z.string(),
+    path: z.string(),
+    statusCode: z.number(),
+  })
+  .merge(IdInt);
+
+export const ServerError = z.object({
+  message: z.string(),
+  stack: z.string().nullable(),
+  statusCode: z.number(),
+  isOperational: z.boolean(),
+  handler: z.enum(KEYS.ERROR.HANDLERS)
+}).merge(IdInt)

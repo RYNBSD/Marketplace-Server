@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import type { TResponse, Tables } from "../../types/index.js";
+import type { TResponse } from "../../types/index.js";
 import { StatusCodes } from "http-status-codes";
 import { APIError } from "../../error/index.js";
 import { model } from "../../model/index.js";
@@ -20,7 +20,7 @@ export default {
         "Unauthenticated user (user:profile)"
       );
 
-    const { UserSetting, Seller } = model.db;
+    const { UserSetting, Store } = model.db;
 
     const setting = await UserSetting.findOne({
       attributes: ["theme", "locale", "forceTheme", "disableAnimations"],
@@ -33,8 +33,8 @@ export default {
         "User has not initial setting"
       );
 
-    const seller = await Seller.findOne({
-      attributes: ["id", "storeName", "image"],
+    const seller = await Store.findOne({
+      attributes: ["id", "name", "image"],
       where: { userId: user.dataValues.id },
       limit: 1,
     });
@@ -63,13 +63,13 @@ export default {
     res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
   ) {
     const { Body } = BecomeSeller;
-    const { Seller } = model.db;
+    const { Store } = model.db;
 
-    const { storeName, theme } = Body.parse(req.body);
+    const { name, theme } = Body.parse(req.body);
 
-    const checkStoreName = await Seller.findOne({
-      attributes: ["storeName"],
-      where: { storeName },
+    const checkStoreName = await Store.findOne({
+      attributes: ["name"],
+      where: { name },
       limit: 1,
     });
     if (checkStoreName !== null)
@@ -107,21 +107,21 @@ export default {
         "Unauthenticated user (user:become-seller)"
       );
 
-    const { SellerSetting } = model.db;
-    const seller = await Seller.create(
+    const { StoreSetting } = model.db;
+    const seller = await Store.create(
       {
-        storeName,
+        name,
         image: uploaded[0]!,
         userId: user.dataValues.id,
       },
-      { fields: ["storeName", "image", "userId"] }
+      { fields: ["name", "image", "userId"] }
     );
-    const setting = await SellerSetting.create(
+    const setting = await StoreSetting.create(
       {
         theme,
-        sellerId: seller.dataValues.id,
+        storeId: seller.dataValues.id,
       },
-      { fields: ["theme", "sellerId"] }
+      { fields: ["theme", "storeId"] }
     );
 
     res.status(StatusCodes.CREATED).json({
@@ -213,8 +213,8 @@ export default {
     const { Query } = Delete;
     const { force = false } = Query.parse(req.query);
 
-    const { Seller } = model.db;
-    const seller = await Seller.findOne({
+    const { Store } = model.db;
+    const seller = await Store.findOne({
       attributes: ["userId"],
       where: { userId: user.dataValues.id },
       plain: true,
@@ -228,7 +228,7 @@ export default {
 
       const categoryIds = await Category.findAll({
         attributes: ["id"],
-        where: { sellerId: seller.dataValues.id },
+        where: { storeId: seller.dataValues.id },
       });
       const products = categoryIds.map((category) =>
         Product.destroy({
@@ -240,7 +240,7 @@ export default {
 
       const category = Category.destroy({
         force,
-        where: { sellerId: seller.dataValues.id },
+        where: { storeId: seller.dataValues.id },
       });
       deletePromises.push(category);
       deletePromises.push(seller.destroy({ force }));

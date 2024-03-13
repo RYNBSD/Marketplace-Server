@@ -6,8 +6,8 @@ const {
 } = KEYS;
 const { MIN } = VALUES.LENGTH;
 
-export const SellerId = z.object({
-  [PARAMS.ID.SELLER]: z.string().trim().min(MIN.REQUIRED).uuid(),
+export const StoreId = z.object({
+  [PARAMS.ID.STORE]: z.string().trim().min(MIN.REQUIRED).uuid(),
 });
 
 export const CategoryId = z.object({

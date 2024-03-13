@@ -46,8 +46,8 @@ export async function isSeller(
       "Unprovided user in isSeller middleware"
     );
 
-  const { Seller } = model.db;
-  const store = await Seller.findOne({
+  const { Store } = model.db;
+  const store = await Store.findOne({
     where: { userId: user.dataValues.id },
     limit: 1,
     plain: true,

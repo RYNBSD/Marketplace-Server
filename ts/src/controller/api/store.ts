@@ -19,12 +19,12 @@ export default {
   ) {
     const { Query } = Search;
     const { s, limit } = Query.parse(req.query);
-    const { Seller, Category, Product } = model.db;
+    const { Store, Category, Product } = model.db;
 
     const [sellers, categories, products] = await Promise.all([
-      Seller.findAll({
-        attributes: ["id", "image", "storeName"],
-        where: { storeName: { [Op.iLike]: `%${s}%` } },
+      Store.findAll({
+        attributes: ["id", "image", "name"],
+        where: { name: { [Op.iLike]: `%${s}%` } },
         order: ["createdAt", "DESC"],
         limit,
       }),
@@ -68,18 +68,18 @@ export default {
     res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
   ) {
     const { Query } = All;
-    const { lastSellerId = NULL.UUID, limit } = Query.parse(req.query);
+    const { lastStoreId = NULL.UUID, limit } = Query.parse(req.query);
 
     const {
-      db: { Seller },
+      db: { Store },
       fn: { tableIndex },
     } = model;
     const { TABLES } = DB;
 
-    const offset = await tableIndex(TABLES.SELLER.TABLE, lastSellerId);
+    const offset = await tableIndex(TABLES.SELLER.TABLE, lastStoreId);
 
-    const sellers = await Seller.findAll({
-      attributes: ["id", "image", "storeName"],
+    const sellers = await Store.findAll({
+      attributes: ["id", "image", "name"],
       offset,
       limit,
     });
@@ -95,14 +95,14 @@ export default {
     res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
   ) {
     const { Params } = Home;
-    const { sellerId } = Params.parse(req.params);
+    const { storeId } = Params.parse(req.params);
 
     const { user } = req;
     if (user !== undefined) {
-      const { SellerViewer } = model.db;
-      await SellerViewer.create(
-        { userId: user.dataValues.id, sellerId },
-        { fields: ["userId", "sellerId"] }
+      const { StoreViewer } = model.db;
+      await StoreViewer.create(
+        { userId: user.dataValues.id, storeId },
+        { fields: ["userId", "storeId"] }
       );
     }
 
@@ -278,7 +278,7 @@ export default {
 
     const categories = await Category.findAll({
       attributes: ["id"],
-      where: { sellerId: store!.dataValues.id },
+      where: { storeId: store!.dataValues.id },
     });
 
     const products = await Product.findAll({
@@ -306,7 +306,7 @@ export default {
     res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
   ) {
     const { Body } = Update;
-    const { storeName } = Body.parse(req.body);
+    const { name } = Body.parse(req.body);
 
     const { store } = res.locals;
     if (store === undefined)
@@ -338,7 +338,7 @@ export default {
       newImage = uploaded[0]!;
     }
 
-    await store.update({ storeName, image: newImage });
+    await store.update({ name, image: newImage });
     res.status(StatusCodes.OK).json({ success: true });
   },
   async delete(

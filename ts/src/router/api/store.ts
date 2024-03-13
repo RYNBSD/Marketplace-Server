@@ -27,7 +27,7 @@ const {
   profile,
   update,
   delete: deleteSeller,
-} = controller.api.seller;
+} = controller.api.store;
 
 export const store = Router();
 
@@ -36,20 +36,20 @@ store.get("/search", handleAsync(search));
 store.get("/all", handleAsync(all));
 
 store.get(
-  `/:${PARAMS.ID.SELLER}`,
+  `/:${PARAMS.ID.STORE}`,
   handleAsync(checkSeller),
   handleAsync(home)
 );
 
 store.get(
-  `/:${PARAMS.ID.SELLER}/:${PARAMS.ID.CATEGORY}`,
+  `/:${PARAMS.ID.STORE}/:${PARAMS.ID.CATEGORY}`,
   handleAsync(checkSeller),
   handleAsync(checkCategory),
   handleAsync(category)
 );
 
 store.get(
-  `/:${PARAMS.ID.SELLER}/:${PARAMS.ID.CATEGORY}/:${PARAMS.ID.PRODUCT}`,
+  `/:${PARAMS.ID.STORE}/:${PARAMS.ID.CATEGORY}/:${PARAMS.ID.PRODUCT}`,
   handleAsync(checkSeller),
   handleAsync(checkCategory),
   handleAsync(checkProduct),
