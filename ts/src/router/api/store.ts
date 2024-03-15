@@ -20,7 +20,7 @@ const {
 } = middleware;
 const {
   search,
-  all,
+  stores,
   home,
   category,
   product,
@@ -33,7 +33,13 @@ export const store = Router();
 
 store.get("/search", handleAsync(search));
 
-store.get("/all", handleAsync(all));
+/** Fetch all products from deferent sellers */
+store.get("/stores", handleAsync(stores));
+
+/** Fetch all categories from deferent sellers */
+store.get("/categories")
+
+store.get("/products")
 
 store.get(
   `/:${PARAMS.ID.STORE}`,

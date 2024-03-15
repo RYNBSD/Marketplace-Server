@@ -31,7 +31,7 @@ export default {
         TABLE: "User",
         SETTING: "UserSetting",
       },
-      SELLER: {
+      STORE: {
         TABLE: "Store",
         SETTING: "StoreSetting",
         LINK: "StoreLink",
@@ -59,9 +59,9 @@ export default {
     // MODELS: {
     //   USER: "user",
     //   USER_SETTING: "user-setting",
-    //   SELLER: "seller",
-    //   SELLER_SETTING: "seller-setting",
-    //   SELLER_LINK: "",
+    //   STORE: "seller",
+    //   STORE_SETTING: "seller-setting",
+    //   STORE_LINK: "",
     // }
   },
   REQUEST: {

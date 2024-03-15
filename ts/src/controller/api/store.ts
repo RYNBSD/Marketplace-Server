@@ -8,7 +8,8 @@ import { lib } from "../../lib/index.js";
 import { model } from "../../model/index.js";
 import { KEYS, VALUES } from "../../constant/index.js";
 
-const { Search, All, Home, Update } = schema.req.api.seller;
+const { Search, Stores, Categories, Products, Home, Update } =
+  schema.req.api.seller;
 const { DB } = KEYS;
 const { NULL, LENGTH } = VALUES;
 
@@ -63,11 +64,11 @@ export default {
       },
     });
   },
-  async all(
+  async stores(
     req: Request,
     res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
   ) {
-    const { Query } = All;
+    const { Query } = Stores;
     const { lastStoreId = NULL.UUID, limit } = Query.parse(req.query);
 
     const {
@@ -76,9 +77,9 @@ export default {
     } = model;
     const { TABLES } = DB;
 
-    const offset = await tableIndex(TABLES.SELLER.TABLE, lastStoreId);
+    const offset = await tableIndex(TABLES.STORE.TABLE, lastStoreId);
 
-    const sellers = await Store.findAll({
+    const stores = await Store.findAll({
       attributes: ["id", "image", "name"],
       offset,
       limit,
@@ -86,8 +87,45 @@ export default {
 
     res.status(StatusCodes.OK).json({
       success: true,
-      data: { sellers: sellers.map((seller) => seller.dataValues) },
+      data: { stores: stores.map((store) => store.dataValues) },
     });
+  },
+  async categories(
+    req: Request,
+    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
+  ) {
+    const { Query } = Categories;
+    const { storeId } = Query.parse(req.query) ?? { storeId: "" };
+
+    const { Category, Store } = model.db;
+
+    const categories = await Category.findAll({
+      attributes: ["id", "image", "name", "nameAr"],
+      where: { storeId },
+      order: ["createdAt", "DESC"],
+      include: {
+        attributes: [["id", "storeId"]],
+        model: Store,
+        separate: true,
+        required: true,
+      },
+    });
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      data: {
+        categories: categories.map((category) => category.dataValues),
+      },
+    });
+  },
+  async products(
+    req: Request,
+    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
+  ) {
+    const { Query } = Products;
+    const q = Query.parse(req.query);
+
+    res.status(StatusCodes.OK).json({ success: true });
   },
   /** Store home page (landing page) */
   async home(
@@ -296,8 +334,8 @@ export default {
         store: store!.dataValues,
         count: {
           categories: categories.length,
-          products: products.length
-        }
+          products: products.length,
+        },
       },
     });
   },

@@ -1,4 +1,4 @@
-import type { KEYS } from "../constant/index.js";
+import { ENV, type KEYS } from "../constant/index.js";
 import { getReasonPhrase, StatusCodes, ReasonPhrases } from "http-status-codes";
 import { schema } from "../schema/index.js";
 
@@ -27,9 +27,12 @@ export class BaseError extends Error {
   }
 
   public static async handleError(error: unknown) {
-    if (!IS_PRODUCTION) console.error(error);
+    if (!IS_PRODUCTION) {
+      console.error(error);
+      return;
+    }
 
-    const [lib, model] = await Promise.all([
+    const [{ lib }, { model }] = await Promise.all([
       import("../lib/index.js"),
       import("../model/index.js"),
     ]);
@@ -47,7 +50,7 @@ export class BaseError extends Error {
 
     const newError: NewErrorType = {
       message: err.message,
-      stack: err.stack ?? "",
+      stack: (err.stack ?? "").replaceAll("\n", "<br/>"),
       statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
       isOperational: false,
       handler: "server",
@@ -59,20 +62,16 @@ export class BaseError extends Error {
     }
 
     try {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
       const { Mail } = lib;
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
       const { ServerError } = model.db;
 
       await Promise.all([
         new Mail(
-          "",
+          ENV.MAIL.USER,
           `New error - ${
-            newError.isOperational ? "Catched" : "Urgent"
+            newError.isOperational ? "Catch" : "Urgent"
           } - Status: ${newError.statusCode}`,
-          JSON.stringify(newError)
+          Mail.errorTemplate(newError)
         ).send(),
         ServerError.create(newError, {
           fields: [

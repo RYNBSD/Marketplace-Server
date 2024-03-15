@@ -20,7 +20,7 @@ export default {
         EMAIL: 100,
         PASSWORD: 72,
       },
-      SELLER: {
+      STORE: {
         STORE_NAME: 20,
         LINK: 75,
       },

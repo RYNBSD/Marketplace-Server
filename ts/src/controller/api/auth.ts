@@ -21,6 +21,16 @@ export default {
     const { Body } = SignUp;
     const { username, email, password, theme, locale } = Body.parse(req.body);
 
+    const { User, UserSetting } = model.db;
+    const checkEmail = await User.findOne({
+      attributes: ["email"],
+      where: { email },
+      limit: 1,
+      plain: true,
+    });
+    if (checkEmail !== null)
+      throw APIError.controller(StatusCodes.BAD_REQUEST, "Email already exist");
+
     const image = req.file ?? null;
 
     if (image === null)
@@ -44,7 +54,6 @@ export default {
         "Can't upload your image"
       );
 
-    const { User, UserSetting } = model.db;
     const { hash } = util.bcrypt;
 
     const user = await User.create(
@@ -74,8 +83,6 @@ export default {
         ],
       }
     );
-
-    // TODO: send email verification
 
     res.status(StatusCodes.CREATED).json({ success: true });
   },

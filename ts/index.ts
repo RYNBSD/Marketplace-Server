@@ -43,9 +43,9 @@ import { schema } from "./src/schema/index.js";
 const app = express();
 app.set("env", ENV.NODE.ENV);
 app.disable("x-powered-by");
-app.disable("trust proxy");
 app.disable("view cache");
 app.enable("json escape");
+app.set("trust proxy", 1);
 
 global.IS_PRODUCTION = ENV.NODE.ENV === "production";
 global.__filename = fileURLToPath(import.meta.url);
@@ -90,11 +90,7 @@ app.use(
     );
   })
 );
-app.use(
-  cors({
-    credentials: true,
-  })
-);
+app.use(cors({ credentials: true }));
 app.use(
   rateLimit({
     windowMs: VALUES.TIME.MINUTE,
@@ -145,14 +141,12 @@ app.use(passport.session());
 app.use(`/v${ENV.API.VERSION}`, router);
 app.use(express.static(path.join(__root, KEYS.GLOBAL.PUBLIC)));
 app.all("*", async (_, res) => res.sendStatus(StatusCodes.NOT_FOUND));
-app.use(
-  async (error: unknown, _req: Request, res: Response) => {
-    await BaseError.handleError(error);
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      message: "Server error",
-    });
-  }
-);
+app.use(async (error: unknown, _req: Request, res: Response) => {
+  await BaseError.handleError(error);
+  res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+    message: "Server error",
+  });
+});
 
 process.on("unhandledRejection", (error) => {
   throw error;

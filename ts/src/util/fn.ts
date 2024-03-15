@@ -9,6 +9,7 @@ import { TResponse } from "../types/index.js";
 export function handleAsync(
   fn: (
     req: Request,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     res: Response<any, any>,
     next: NextFunction
   ) => Promise<void>
@@ -21,13 +22,14 @@ export function handleAsync(
     try {
       await fn(req, res, next);
     } catch (error) {
+      await BaseError.handleError(error)
       let status: StatusCodes = StatusCodes.BAD_REQUEST;
       let message = "";
       if (error instanceof BaseError) {
         status = error.statusCode;
         message = error.message;
       } else if (error instanceof ZodError) {
-        message = error.message;
+        message = error.format()._errors.map((error) => error + ";").join("");
       } else {
         return next(error);
       }

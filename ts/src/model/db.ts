@@ -90,7 +90,7 @@ export const Store = sequelize.define<Tables["Store"]>(
       defaultValue: DataTypes.UUIDV4,
     },
     name: {
-      type: DataTypes.STRING(MAX.SELLER.STORE_NAME),
+      type: DataTypes.STRING(MAX.STORE.STORE_NAME),
       unique: true,
       allowNull: false,
     },
@@ -108,7 +108,7 @@ export const Store = sequelize.define<Tables["Store"]>(
       },
     },
   },
-  { tableName: DB.TABLES.SELLER.TABLE, timestamps: true, paranoid: true }
+  { tableName: DB.TABLES.STORE.TABLE, timestamps: true, paranoid: true }
 );
 
 export const StoreSetting = sequelize.define<Tables["StoreSetting"]>(
@@ -129,7 +129,7 @@ export const StoreSetting = sequelize.define<Tables["StoreSetting"]>(
     },
   },
   {
-    tableName: DB.TABLES.SELLER.SETTING,
+    tableName: DB.TABLES.STORE.SETTING,
     timestamps: true,
   }
 );
@@ -147,7 +147,7 @@ export const StoreLink = sequelize.define<Tables["StoreLink"]>(
       allowNull: false,
     },
     link: {
-      type: DataTypes.STRING(MAX.SELLER.LINK),
+      type: DataTypes.STRING(MAX.STORE.LINK),
       allowNull: false,
     },
     storeId: {
@@ -160,7 +160,7 @@ export const StoreLink = sequelize.define<Tables["StoreLink"]>(
     },
   },
   {
-    tableName: DB.TABLES.SELLER.LINK,
+    tableName: DB.TABLES.STORE.LINK,
     timestamps: true,
     paranoid: true,
   }
@@ -191,7 +191,7 @@ export const StoreViewer = sequelize.define<Tables["StoreViewer"]>(
       },
     },
   },
-  { tableName: DB.TABLES.SELLER.VIEWER, createdAt: true, updatedAt: false }
+  { tableName: DB.TABLES.STORE.VIEWER, createdAt: true, updatedAt: false }
 );
 
 export const Category = sequelize.define<Tables["Category"]>(

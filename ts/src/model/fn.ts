@@ -9,7 +9,7 @@ export async function tableIndex(table: string, id: string) {
   const index = await sequelize.query<{ row_number: number }>(
     `
       SELECT row_number FROM (
-        SELECT ROW_NUMBER() OVER() AS row_number, id FROM "$table"
+        SELECT ROW_NUMBER() OVER() AS row_number, id FROM "${table}"
       )
       WHERE id=$id
       LIMIT 1
@@ -19,7 +19,6 @@ export async function tableIndex(table: string, id: string) {
       plain: true,
       raw: true,
       bind: {
-        table,
         id: parsedId,
       },
     }
