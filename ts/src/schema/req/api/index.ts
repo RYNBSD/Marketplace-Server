@@ -2,7 +2,7 @@ const [{ default: auth }, { default: user }, { default: seller }] =
   await Promise.all([
     import("./auth.js"),
     import("./user.js"),
-    import("./seller.js"),
+    import("./store.js"),
   ]);
 
 export default {

@@ -53,7 +53,7 @@ export async function isSeller(
     plain: true,
   });
   if (store === null)
-    throw APIError.middleware(StatusCodes.NOT_FOUND, "Seller bot found");
+    throw APIError.middleware(StatusCodes.NOT_FOUND, "Seller not found");
 
   res.locals = {
     ...res.locals,

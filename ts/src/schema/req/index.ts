@@ -3,4 +3,7 @@ const [{ default: api }, { default: security }] = await Promise.all([
   import("./security/index.js"),
 ]);
 
-export default { api, security } as const;
+export default {
+  api,
+  security,
+} as const;

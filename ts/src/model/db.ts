@@ -90,7 +90,7 @@ export const Store = sequelize.define<Tables["Store"]>(
       defaultValue: DataTypes.UUIDV4,
     },
     name: {
-      type: DataTypes.STRING(MAX.STORE.STORE_NAME),
+      type: DataTypes.STRING(MAX.STORE.NAME),
       unique: true,
       allowNull: false,
     },

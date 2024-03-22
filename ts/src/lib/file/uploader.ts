@@ -54,7 +54,7 @@ export default class FileUploader {
   }
 
   async upload() {
-    return Promise.all(this.files.map(async (file) => await this.write(file)));
+    return Promise.all(this.files.map((file) => this.write(file)));
   }
 
   static async remove(...uris: string[]) {

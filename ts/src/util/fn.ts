@@ -22,14 +22,17 @@ export function handleAsync(
     try {
       await fn(req, res, next);
     } catch (error) {
-      await BaseError.handleError(error)
+      await BaseError.handleError(error);
       let status: StatusCodes = StatusCodes.BAD_REQUEST;
       let message = "";
       if (error instanceof BaseError) {
         status = error.statusCode;
         message = error.message;
       } else if (error instanceof ZodError) {
-        message = error.format()._errors.map((error) => error + ";").join("");
+        message = error
+          .format()
+          ._errors.map((error) => error + ";")
+          .join("");
       } else {
         return next(error);
       }

@@ -10,7 +10,8 @@ export default {
     },
   },
   COOKIE: {
-    JWT: "authorization",
+    AUTHORIZATION: "authorization",
+    SESSION: "session",
   },
   GLOBAL: {
     PUBLIC: "public",

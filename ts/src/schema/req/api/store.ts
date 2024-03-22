@@ -18,7 +18,7 @@ export default {
     }),
   },
   Categories: {
-    Query: StoreId.optional()
+    Query: StoreId.optional(),
   },
   Products: {
     Query: z.object({}).merge(StoreId).merge(CategoryId).optional(),
@@ -28,7 +28,7 @@ export default {
   },
   Update: {
     Body: z.object({
-      name: z.string().trim().min(MIN.REQUIRED).max(MAX.STORE.STORE_NAME),
+      name: z.string().trim().min(MIN.REQUIRED).max(MAX.STORE.NAME),
     }),
   },
 } as const;

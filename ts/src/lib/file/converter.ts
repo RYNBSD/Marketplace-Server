@@ -93,7 +93,7 @@ export default class FileConverter extends FileTmp {
         .output(output)
         .on("end", () => {
           this.fileToBuffer(output)
-            .then((buffer) => resolve(buffer))
+            .then(resolve)
             .catch(reject);
         })
         .on("error", reject)
@@ -114,7 +114,7 @@ export default class FileConverter extends FileTmp {
         .output(output)
         .on("end", () => {
           this.fileToBuffer(output)
-            .then((buffer) => resolve(buffer))
+            .then(resolve)
             .catch(reject);
         })
         .on("error", reject)

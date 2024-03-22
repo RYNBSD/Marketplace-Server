@@ -31,9 +31,8 @@ export default {
     if (checkEmail !== null)
       throw APIError.controller(StatusCodes.BAD_REQUEST, "Email already exist");
 
-    const image = req.file ?? null;
-
-    if (image === null)
+    const image = req.file;
+    if (image === undefined || image.buffer.length === 0)
       throw APIError.controller(
         StatusCodes.BAD_REQUEST,
         "Please, provide an image"
@@ -97,13 +96,31 @@ export default {
       res,
       next
     )) as Tables["User"];
+
     const { sign } = util.jwt;
+    const { UserSetting, Store } = model.db;
+
+    const setting = await UserSetting.findOne({
+      attributes: {
+        exclude: ["userId"],
+      },
+      where: { userId: user.dataValues.id },
+      plain: true,
+      limit: 1,
+    });
+
+    const store = await Store.findOne({
+      attributes: ["id"],
+      where: { userId: user.dataValues.id },
+      plain: true,
+      limit: 1,
+    });
 
     res
       .status(StatusCodes.OK)
       .setHeader(
         "Set-Cookie",
-        serialize(COOKIE.JWT, sign(user.dataValues.id), {
+        serialize(COOKIE.AUTHORIZATION, sign(user.dataValues.id), {
           maxAge: VALUES.TIME.MONTH,
           httpOnly: IS_PRODUCTION,
           sameSite: IS_PRODUCTION,
@@ -111,7 +128,14 @@ export default {
           path: "/",
         })
       )
-      .json({ success: true, data: { user: user.dataValues } });
+      .json({
+        success: true,
+        data: {
+          user: user.dataValues,
+          setting: setting!.dataValues,
+          store: store?.dataValues ?? null,
+        },
+      });
   },
   async signOut(
     req: Request,
@@ -137,13 +161,31 @@ export default {
       res,
       next
     )) as Tables["User"];
+
     const { sign } = util.jwt;
+    const { UserSetting, Store } = model.db;
+
+    const setting = await UserSetting.findOne({
+      attributes: {
+        exclude: ["userId"],
+      },
+      where: { userId: user.dataValues.id },
+      plain: true,
+      limit: 1,
+    });
+
+    const store = await Store.findOne({
+      attributes: ["id"],
+      where: { userId: user.dataValues.id },
+      plain: true,
+      limit: 1,
+    });
 
     res
       .status(StatusCodes.OK)
       .setHeader(
         "Set-Cookie",
-        serialize(COOKIE.JWT, sign(user.dataValues.id), {
+        serialize(COOKIE.AUTHORIZATION, sign(user.dataValues.id), {
           maxAge: VALUES.TIME.MONTH,
           httpOnly: IS_PRODUCTION,
           sameSite: IS_PRODUCTION,
@@ -151,7 +193,14 @@ export default {
           path: "/",
         })
       )
-      .json({ success: true, data: { user: user.dataValues } });
+      .json({
+        success: true,
+        data: {
+          user: user.dataValues,
+          setting: setting!.dataValues,
+          store: store?.dataValues ?? null,
+        },
+      });
   },
   async verifyEmail(
     req: Request,
@@ -188,20 +237,14 @@ export default {
     res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
   ) {
     const { user } = req;
-    if (user === undefined)
-      throw APIError.server(
-        StatusCodes.INTERNAL_SERVER_ERROR,
-        "Unprovided user is req controller (auth:forgot-password)"
-      );
-
     const { Body } = ForgotPassword;
     const { password } = Body.parse(req.body);
 
     const { hash } = util.bcrypt;
-    await user.update({ password: hash(password) });
+    await user!.update({ password: hash(password) });
 
-    if (user.dataValues.emailVerified === null)
-      await user.update({ emailVerified: new Date() });
+    if (user!.dataValues.emailVerified === null)
+      await user!.update({ emailVerified: new Date() });
 
     res.status(StatusCodes.OK).json({ success: true });
   },

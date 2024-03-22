@@ -1,4 +1,5 @@
 import type { Request, Response } from "express";
+import type { TResponse } from "./src/types/index.js";
 import express from "express";
 import compression from "compression";
 import hpp from "hpp";
@@ -43,10 +44,11 @@ import { schema } from "./src/schema/index.js";
 const app = express();
 app.set("env", ENV.NODE.ENV);
 app.disable("x-powered-by");
+app.disable("trust proxy");
 app.disable("view cache");
 app.enable("json escape");
-app.set("trust proxy", 1);
 
+const { COOKIE, HTTP } = KEYS;
 global.IS_PRODUCTION = ENV.NODE.ENV === "production";
 global.__filename = fileURLToPath(import.meta.url);
 global.__dirname = path.dirname(__filename);
@@ -70,7 +72,7 @@ await db.init();
 app.use(timeout(VALUES.TIME.MINUTE));
 app.use(
   responseTime(async (req: Request, res: Response, time: number) => {
-    const { RESPONSE_TIME } = KEYS.HTTP.HEADERS;
+    const { RESPONSE_TIME } = HTTP.HEADERS;
     res.setHeader(RESPONSE_TIME, time);
 
     const { method, originalUrl: path } = req;
@@ -94,7 +96,7 @@ app.use(cors({ credentials: true }));
 app.use(
   rateLimit({
     windowMs: VALUES.TIME.MINUTE,
-    limit: 100,
+    limit: 1000,
   })
 );
 app.use(
@@ -102,7 +104,7 @@ app.use(
     level: 9,
     filter(req, res) {
       const { getHeader } = util.fn;
-      const { NO_COMPRESSION } = KEYS.HTTP.HEADERS;
+      const { NO_COMPRESSION } = HTTP.HEADERS;
       const noCompressionHeader = getHeader(req.headers, NO_COMPRESSION);
 
       const { toBoolean } = schema.validators;
@@ -112,7 +114,7 @@ app.use(
   })
 );
 
-app.use(methodOverride(KEYS.HTTP.HEADERS.METHOD_OVERRIDE));
+app.use(methodOverride(HTTP.HEADERS.METHOD_OVERRIDE));
 app.use(morgan(IS_PRODUCTION ? "combined" : "dev"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ limit: "10mb" }));
@@ -123,6 +125,7 @@ app.use(hpp());
 app.use(
   session({
     genid: () => randomUUID(),
+    name: COOKIE.SESSION,
     secret: ENV.SESSION.SECRET,
     resave: false,
     saveUninitialized: false,
@@ -140,13 +143,22 @@ app.use(passport.session());
 
 app.use(`/v${ENV.API.VERSION}`, router);
 app.use(express.static(path.join(__root, KEYS.GLOBAL.PUBLIC)));
-app.all("*", async (_, res) => res.sendStatus(StatusCodes.NOT_FOUND));
-app.use(async (error: unknown, _req: Request, res: Response) => {
-  await BaseError.handleError(error);
-  res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-    message: "Server error",
-  });
-});
+app.all("*", async (_, res: Response<TResponse["Body"]["Fail"]>) =>
+  res.sendStatus(StatusCodes.NOT_FOUND).json({ success: false })
+);
+app.use(
+  async (
+    error: unknown,
+    _req: Request,
+    res: Response<TResponse["Body"]["Fail"]>
+  ) => {
+    await BaseError.handleError(error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+);
 
 process.on("unhandledRejection", (error) => {
   throw error;

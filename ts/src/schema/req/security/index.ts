@@ -1,3 +1,6 @@
-const [{ default: access }] = await Promise.all([import("./access.js")])
+const [{ default: access }, { default: validate }] = await Promise.all([
+  import("./access.js"),
+  import("./validate/index.js"),
+]);
 
-export default { access } as const
+export default { access, validate } as const;

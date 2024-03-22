@@ -21,7 +21,7 @@ export default {
         PASSWORD: 72,
       },
       STORE: {
-        STORE_NAME: 20,
+        NAME: 20,
         LINK: 75,
       },
       CATEGORY: {

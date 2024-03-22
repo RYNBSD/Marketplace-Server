@@ -1,6 +1,8 @@
-const [{ default: csrf }, { default: access }] = await Promise.all([
-  import("./csrf.js"),
-  import("./access.js"),
-]);
+const [{ default: csrf }, { default: access }, { default: validate }] =
+  await Promise.all([
+    import("./csrf.js"),
+    import("./access.js"),
+    import("./validate/index.js"),
+  ]);
 
-export default { csrf, access } as const;
+export default { csrf, access, validate } as const;

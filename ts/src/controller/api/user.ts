@@ -6,7 +6,7 @@ import { model } from "../../model/index.js";
 import { schema } from "../../schema/index.js";
 import { lib } from "../../lib/index.js";
 
-const { BecomeSeller, Update, Delete } = schema.req.api.user;
+const { Setting, BecomeSeller, Update, Delete } = schema.req.api.user;
 
 export default {
   async profile(
@@ -14,39 +14,27 @@ export default {
     res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
   ) {
     const { user } = req;
-    if (user === undefined)
-      throw APIError.server(
-        StatusCodes.INTERNAL_SERVER_ERROR,
-        "Unauthenticated user (user:profile)"
-      );
-
     const { UserSetting, Store } = model.db;
 
     const setting = await UserSetting.findOne({
       attributes: ["theme", "locale", "forceTheme", "disableAnimations"],
-      where: { userId: user.dataValues.id },
+      where: { userId: user!.dataValues.id },
+      plain: true,
       limit: 1,
     });
-    if (setting === null)
-      throw APIError.server(
-        StatusCodes.INTERNAL_SERVER_ERROR,
-        "User has not initial setting"
-      );
-
-    const seller = await Store.findOne({
+    const store = await Store.findOne({
       attributes: ["id", "name", "image"],
-      where: { userId: user.dataValues.id },
+      where: { userId: user!.dataValues.id },
+      plain: true,
       limit: 1,
     });
 
     res.status(StatusCodes.OK).json({
       success: true,
       data: {
-        user: {
-          ...user.dataValues,
-          setting: setting.dataValues,
-          seller: seller?.dataValues ?? null,
-        },
+        user: user!.dataValues,
+        setting: setting!.dataValues,
+        store: store?.dataValues ?? null,
       },
     });
   },
@@ -58,14 +46,37 @@ export default {
     req;
     res.status(StatusCodes.OK).json({ success: true });
   },
+  async setting(req: Request, res: Response<TResponse["Body"]["Success"]>) {
+    const { Body } = Setting;
+    const { user } = req;
+
+    const { theme, locale, disableAnimations, forceTheme } = Body.parse(
+      req.body
+    );
+    const { UserSetting } = model.db;
+
+    const [_, setting] = await UserSetting.update(
+      { theme, locale, disableAnimations, forceTheme },
+      {
+        where: { userId: user!.dataValues.id },
+        fields: ["theme", "locale", "forceTheme", "disableAnimations"],
+        returning: true,
+        limit: 1,
+      }
+    );
+
+    res
+      .status(StatusCodes.OK)
+      .json({ success: true, data: { setting: setting[0]!.dataValues } });
+  },
   async becomeSeller(
     req: Request,
     res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
   ) {
     const { Body } = BecomeSeller;
-    const { Store } = model.db;
-
     const { name, theme } = Body.parse(req.body);
+
+    const { Store } = model.db;
 
     const checkStoreName = await Store.findOne({
       attributes: ["name"],
@@ -78,8 +89,8 @@ export default {
         "Store name already exists"
       );
 
-    const image = req.file ?? null;
-    if (image === null)
+    const image = req.file;
+    if (image === undefined || image.buffer.length === 0)
       throw APIError.controller(
         StatusCodes.BAD_REQUEST,
         "Please, provide a logo for your store"
@@ -101,25 +112,20 @@ export default {
       );
 
     const { user } = req;
-    if (user === undefined)
-      throw APIError.server(
-        StatusCodes.INTERNAL_SERVER_ERROR,
-        "Unauthenticated user (user:become-seller)"
-      );
-
     const { StoreSetting } = model.db;
-    const seller = await Store.create(
+
+    const store = await Store.create(
       {
         name,
         image: uploaded[0]!,
-        userId: user.dataValues.id,
+        userId: user!.dataValues.id,
       },
       { fields: ["name", "image", "userId"] }
     );
     const setting = await StoreSetting.create(
       {
         theme,
-        storeId: seller.dataValues.id,
+        storeId: store.dataValues.id,
       },
       { fields: ["theme", "storeId"] }
     );
@@ -127,10 +133,8 @@ export default {
     res.status(StatusCodes.CREATED).json({
       success: true,
       data: {
-        seller: {
-          ...seller.dataValues,
-          setting: setting.dataValues,
-        },
+        store: store.dataValues,
+        setting: setting.dataValues,
       },
     });
   },
@@ -139,19 +143,12 @@ export default {
     res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
   ) {
     const { user } = req;
-    if (user === undefined)
-      throw APIError.server(
-        StatusCodes.INTERNAL_SERVER_ERROR,
-        "Unauthenticated user (user:update)"
-      );
-
     const { Body } = Update;
-    const { username, theme, locale, forceTheme, disableAnimations } =
-      Body.parse(req.body);
+    const { username } = Body.parse(req.body);
 
-    const image = req.file ?? null;
+    const image = req.file;
     let newImage = "";
-    if (image !== null) {
+    if (image !== undefined && image.buffer.length > 0) {
       const { FileConverter, FileUploader } = lib.file;
 
       const converted = await new FileConverter(image.buffer).convert();
@@ -168,34 +165,15 @@ export default {
           "Can't upload your image"
         );
 
-      await FileUploader.remove(user.dataValues.image);
+      await FileUploader.remove(user!.dataValues.image);
       newImage = uploaded[0]!;
     }
 
-    const { UserSetting } = model.db;
-    await Promise.all([
-      UserSetting.update(
-        { theme, locale, forceTheme, disableAnimations },
-        {
-          fields: ["theme", "locale", "forceTheme", "disableAnimations"],
-          where: { userId: user.dataValues.id },
-        }
-      ),
-      user.update({ username, image: newImage || user.dataValues.image }),
-    ]);
-
+    await user!.update({ username, image: newImage || user!.dataValues.image });
     res.status(StatusCodes.OK).json({
       success: true,
       data: {
-        user: {
-          ...user.dataValues,
-          setting: {
-            locale,
-            theme,
-            disableAnimations,
-            forceTheme,
-          },
-        },
+        user: user!.dataValues,
       },
     });
   },
@@ -204,48 +182,43 @@ export default {
     res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
   ) {
     const { user } = req;
-    if (user === undefined)
-      throw APIError.server(
-        StatusCodes.INTERNAL_SERVER_ERROR,
-        "Unauthenticated user (user:update)"
-      );
-
     const { Query } = Delete;
     const { force = false } = Query.parse(req.query);
 
     const { Store } = model.db;
-    const seller = await Store.findOne({
-      attributes: ["userId"],
-      where: { userId: user.dataValues.id },
+    const store = await Store.findOne({
+      attributes: ["userId", "id"],
+      where: { userId: user!.dataValues.id },
       plain: true,
       limit: 1,
     });
 
     const deletePromises: Promise<unknown>[] = [];
 
-    if (seller !== null) {
+    if (store !== null) {
       const { Category, Product } = model.db;
 
       const categoryIds = await Category.findAll({
         attributes: ["id"],
-        where: { storeId: seller.dataValues.id },
+        where: { storeId: store.dataValues.id },
       });
-      const products = categoryIds.map((category) =>
-        Product.destroy({
-          force,
-          where: { categoryId: category.dataValues.id },
-        })
-      );
-      deletePromises.concat(products);
+
+      const products = Product.destroy({
+        force,
+        where: {
+          categoryId: categoryIds.map((category) => category.dataValues.id),
+        },
+      });
+      deletePromises.push(products);
 
       const category = Category.destroy({
         force,
-        where: { storeId: seller.dataValues.id },
+        where: { storeId: store.dataValues.id },
       });
       deletePromises.push(category);
-      deletePromises.push(seller.destroy({ force }));
+      deletePromises.push(store.destroy({ force }));
     }
-    deletePromises.push(user.destroy({ force }));
+    deletePromises.push(user!.destroy({ force }));
 
     await Promise.all(deletePromises);
     res.status(StatusCodes.OK).json({ success: true });

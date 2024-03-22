@@ -19,6 +19,7 @@ const {
   profile,
   orders,
   order,
+  setting,
   becomeSeller,
   update,
   delete: deleteUser,
@@ -34,6 +35,13 @@ user.get(
   `/orders/:${PARAMS.ID.ORDER}`,
   handleAsync(isAuthenticated),
   handleAsync(order)
+);
+
+user.patch(
+  "/setting",
+  handleAsync(isAuthenticated),
+  upload.any(),
+  handleAsync(setting)
 );
 
 user.post(
