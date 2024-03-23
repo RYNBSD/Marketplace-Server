@@ -11,7 +11,7 @@ export default {
       db: sequelize,
       tableName: TABLES.SESSION,
     });
-    sessionStore.sync({ force: !IS_PRODUCTION });
+    // sessionStore.sync({ force: !IS_PRODUCTION });
     return { sessionStore };
   },
 };

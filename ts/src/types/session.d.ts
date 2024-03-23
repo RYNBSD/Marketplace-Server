@@ -1,7 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import type { SessionData } from "express-session";
 import type { z } from "zod";
-import type { schema } from "../schema/index.js";
+import type { schema } from "../schema/index.ts";
 
 const { session } = schema;
 

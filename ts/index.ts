@@ -47,6 +47,7 @@ app.disable("x-powered-by");
 app.disable("trust proxy");
 app.disable("view cache");
 app.enable("json escape");
+app.enable("etag");
 
 const { COOKIE, HTTP } = KEYS;
 
@@ -149,7 +150,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use(`/v${ENV.API.VERSION}`, router);
-app.use(express.static(path.join(__root, KEYS.GLOBAL.PUBLIC)));
+app.use(express.static(path.join(__root, KEYS.GLOBAL.PUBLIC), { etag: true }));
 app.all("*", async (_, res: Response<TResponse["Body"]["Fail"]>) =>
   res.sendStatus(StatusCodes.NOT_FOUND).json({ success: false })
 );

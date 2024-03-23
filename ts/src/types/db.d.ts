@@ -5,7 +5,7 @@ import type {
   CreationOptional,
 } from "sequelize";
 import type { z } from "zod";
-import type { schema } from "../schema/index.js";
+import type { schema } from "../schema/index.ts";
 
 type CreateOptionalIdNumber = { id: CreationOptional<number> };
 type CreateOptionalIdString = { id: CreationOptional<string> };

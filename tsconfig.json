@@ -105,7 +105,7 @@
   },
   "include": [
     "./ts/**/*"
-  ],
+, "ts/index.ts"  ],
   "exclude": [
     "./node_modules",
     "./js",
