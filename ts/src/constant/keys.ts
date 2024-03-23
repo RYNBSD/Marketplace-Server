@@ -56,6 +56,7 @@ export default {
       ORDER: "Order",
       RESPONSE_TIME: "ResponseTime",
       SERVER_ERROR: "ServerError",
+      SESSION: "Session",
     },
     // MODELS: {
     //   USER: "user",
