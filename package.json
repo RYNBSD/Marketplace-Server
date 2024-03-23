@@ -28,6 +28,7 @@
     "audio-extensions": "^0.0.0",
     "bcrypt": "^5.1.1",
     "compression": "^1.7.4",
+    "connect-session-sequelize": "^7.1.7",
     "connect-timeout": "^1.9.0",
     "cookie": "^0.6.0",
     "cookie-encrypter": "^1.0.1",

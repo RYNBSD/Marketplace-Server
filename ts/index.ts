@@ -49,6 +49,7 @@ app.disable("view cache");
 app.enable("json escape");
 
 const { COOKIE, HTTP } = KEYS;
+
 global.IS_PRODUCTION = ENV.NODE.ENV === "production";
 global.__filename = fileURLToPath(import.meta.url);
 global.__dirname = path.dirname(__filename);
@@ -60,9 +61,14 @@ if (!IS_PRODUCTION) {
   await import("colors");
 }
 
-const { db, tmp } = config;
+const {
+  db,
+  tmp,
+  session: { initStore },
+} = config;
 await tmp.initTmpDir();
 await db.connect();
+const { sessionStore } = initStore(session.Store);
 const { model } = await import("./src/model/index.js");
 const { passport } = await import("./src/passport/index.js");
 const { router } = await import("./src/router/index.js");
@@ -125,6 +131,7 @@ app.use(hpp());
 app.use(
   session({
     genid: () => randomUUID(),
+    store: sessionStore,
     name: COOKIE.SESSION,
     secret: ENV.SESSION.SECRET,
     resave: false,
