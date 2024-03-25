@@ -5,7 +5,6 @@ const [{ api }, { security }] = await Promise.all([import("./api/index.js"), imp
 
 // const cache = apicache.middleware;
 
-
 export const router = Router();
 
 router.use("/api", api);

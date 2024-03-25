@@ -24,7 +24,13 @@ auth.post(
   handleAsync(signUp),
 );
 
-auth.post("/sign-in", handleAsync(csrf), handleAsync(notAuthenticated), handleAsync(upload.none()), handleAsync(signIn));
+auth.post(
+  "/sign-in",
+  handleAsync(csrf),
+  handleAsync(notAuthenticated),
+  handleAsync(upload.none()),
+  handleAsync(signIn),
+);
 
 auth.post("/sign-out", handleAsync(isAuthenticated), handleAsync(signOut));
 

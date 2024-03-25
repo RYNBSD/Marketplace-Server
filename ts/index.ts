@@ -49,7 +49,7 @@ app.disable("view cache");
 app.enable("json escape");
 app.enable("etag");
 
-const { TIME, PACKAGE } = VALUES
+const { TIME, PACKAGE } = VALUES;
 const { COOKIE, HTTP } = KEYS;
 
 global.IS_PRODUCTION = ENV.NODE.ENV === "production";
@@ -67,11 +67,11 @@ const {
   db,
   tmp,
   session: { initStore },
-  swagger
+  swagger,
 } = config;
 await tmp.initTmpDir();
 await db.connect();
-const docs = swagger.init()
+const docs = swagger.init();
 const { sessionStore } = initStore(session.Store);
 const { model } = await import("./src/model/index.js");
 const { passport } = await import("./src/passport/index.js");
@@ -154,7 +154,7 @@ app.use(passport.session());
 
 app.use(`/v${PACKAGE.VERSION}`, router);
 app.use(express.static(path.join(__root, KEYS.GLOBAL.PUBLIC), { etag: true }));
-app.use("/docs", docs.serve, docs.ui)
+app.use("/docs", docs.serve, docs.ui);
 app.all("*", async (_, res: Response<TResponse["Body"]["Fail"]>) =>
   res.sendStatus(StatusCodes.NOT_FOUND).json({ success: false }),
 );

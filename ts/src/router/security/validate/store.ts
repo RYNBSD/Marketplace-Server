@@ -13,6 +13,18 @@ export const store = Router();
 
 store.post("/name", handleAsync(isAuthenticated), handleAsync(upload.none()), handleAsync(name));
 
-store.post("/category", handleAsync(isAuthenticated), handleAsync(isSeller), handleAsync(upload.none()), handleAsync(category));
+store.post(
+  "/category",
+  handleAsync(isAuthenticated),
+  handleAsync(isSeller),
+  handleAsync(upload.none()),
+  handleAsync(category),
+);
 
-store.post("/product", handleAsync(isAuthenticated), handleAsync(isSeller), handleAsync(upload.none()), handleAsync(product));
+store.post(
+  "/product",
+  handleAsync(isAuthenticated),
+  handleAsync(isSeller),
+  handleAsync(upload.none()),
+  handleAsync(product),
+);
