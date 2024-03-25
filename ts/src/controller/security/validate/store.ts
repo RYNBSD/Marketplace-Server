@@ -5,17 +5,10 @@ import { schema } from "../../../schema/index.js";
 import { model } from "../../../model/index.js";
 import { APIError } from "../../../error/index.js";
 
-const {
-  Name,
-  Category: CategorySchema,
-  Product: ProductSchema,
-} = schema.req.security.validate.store;
+const { Name, Category: CategorySchema, Product: ProductSchema } = schema.req.security.validate.store;
 
 export default {
-  async name(
-    req: Request,
-    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
-  ) {
+  async name(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
     const { Body } = Name;
     const { name } = Body.parse(req.body);
     const { Store } = model.db;
@@ -27,18 +20,11 @@ export default {
       plain: true,
       paranoid: false,
     });
-    if (store !== null)
-      throw APIError.controller(
-        StatusCodes.CONFLICT,
-        "Store name already exists"
-      );
+    if (store !== null) throw APIError.controller(StatusCodes.CONFLICT, "Store name already exists");
 
     res.status(StatusCodes.OK).json({ success: true });
   },
-  async category(
-    req: Request,
-    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
-  ) {
+  async category(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
     const { Body } = CategorySchema;
     const { name, nameAr } = Body.parse(req.body);
     const { Category } = model.db;
@@ -60,23 +46,13 @@ export default {
       }),
     ]);
 
-    if (category !== null)
-      throw APIError.controller(
-        StatusCodes.CONFLICT,
-        "Category name already exists"
-      );
+    if (category !== null) throw APIError.controller(StatusCodes.CONFLICT, "Category name already exists");
     else if (categoryAr !== null)
-      throw APIError.controller(
-        StatusCodes.CONFLICT,
-        "Category arabic name already exists"
-      );
+      throw APIError.controller(StatusCodes.CONFLICT, "Category arabic name already exists");
 
     res.status(StatusCodes.OK).json({ success: true });
   },
-  async product(
-    req: Request,
-    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
-  ) {
+  async product(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
     const { Body } = ProductSchema;
     const { title, titleAr } = Body.parse(req.body);
     const { Product } = model.db;
@@ -98,16 +74,8 @@ export default {
       }),
     ]);
 
-    if (product !== null)
-      throw APIError.controller(
-        StatusCodes.CONFLICT,
-        "Product name already exists"
-      );
-    else if (productAr !== null)
-      throw APIError.controller(
-        StatusCodes.CONFLICT,
-        "Product arabic name already exists"
-      );
+    if (product !== null) throw APIError.controller(StatusCodes.CONFLICT, "Product name already exists");
+    else if (productAr !== null) throw APIError.controller(StatusCodes.CONFLICT, "Product arabic name already exists");
 
     res.status(StatusCodes.OK).json({ success: true });
   },

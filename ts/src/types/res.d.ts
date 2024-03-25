@@ -1,7 +1,7 @@
 import { Tables } from "./db.js";
 
 type Locals = {
-  store: Tables["Seller"];
+  store: Tables["Store"];
   category: Tables["Category"];
   product: Tables["Product"];
 };

@@ -27,6 +27,6 @@ export async function withProductsCount(storeId: string, desc = true) {
       bind: {
         sellerId: parsedId,
       },
-    }
+    },
   );
 }

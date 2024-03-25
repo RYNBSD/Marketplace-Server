@@ -9,10 +9,7 @@ import { lib } from "../../lib/index.js";
 const { Setting, BecomeSeller, Update, Delete } = schema.req.api.user;
 
 export default {
-  async profile(
-    req: Request,
-    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
-  ) {
+  async profile(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
     const { user } = req;
     const { UserSetting, Store } = model.db;
 
@@ -50,9 +47,7 @@ export default {
     const { Body } = Setting;
     const { user } = req;
 
-    const { theme, locale, disableAnimations, forceTheme } = Body.parse(
-      req.body
-    );
+    const { theme, locale, disableAnimations, forceTheme } = Body.parse(req.body);
     const { UserSetting } = model.db;
 
     const [_, setting] = await UserSetting.update(
@@ -62,17 +57,12 @@ export default {
         fields: ["theme", "locale", "forceTheme", "disableAnimations"],
         returning: true,
         limit: 1,
-      }
+      },
     );
 
-    res
-      .status(StatusCodes.OK)
-      .json({ success: true, data: { setting: setting[0]!.dataValues } });
+    res.status(StatusCodes.OK).json({ success: true, data: { setting: setting[0]!.dataValues } });
   },
-  async becomeSeller(
-    req: Request,
-    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
-  ) {
+  async becomeSeller(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
     const { Body } = BecomeSeller;
     const { name, theme } = Body.parse(req.body);
 
@@ -83,33 +73,18 @@ export default {
       where: { name },
       limit: 1,
     });
-    if (checkStoreName !== null)
-      throw APIError.controller(
-        StatusCodes.BAD_REQUEST,
-        "Store name already exists"
-      );
+    if (checkStoreName !== null) throw APIError.controller(StatusCodes.BAD_REQUEST, "Store name already exists");
 
     const image = req.file;
     if (image === undefined || image.buffer.length === 0)
-      throw APIError.controller(
-        StatusCodes.BAD_REQUEST,
-        "Please, provide a logo for your store"
-      );
+      throw APIError.controller(StatusCodes.BAD_REQUEST, "Please, provide a logo for your store");
 
     const { FileConverter, FileUploader } = lib.file;
     const converted = await new FileConverter(image.buffer).convert();
-    if (converted.length === 0)
-      throw APIError.controller(
-        StatusCodes.UNSUPPORTED_MEDIA_TYPE,
-        "Invalid image format"
-      );
+    if (converted.length === 0) throw APIError.controller(StatusCodes.UNSUPPORTED_MEDIA_TYPE, "Invalid image format");
 
     const uploaded = await new FileUploader(...converted).upload();
-    if (uploaded.length === 0)
-      throw APIError.server(
-        StatusCodes.INTERNAL_SERVER_ERROR,
-        "Can't upload your image"
-      );
+    if (uploaded.length === 0) throw APIError.server(StatusCodes.INTERNAL_SERVER_ERROR, "Can't upload your image");
 
     const { user } = req;
     const { StoreSetting } = model.db;
@@ -120,14 +95,14 @@ export default {
         image: uploaded[0]!,
         userId: user!.dataValues.id,
       },
-      { fields: ["name", "image", "userId"] }
+      { fields: ["name", "image", "userId"] },
     );
     const setting = await StoreSetting.create(
       {
         theme,
         storeId: store.dataValues.id,
       },
-      { fields: ["theme", "storeId"] }
+      { fields: ["theme", "storeId"] },
     );
 
     res.status(StatusCodes.CREATED).json({
@@ -138,10 +113,7 @@ export default {
       },
     });
   },
-  async update(
-    req: Request,
-    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
-  ) {
+  async update(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
     const { user } = req;
     const { Body } = Update;
     const { username } = Body.parse(req.body);
@@ -153,17 +125,10 @@ export default {
 
       const converted = await new FileConverter(image.buffer).convert();
       if (converted.length === 0)
-        throw APIError.controller(
-          StatusCodes.UNSUPPORTED_MEDIA_TYPE,
-          "Please, provide a valid image"
-        );
+        throw APIError.controller(StatusCodes.UNSUPPORTED_MEDIA_TYPE, "Please, provide a valid image");
 
       const uploaded = await new FileUploader(...converted).upload();
-      if (uploaded.length === 0)
-        throw APIError.server(
-          StatusCodes.INTERNAL_SERVER_ERROR,
-          "Can't upload your image"
-        );
+      if (uploaded.length === 0) throw APIError.server(StatusCodes.INTERNAL_SERVER_ERROR, "Can't upload your image");
 
       await FileUploader.remove(user!.dataValues.image);
       newImage = uploaded[0]!;
@@ -177,10 +142,7 @@ export default {
       },
     });
   },
-  async delete(
-    req: Request,
-    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
-  ) {
+  async delete(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
     const { user } = req;
     const { Query } = Delete;
     const { force = false } = Query.parse(req.query);

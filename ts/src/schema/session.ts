@@ -22,6 +22,4 @@ export const Access = z
   .strict()
   .optional();
 
-export const Session = z
-  .object({ csrf: Csrf, passport: Passport, access: Access })
-  .strict();
+export const Session = z.object({ csrf: Csrf, passport: Passport, access: Access }).strict();

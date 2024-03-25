@@ -11,12 +11,7 @@ export class BaseError extends Error {
   public readonly handler: HandlerTypes;
   public readonly statusText: ReasonPhrases;
   public readonly statusCode: StatusCodes;
-  constructor(
-    statusCode: StatusCodes,
-    message: string,
-    handler: HandlerTypes,
-    isOperational: boolean
-  ) {
+  constructor(statusCode: StatusCodes, message: string, handler: HandlerTypes, isOperational: boolean) {
     super(message);
     this.statusCode = statusCode;
     this.statusText = getReasonPhrase(this.statusCode) as ReasonPhrases;
@@ -32,10 +27,7 @@ export class BaseError extends Error {
       return;
     }
 
-    const [{ lib }, { model }] = await Promise.all([
-      import("../lib/index.js"),
-      import("../model/index.js"),
-    ]);
+    const [{ lib }, { model }] = await Promise.all([import("../lib/index.js"), import("../model/index.js")]);
 
     type NewErrorType = {
       message: string;
@@ -45,8 +37,7 @@ export class BaseError extends Error {
       handler: HandlerTypes;
     };
 
-    const err =
-      error instanceof Error ? error : new Error(toString.parse(error));
+    const err = error instanceof Error ? error : new Error(toString.parse(error));
 
     const newError: NewErrorType = {
       message: err.message,
@@ -68,19 +59,11 @@ export class BaseError extends Error {
       await Promise.all([
         new Mail(
           ENV.MAIL.USER,
-          `New error - ${
-            newError.isOperational ? "Catch" : "Urgent"
-          } - Status: ${newError.statusCode}`,
-          Mail.errorTemplate(newError)
+          `New error - ${newError.isOperational ? "Catch" : "Urgent"} - Status: ${newError.statusCode}`,
+          Mail.errorTemplate(newError),
         ).send(),
         ServerError.create(newError, {
-          fields: [
-            "message",
-            "stack",
-            "statusCode",
-            "isOperational",
-            "handler",
-          ],
+          fields: ["message", "stack", "statusCode", "isOperational", "handler"],
         }),
       ]);
     } catch (error) {

@@ -20,11 +20,7 @@ export async function order(orderId: string) {
 
 type OrderFilter = (typeof ORDER_STATUS)[number];
 
-export async function orders(
-  userId: string,
-  filter: OrderFilter | "all" = "all",
-  offset = 0
-) {
+export async function orders(userId: string, filter: OrderFilter | "all" = "all", offset = 0) {
   const parsedId = isUUID.parse(userId);
 
   return sequelize.query(
@@ -44,9 +40,7 @@ export async function orders(
     INNER JOIN "Product" ON "Product"."id" = "Order"."productId"
     INNER JOIN "ProductImage" ON "ProductImage"."productId" = "Product"."id"
     INNER JOIN "User" ON "User"."id" = "Order"."userId"
-    WHERE "User"."id" = $id ${
-      filter !== "all" ? 'AND "Order"."status" = $filter' : ""
-    }
+    WHERE "User"."id" = $id ${filter !== "all" ? 'AND "Order"."status" = $filter' : ""}
     LIMIT $limit OFFSET $offset
   `,
     {
@@ -58,6 +52,6 @@ export async function orders(
         limit: LENGTH.LIMIT,
         offset,
       },
-    }
+    },
   );
 }

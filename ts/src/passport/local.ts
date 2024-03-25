@@ -15,19 +15,14 @@ export const localStrategy = new LocalStrategy(
       limit: 1,
     })
       .then((user) => {
-        if (user === null)
-          return done(
-            APIError.passport(StatusCodes.NOT_FOUND, "User not found")
-          );
+        if (user === null) return done(APIError.passport(StatusCodes.NOT_FOUND, "User not found"));
 
         const { compare } = util.bcrypt;
         if (!compare(password, user.dataValues.password))
-          return done(
-            APIError.passport(StatusCodes.UNAUTHORIZED, "Invalid password")
-          );
+          return done(APIError.passport(StatusCodes.UNAUTHORIZED, "Invalid password"));
 
         return done(null, user);
       })
       .catch(done);
-  }
+  },
 );

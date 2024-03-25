@@ -15,15 +15,7 @@ const {
   fn: { isAuthenticated },
   security: { csrf },
 } = middleware;
-const {
-  profile,
-  orders,
-  order,
-  setting,
-  becomeSeller,
-  update,
-  delete: deleteUser,
-} = controller.api.user;
+const { profile, orders, order, setting, becomeSeller, update, delete: deleteUser } = controller.api.user;
 
 export const user = Router();
 
@@ -31,33 +23,18 @@ user.get("/", handleAsync(isAuthenticated), handleAsync(profile));
 
 user.get("/orders", handleAsync(isAuthenticated), handleAsync(orders));
 
-user.get(
-  `/orders/:${PARAMS.ID.ORDER}`,
-  handleAsync(isAuthenticated),
-  handleAsync(order)
-);
+user.get(`/orders/:${PARAMS.ID.ORDER}`, handleAsync(isAuthenticated), handleAsync(order));
 
-user.patch(
-  "/setting",
-  handleAsync(isAuthenticated),
-  upload.any(),
-  handleAsync(setting)
-);
+user.patch("/setting", handleAsync(isAuthenticated), handleAsync(upload.none()), handleAsync(setting));
 
 user.post(
   "/become-seller",
   handleAsync(csrf),
   handleAsync(isAuthenticated),
   upload.single(IMAGE),
-  handleAsync(becomeSeller)
+  handleAsync(becomeSeller),
 );
 
-user.put(
-  "/",
-  handleAsync(csrf),
-  handleAsync(isAuthenticated),
-  upload.single(IMAGE),
-  handleAsync(update)
-);
+user.put("/", handleAsync(csrf), handleAsync(isAuthenticated), upload.single(IMAGE), handleAsync(update));
 
 user.delete("/", handleAsync(isAuthenticated), handleAsync(deleteUser));

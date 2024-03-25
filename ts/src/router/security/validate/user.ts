@@ -11,9 +11,4 @@ const { email } = controller.security.validate.user;
 
 export const user = Router();
 
-user.post(
-  "/email",
-  handleAsync(notAuthenticated),
-  upload.any(),
-  handleAsync(email)
-);
+user.post("/email", handleAsync(notAuthenticated), handleAsync(upload.none()), handleAsync(email));

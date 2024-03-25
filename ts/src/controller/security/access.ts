@@ -12,10 +12,7 @@ const { HTTP } = KEYS;
 const { Email } = schema.req.security.access;
 
 export default {
-  async email(
-    req: Request,
-    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
-  ) {
+  async email(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
     const { Body } = Email;
     const { User } = model.db;
     const { email } = Body.parse(req.body);
@@ -25,8 +22,7 @@ export default {
       where: { email },
       limit: 1,
     });
-    if (user === null)
-      throw APIError.controller(StatusCodes.NOT_FOUND, "user not found");
+    if (user === null) throw APIError.controller(StatusCodes.NOT_FOUND, "user not found");
 
     const { access } = util;
     const { token, code, key, iv } = access.token(user.dataValues.id);

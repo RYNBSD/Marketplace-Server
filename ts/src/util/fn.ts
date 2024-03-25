@@ -1,30 +1,23 @@
 import type { IncomingHttpHeaders } from "node:http";
-import type { Request, Response, NextFunction } from "express";
-import { VALUES } from "../constant/index.js";
+import type { Request, Response, NextFunction, RequestHandler } from "express";
+import type { TResponse } from "../types/index.js";
 import { StatusCodes } from "http-status-codes";
-import { BaseError } from "../error/index.js";
 import { ZodError } from "zod";
-import { TResponse } from "../types/index.js";
+import { MulterError } from "multer";
+import { VALUES } from "../constant/index.js";
+import { BaseError } from "../error/index.js";
 
-export function handleAsync(
-  fn: (
-    req: Request,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    res: Response<any, any>,
-    next: NextFunction
-  ) => Promise<void>
-) {
-  return async (
-    req: Request,
-    res: Response<TResponse["Body"]["Fail"]>,
-    next: NextFunction
-  ) => {
+type HandleAsyncFn = ((req: Request, res: Response<any, any>, next: NextFunction) => Promise<void>) | RequestHandler;
+
+export function handleAsync(fn: HandleAsyncFn) {
+  return async (req: Request, res: Response<TResponse["Body"]["Fail"]>, next: NextFunction) => {
     try {
       await fn(req, res, next);
     } catch (error) {
       await BaseError.handleError(error);
       let status: StatusCodes = StatusCodes.BAD_REQUEST;
       let message = "";
+
       if (error instanceof BaseError) {
         status = error.statusCode;
         message = error.message;
@@ -33,9 +26,13 @@ export function handleAsync(
           .format()
           ._errors.map((error) => error + ";")
           .join("");
+      } else if (error instanceof MulterError) {
+        status = StatusCodes.FORBIDDEN;
+        message = error.message;
       } else {
         return next(error);
       }
+
       res.status(status).json({ success: false, message });
     }
   };

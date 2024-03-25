@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { VALUES } from "../../../constant/index.js";
 
-const { PASSWORD, MIN } = VALUES.LENGTH
+const { PASSWORD, MIN } = VALUES.LENGTH;
 
 export default {
   Email: {
@@ -12,9 +12,8 @@ export default {
         confirmPassword: z.string().trim().min(PASSWORD),
       }),
     },
-    Body: z
-      .object({
-        email: z.string().trim().min(MIN.REQUIRED).email(),
-      }),
+    Body: z.object({
+      email: z.string().trim().min(MIN.REQUIRED).email(),
+    }),
   },
 } as const;

@@ -8,10 +8,7 @@ import { APIError } from "../../../error/index.js";
 const { Email } = schema.req.security.validate.user;
 
 export default {
-  async email(
-    req: Request,
-    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
-  ) {
+  async email(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
     const { Body } = Email;
     const { email } = Body.parse(req.body);
     const { User } = model.db;
@@ -23,8 +20,7 @@ export default {
       plain: true,
       paranoid: false,
     });
-    if (user !== null)
-      throw APIError.controller(StatusCodes.CONFLICT, "Email already exists");
+    if (user !== null) throw APIError.controller(StatusCodes.CONFLICT, "Email already exists");
 
     res.status(StatusCodes.OK).json({ success: true });
   },

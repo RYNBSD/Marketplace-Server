@@ -8,16 +8,12 @@ import { lib } from "../../lib/index.js";
 import { model } from "../../model/index.js";
 import { KEYS, VALUES } from "../../constant/index.js";
 
-const { Search, Stores, Categories, Products, Home, Update } =
-  schema.req.api.seller;
+const { Search, Stores, Categories, Products, Home, Update } = schema.req.api.store;
 const { DB } = KEYS;
 const { NULL, LENGTH } = VALUES;
 
 export default {
-  async search(
-    req: Request,
-    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
-  ) {
+  async search(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
     const { Query } = Search;
     const { s, limit } = Query.parse(req.query);
     const { Store, Category, Product } = model.db;
@@ -64,10 +60,7 @@ export default {
       },
     });
   },
-  async stores(
-    req: Request,
-    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
-  ) {
+  async stores(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
     const { Query } = Stores;
     const { lastStoreId = NULL.UUID, limit } = Query.parse(req.query);
 
@@ -90,10 +83,7 @@ export default {
       data: { stores: stores.map((store) => store.dataValues) },
     });
   },
-  async categories(
-    req: Request,
-    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
-  ) {
+  async categories(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
     const { Query } = Categories;
     const { storeId } = Query.parse(req.query) ?? { storeId: "" };
 
@@ -118,30 +108,21 @@ export default {
       },
     });
   },
-  async products(
-    req: Request,
-    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
-  ) {
+  async products(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
     const { Query } = Products;
     const q = Query.parse(req.query);
 
     res.status(StatusCodes.OK).json({ success: true });
   },
   /** Store home page (landing page) */
-  async home(
-    req: Request,
-    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
-  ) {
+  async home(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
     const { Params } = Home;
     const { storeId } = Params.parse(req.params);
 
     const { user } = req;
     if (user !== undefined) {
       const { StoreViewer } = model.db;
-      await StoreViewer.create(
-        { userId: user.dataValues.id, storeId },
-        { fields: ["userId", "storeId"] }
-      );
+      await StoreViewer.create({ userId: user.dataValues.id, storeId }, { fields: ["userId", "storeId"] });
     }
 
     const { store } = res.locals;
@@ -150,9 +131,7 @@ export default {
       query,
     } = model;
 
-    const categories = await query.category.withProductsCount(
-      store!.dataValues.id
-    );
+    const categories = await query.category.withProductsCount(store!.dataValues.id);
 
     const products = await Product.findAll({
       attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
@@ -181,10 +160,7 @@ export default {
       },
     });
   },
-  async category(
-    req: Request,
-    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
-  ) {
+  async category(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
     const { category } = res.locals;
 
     const { user } = req;
@@ -192,7 +168,7 @@ export default {
       const { CategoryViewer } = model.db;
       await CategoryViewer.create(
         { userId: user.dataValues.id, categoryId: category!.dataValues.id },
-        { fields: ["userId", "categoryId"] }
+        { fields: ["userId", "categoryId"] },
       );
     }
 
@@ -217,31 +193,19 @@ export default {
       },
     });
   },
-  async product(
-    req: Request,
-    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
-  ) {
+  async product(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
     const { product } = res.locals;
     const { user } = req;
     if (user !== undefined) {
       const { ProductViewer } = model.db;
       await ProductViewer.create(
         { userId: user.dataValues.id, productId: product!.dataValues.id },
-        { fields: ["userId", "productId"] }
+        { fields: ["userId", "productId"] },
       );
     }
 
-    const {
-      User,
-      Tag,
-      Product,
-      ProductImage,
-      ProductColor,
-      ProductInfo,
-      ProductRating,
-      ProductSize,
-      ProductTag,
-    } = model.db;
+    const { User, Tag, Product, ProductImage, ProductColor, ProductInfo, ProductRating, ProductSize, ProductTag } =
+      model.db;
 
     const fullProduct = await Product.findOne({
       attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
@@ -302,14 +266,9 @@ export default {
       ],
     });
 
-    res
-      .status(StatusCodes.OK)
-      .json({ success: true, data: { product: fullProduct!.dataValues } });
+    res.status(StatusCodes.OK).json({ success: true, data: { product: fullProduct!.dataValues } });
   },
-  async profile(
-    _req: Request,
-    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
-  ) {
+  async profile(_req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
     const { store } = res.locals;
 
     const { Category, Product } = model.db;
@@ -339,19 +298,13 @@ export default {
       },
     });
   },
-  async update(
-    req: Request,
-    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
-  ) {
+  async update(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
     const { Body } = Update;
     const { name } = Body.parse(req.body);
 
     const { store } = res.locals;
     if (store === undefined)
-      throw APIError.server(
-        StatusCodes.INTERNAL_SERVER_ERROR,
-        "Unprovided local store (seller:update)"
-      );
+      throw APIError.server(StatusCodes.INTERNAL_SERVER_ERROR, "Unprovided local store (seller:update)");
 
     let newImage = store.dataValues.image;
     const image = req.file ?? null;
@@ -360,18 +313,10 @@ export default {
       const { FileConverter, FileUploader } = lib.file;
 
       const converted = await new FileConverter(image.buffer).convert();
-      if (converted.length === 0)
-        throw APIError.controller(
-          StatusCodes.UNSUPPORTED_MEDIA_TYPE,
-          "Invalid image format"
-        );
+      if (converted.length === 0) throw APIError.controller(StatusCodes.UNSUPPORTED_MEDIA_TYPE, "Invalid image format");
 
       const uploaded = await new FileUploader(...converted).upload();
-      if (uploaded.length === 0)
-        throw APIError.server(
-          StatusCodes.INTERNAL_SERVER_ERROR,
-          "Can't upload your image"
-        );
+      if (uploaded.length === 0) throw APIError.server(StatusCodes.INTERNAL_SERVER_ERROR, "Can't upload your image");
 
       newImage = uploaded[0]!;
     }
@@ -379,16 +324,10 @@ export default {
     await store.update({ name, image: newImage });
     res.status(StatusCodes.OK).json({ success: true });
   },
-  async delete(
-    _: Request,
-    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
-  ) {
+  async delete(_: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
     const { store } = res.locals;
     if (store === null)
-      throw APIError.server(
-        StatusCodes.INTERNAL_SERVER_ERROR,
-        "Unprovided local store (seller:update)"
-      );
+      throw APIError.server(StatusCodes.INTERNAL_SERVER_ERROR, "Unprovided local store (seller:update)");
 
     res.status(StatusCodes.OK).json({ success: true });
   },

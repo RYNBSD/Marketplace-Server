@@ -12,18 +12,14 @@ const ALGORITHM = "aes-256-cbc";
 export const access = {
   token(id: string) {
     if (!isUUID.parse(id))
-      throw APIError.server(
-        StatusCodes.INTERNAL_SERVER_ERROR,
-        "Invalid id type (uuid) to create Access Token"
-      );
+      throw APIError.server(StatusCodes.INTERNAL_SERVER_ERROR, "Invalid id type (uuid) to create Access Token");
 
     const encryptData = `${id}`;
     const key = randomBytes(KEY_LENGTH);
     const iv = randomBytes(IV_LENGTH);
 
     const cipher = createCipheriv(ALGORITHM, key, iv);
-    const token =
-      cipher.update(encryptData, "utf8", "base64") + cipher.final("base64");
+    const token = cipher.update(encryptData, "utf8", "base64") + cipher.final("base64");
 
     const stringIv = iv.toString("hex");
     const stringKey = key.toString("hex");
@@ -44,14 +40,10 @@ export const access = {
     const bufferKey = Buffer.from(codeKey + key, "hex");
     const bufferIv = Buffer.from(codeIv + iv, "hex");
 
-    if (bufferIv.length !== IV_LENGTH || bufferKey.length !== KEY_LENGTH)
-      return { valid: false, id: "" };
+    if (bufferIv.length !== IV_LENGTH || bufferKey.length !== KEY_LENGTH) return { valid: false, id: "" };
 
     const decipher = createDecipheriv(ALGORITHM, bufferKey, bufferIv);
-    const decrypted = Buffer.concat([
-      decipher.update(encrypted),
-      decipher.final(),
-    ]);
+    const decrypted = Buffer.concat([decipher.update(encrypted), decipher.final()]);
 
     const id = decrypted.toString();
     if (id === undefined) return { valid: false, id: "" };

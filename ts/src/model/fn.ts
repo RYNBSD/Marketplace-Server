@@ -21,7 +21,7 @@ export async function tableIndex(table: string, id: string) {
       bind: {
         id: parsedId,
       },
-    }
+    },
   );
 
   return index?.row_number ?? 0;

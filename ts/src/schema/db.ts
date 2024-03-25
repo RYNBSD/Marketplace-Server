@@ -57,12 +57,7 @@ export const StoreLink = z
   .merge(StoreId)
   .strict();
 
-export const StoreViewer = z
-  .object({})
-  .merge(IdUUID)
-  .merge(StoreId)
-  .merge(UserId)
-  .strict();
+export const StoreViewer = z.object({}).merge(IdUUID).merge(StoreId).merge(UserId).strict();
 
 export const Category = z
   .object({
@@ -74,12 +69,7 @@ export const Category = z
   .merge(StoreId)
   .strict();
 
-export const CategoryViewer = z
-  .object({})
-  .merge(IdUUID)
-  .merge(CategoryId)
-  .merge(UserId)
-  .strict();
+export const CategoryViewer = z.object({}).merge(IdUUID).merge(CategoryId).merge(UserId).strict();
 
 export const Product = z
   .object({
@@ -139,12 +129,7 @@ export const ProductColor = z
   .merge(ProductId)
   .strict();
 
-export const ProductViewer = z
-  .object({})
-  .merge(IdUUID)
-  .merge(ProductId)
-  .merge(UserId)
-  .strict();
+export const ProductViewer = z.object({}).merge(IdUUID).merge(ProductId).merge(UserId).strict();
 
 export const Tag = z
   .object({
@@ -180,10 +165,12 @@ export const ResponseTime = z
   })
   .merge(IdInt);
 
-export const ServerError = z.object({
-  message: z.string(),
-  stack: z.string().nullable(),
-  statusCode: z.number(),
-  isOperational: z.boolean(),
-  handler: z.enum(KEYS.ERROR.HANDLERS)
-}).merge(IdInt)
+export const ServerError = z
+  .object({
+    message: z.string(),
+    stack: z.string().nullable(),
+    statusCode: z.number(),
+    isOperational: z.boolean(),
+    handler: z.enum(KEYS.ERROR.HANDLERS),
+  })
+  .merge(IdInt);

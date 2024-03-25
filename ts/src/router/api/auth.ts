@@ -12,8 +12,7 @@ const {
   fn: { isAuthenticated, notAuthenticated },
   security: { csrf, access },
 } = middleware;
-const { signUp, signIn, signOut, me, verifyEmail, forgotPassword } =
-  controller.api.auth;
+const { signUp, signIn, signOut, me, verifyEmail, forgotPassword } = controller.api.auth;
 
 export const auth = Router();
 
@@ -22,16 +21,10 @@ auth.post(
   handleAsync(csrf),
   handleAsync(notAuthenticated),
   upload.single(UPLOAD.IMAGE),
-  handleAsync(signUp)
+  handleAsync(signUp),
 );
 
-auth.post(
-  "/sign-in",
-  handleAsync(csrf),
-  handleAsync(notAuthenticated),
-  upload.any(),
-  handleAsync(signIn)
-);
+auth.post("/sign-in", handleAsync(csrf), handleAsync(notAuthenticated), handleAsync(upload.none()), handleAsync(signIn));
 
 auth.post("/sign-out", handleAsync(isAuthenticated), handleAsync(signOut));
 
@@ -43,7 +36,7 @@ auth.put(
   "/forgot-password",
   handleAsync(csrf),
   handleAsync(notAuthenticated),
-  upload.any(),
+  handleAsync(upload.none()),
   handleAsync(access),
-  handleAsync(forgotPassword)
+  handleAsync(forgotPassword),
 );

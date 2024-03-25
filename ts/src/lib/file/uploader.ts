@@ -1,7 +1,4 @@
-import type {
-  ConvertedFile,
-  SupportFileExtensions,
-} from "../../types/index.js";
+import type { ConvertedFile, SupportFileExtensions } from "../../types/index.js";
 import { rm, writeFile } from "node:fs/promises";
 import { util } from "../../util/index.js";
 import { randomUUID } from "node:crypto";
@@ -41,10 +38,7 @@ export default class FileUploader {
         ext = "glb";
         break;
       default:
-        throw APIError.server(
-          StatusCodes.INTERNAL_SERVER_ERROR,
-          "File uploader unhandled write case (ext)"
-        );
+        throw APIError.server(StatusCodes.INTERNAL_SERVER_ERROR, "File uploader unhandled write case (ext)");
     }
 
     const uri = path.join(UPLOAD, file.type, this.generateUniqueFileName(ext));
@@ -62,8 +56,8 @@ export default class FileUploader {
       uris.map((uri) =>
         rm(path.join(__root, PUBLIC, uri), {
           force: true,
-        })
-      )
+        }),
+      ),
     );
   }
 }

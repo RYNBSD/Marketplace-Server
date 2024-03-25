@@ -8,16 +8,11 @@ import { schema } from "../schema/index.js";
 export const bearerStrategy = new BearerStrategy((token, done) => {
   const { verify } = util.jwt;
   const userId = verify(token) as string | null;
-  if (userId === null)
-    return done(APIError.passport(StatusCodes.BAD_REQUEST, "Invalid token"));
+  if (userId === null) return done(APIError.passport(StatusCodes.BAD_REQUEST, "Invalid token"));
 
-    
   const { isUUID } = schema.validators;
   const parsedId = isUUID.safeParse(userId);
-  if (!parsedId.success)
-    return done(
-      APIError.passport(StatusCodes.BAD_REQUEST, parsedId.error.message)
-    );
+  if (!parsedId.success) return done(APIError.passport(StatusCodes.BAD_REQUEST, parsedId.error.message));
 
   const { User } = model.db;
   User.findOne({
@@ -27,8 +22,7 @@ export const bearerStrategy = new BearerStrategy((token, done) => {
     plain: true,
   })
     .then((user) => {
-      if (user === null)
-        return done(APIError.passport(StatusCodes.NOT_FOUND, "User not found"));
+      if (user === null) return done(APIError.passport(StatusCodes.NOT_FOUND, "User not found"));
       return done(null, user);
     })
     .catch(done);

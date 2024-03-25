@@ -15,19 +15,10 @@ const {
   security: { csrf },
   fn: { isAuthenticated, isSeller },
   api: {
-    seller: { checkSeller, checkCategory, checkProduct },
+    store: { checkStore, checkCategory, checkProduct },
   },
 } = middleware;
-const {
-  search,
-  stores,
-  home,
-  category,
-  product,
-  profile,
-  update,
-  delete: deleteSeller,
-} = controller.api.store;
+const { search, stores, home, category, product, profile, update, delete: deleteSeller } = controller.api.store;
 
 export const store = Router();
 
@@ -37,37 +28,28 @@ store.get("/search", handleAsync(search));
 store.get("/stores", handleAsync(stores));
 
 /** Fetch all categories from deferent sellers */
-store.get("/categories")
+store.get("/categories");
 
-store.get("/products")
+store.get("/products");
 
-store.get(
-  `/:${PARAMS.ID.STORE}`,
-  handleAsync(checkSeller),
-  handleAsync(home)
-);
+store.get(`/:${PARAMS.ID.STORE}`, handleAsync(checkStore), handleAsync(home));
 
 store.get(
   `/:${PARAMS.ID.STORE}/:${PARAMS.ID.CATEGORY}`,
-  handleAsync(checkSeller),
+  handleAsync(checkStore),
   handleAsync(checkCategory),
-  handleAsync(category)
+  handleAsync(category),
 );
 
 store.get(
   `/:${PARAMS.ID.STORE}/:${PARAMS.ID.CATEGORY}/:${PARAMS.ID.PRODUCT}`,
-  handleAsync(checkSeller),
+  handleAsync(checkStore),
   handleAsync(checkCategory),
   handleAsync(checkProduct),
-  handleAsync(product)
+  handleAsync(product),
 );
 
-store.get(
-  "/",
-  handleAsync(isAuthenticated),
-  handleAsync(isSeller),
-  handleAsync(profile)
-);
+store.get("/", handleAsync(isAuthenticated), handleAsync(isSeller), handleAsync(profile));
 
 store.put(
   "/",
@@ -75,12 +57,7 @@ store.put(
   handleAsync(isAuthenticated),
   handleAsync(isSeller),
   upload.single(IMAGE),
-  handleAsync(update)
+  handleAsync(update),
 );
 
-store.delete(
-  "/",
-  handleAsync(isAuthenticated),
-  handleAsync(isSeller),
-  handleAsync(deleteSeller)
-);
+store.delete("/", handleAsync(isAuthenticated), handleAsync(isSeller), handleAsync(deleteSeller));

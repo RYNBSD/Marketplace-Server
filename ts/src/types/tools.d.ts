@@ -1,8 +1,6 @@
 export type ArrayValues<T extends Array> = T[number];
 
-export type DeepArrayValues<T extends Array> = T[number] extends Array
-  ? DeepArrayValues<T[number]>
-  : T[number];
+export type DeepArrayValues<T extends Array> = T[number] extends Array ? DeepArrayValues<T[number]> : T[number];
 
 export type ObjectKeys<T extends Record<string, unknown>> = keyof T;
 export type ObjectValues<T extends Record<string, unknown>> = T[keyof T];

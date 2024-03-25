@@ -4,7 +4,7 @@ import { middleware } from "../../middleware/index.js";
 import { controller } from "../../controller/index.js";
 import { config } from "../../config/index.js";
 
-const { upload } = config
+const { upload } = config;
 const { handleAsync } = util.fn;
 const {
   security: { csrf },
@@ -13,9 +13,4 @@ const { email } = controller.security.access;
 
 export const access = Router();
 
-access.post(
-  "/email",
-  handleAsync(csrf),
-  upload.any(),
-  handleAsync(email)
-);
+access.post("/email", handleAsync(csrf), handleAsync(upload.none()), handleAsync(email));

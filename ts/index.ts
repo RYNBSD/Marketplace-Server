@@ -49,6 +49,7 @@ app.disable("view cache");
 app.enable("json escape");
 app.enable("etag");
 
+const { TIME, PACKAGE } = VALUES
 const { COOKIE, HTTP } = KEYS;
 
 global.IS_PRODUCTION = ENV.NODE.ENV === "production";
@@ -66,9 +67,11 @@ const {
   db,
   tmp,
   session: { initStore },
+  swagger
 } = config;
 await tmp.initTmpDir();
 await db.connect();
+const docs = swagger.init()
 const { sessionStore } = initStore(session.Store);
 const { model } = await import("./src/model/index.js");
 const { passport } = await import("./src/passport/index.js");
@@ -76,7 +79,7 @@ const { router } = await import("./src/router/index.js");
 const { BaseError } = await import("./src/error/index.js");
 await db.init();
 
-app.use(timeout(VALUES.TIME.MINUTE));
+app.use(timeout(TIME.MINUTE));
 app.use(
   responseTime(async (req: Request, res: Response, time: number) => {
     const { RESPONSE_TIME } = HTTP.HEADERS;
@@ -95,16 +98,16 @@ app.use(
         path,
         statusCode,
       },
-      { fields: ["date", "time", "method", "path", "statusCode"] }
+      { fields: ["date", "time", "method", "path", "statusCode"] },
     );
-  })
+  }),
 );
 app.use(cors({ credentials: true }));
 app.use(
   rateLimit({
-    windowMs: VALUES.TIME.MINUTE,
+    windowMs: TIME.MINUTE,
     limit: 1000,
-  })
+  }),
 );
 app.use(
   compression({
@@ -118,7 +121,7 @@ app.use(
       const noCompression = toBoolean.parse(noCompressionHeader);
       return noCompression ? false : compression.filter(req, res);
     },
-  })
+  }),
 );
 
 app.use(methodOverride(HTTP.HEADERS.METHOD_OVERRIDE));
@@ -138,35 +141,30 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      maxAge: VALUES.TIME.MINUTE * 15,
+      maxAge: TIME.MINUTE * 15,
       sameSite: IS_PRODUCTION,
       httpOnly: IS_PRODUCTION,
       secure: IS_PRODUCTION,
       path: "/",
     },
-  })
+  }),
 );
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use(`/v${ENV.API.VERSION}`, router);
+app.use(`/v${PACKAGE.VERSION}`, router);
 app.use(express.static(path.join(__root, KEYS.GLOBAL.PUBLIC), { etag: true }));
+app.use("/docs", docs.serve, docs.ui)
 app.all("*", async (_, res: Response<TResponse["Body"]["Fail"]>) =>
-  res.sendStatus(StatusCodes.NOT_FOUND).json({ success: false })
+  res.sendStatus(StatusCodes.NOT_FOUND).json({ success: false }),
 );
-app.use(
-  async (
-    error: unknown,
-    _req: Request,
-    res: Response<TResponse["Body"]["Fail"]>
-  ) => {
-    await BaseError.handleError(error);
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      success: false,
-      message: "Server error",
-    });
-  }
-);
+app.use(async (error: unknown, _req: Request, res: Response<TResponse["Body"]["Fail"]>) => {
+  await BaseError.handleError(error);
+  res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+    success: false,
+    message: "Server error",
+  });
+});
 
 process.on("unhandledRejection", (error) => {
   throw error;

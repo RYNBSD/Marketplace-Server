@@ -11,25 +11,8 @@ const { name, category, product } = controller.security.validate.store;
 
 export const store = Router();
 
-store.post(
-  "/name",
-  handleAsync(isAuthenticated),
-  upload.any(),
-  handleAsync(name)
-);
+store.post("/name", handleAsync(isAuthenticated), handleAsync(upload.none()), handleAsync(name));
 
-store.post(
-  "/category",
-  handleAsync(isAuthenticated),
-  handleAsync(isSeller),
-  upload.any(),
-  handleAsync(category)
-);
+store.post("/category", handleAsync(isAuthenticated), handleAsync(isSeller), handleAsync(upload.none()), handleAsync(category));
 
-store.post(
-  "/product",
-  handleAsync(isAuthenticated),
-  handleAsync(isSeller),
-  upload.any(),
-  handleAsync(product)
-);
+store.post("/product", handleAsync(isAuthenticated), handleAsync(isSeller), handleAsync(upload.none()), handleAsync(product));

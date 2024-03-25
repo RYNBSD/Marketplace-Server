@@ -6,9 +6,6 @@ export default {
     PORT: process.env.PORT,
     ENV: process.env.NODE_ENV,
   },
-  API: {
-    VERSION: process.env.API_VERSION,
-  },
   SEQUELIZE: {
     DB_DATABASE: process.env.DB_DATABASE,
     DB_USERNAME: process.env.DB_USERNAME,

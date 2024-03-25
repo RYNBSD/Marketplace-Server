@@ -16,8 +16,6 @@ declare global {
       NODE_ENV: "production" | "development" | "test";
       PORT: number | `${number}`;
 
-      API_VERSION: number | `${number}`;
-
       COOKIE_PARSER: string;
       COOKIE_SECRET: string;
 

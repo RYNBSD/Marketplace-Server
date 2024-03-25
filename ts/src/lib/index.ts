@@ -1,8 +1,4 @@
-const [
-  { default: FileConverter },
-  { default: FileUploader },
-  { default: Mail },
-] = await Promise.all([
+const [{ default: FileConverter }, { default: FileUploader }, { default: Mail }] = await Promise.all([
   import("./file/converter.js"),
   import("./file/uploader.js"),
   import("./mail.js"),

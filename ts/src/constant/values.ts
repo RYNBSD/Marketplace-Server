@@ -1,3 +1,5 @@
+import packageJson from "../../../package.json" assert { type: "json" };
+
 export default {
   TIME: {
     MILLISECONDS: 1,
@@ -9,8 +11,12 @@ export default {
     MONTH: 1000 * 60 * 60 * 24 * 30,
     YEAR: 1000 * 60 * 60 * 24 * 30 * 12,
   },
+  PACKAGE: {
+    VERSION: packageJson.version.substring(0, 1),
+  },
   LENGTH: {
     LIMIT: 25,
+    COLOR: 7,
     PASSWORD: 8,
     MAX: {
       IMAGE: 255,

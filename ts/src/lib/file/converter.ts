@@ -92,9 +92,7 @@ export default class FileConverter extends FileTmp {
         .format("mp4")
         .output(output)
         .on("end", () => {
-          this.fileToBuffer(output)
-            .then(resolve)
-            .catch(reject);
+          this.fileToBuffer(output).then(resolve).catch(reject);
         })
         .on("error", reject)
         .run();
@@ -113,9 +111,7 @@ export default class FileConverter extends FileTmp {
         .format("mp3")
         .output(output)
         .on("end", () => {
-          this.fileToBuffer(output)
-            .then(resolve)
-            .catch(reject);
+          this.fileToBuffer(output).then(resolve).catch(reject);
         })
         .on("error", reject)
         .run();
@@ -171,10 +167,7 @@ export default class FileConverter extends FileTmp {
           file.buffer = await this.toGlb(file.buffer);
           break;
         default:
-          throw APIError.server(
-            StatusCodes.INTERNAL_SERVER_ERROR,
-            "File converter unhandled convert case"
-          );
+          throw APIError.server(StatusCodes.INTERNAL_SERVER_ERROR, "File converter unhandled convert case");
       }
       return file;
     });
@@ -184,9 +177,7 @@ export default class FileConverter extends FileTmp {
   async convert() {
     const typePromises = this.files.map((file) => this.fileType(file));
     const types = await Promise.all(typePromises);
-    const filterTypes = types.filter(
-      (file) => file !== null
-    ) as ConvertedFile[];
+    const filterTypes = types.filter((file) => file !== null) as ConvertedFile[];
 
     const converted = await this.fileConvert(filterTypes);
     if (this.cleanTmp) await tmp.cleanup();

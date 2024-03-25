@@ -14,10 +14,7 @@ const { COOKIE } = KEYS;
 const { SignUp, VerifyEmail, ForgotPassword } = schema.req.api.auth;
 
 export default {
-  async signUp(
-    req: Request,
-    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
-  ) {
+  async signUp(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
     const { Body } = SignUp;
     const { username, email, password, theme, locale } = Body.parse(req.body);
 
@@ -28,30 +25,19 @@ export default {
       limit: 1,
       plain: true,
     });
-    if (checkEmail !== null)
-      throw APIError.controller(StatusCodes.BAD_REQUEST, "Email already exist");
+    if (checkEmail !== null) throw APIError.controller(StatusCodes.BAD_REQUEST, "Email already exist");
 
     const image = req.file;
     if (image === undefined || image.buffer.length === 0)
-      throw APIError.controller(
-        StatusCodes.BAD_REQUEST,
-        "Please, provide an image"
-      );
+      throw APIError.controller(StatusCodes.BAD_REQUEST, "Please, provide an image");
 
     const { FileConverter, FileUploader } = lib.file;
     const converter = await new FileConverter(image.buffer).convert();
     if (converter.length === 0)
-      throw APIError.controller(
-        StatusCodes.UNSUPPORTED_MEDIA_TYPE,
-        "Unsupported image format"
-      );
+      throw APIError.controller(StatusCodes.UNSUPPORTED_MEDIA_TYPE, "Unsupported image format");
 
     const uploaded = await new FileUploader(...converter).upload();
-    if (uploaded.length === 0)
-      throw APIError.server(
-        StatusCodes.INTERNAL_SERVER_ERROR,
-        "Can't upload your image"
-      );
+    if (uploaded.length === 0) throw APIError.server(StatusCodes.INTERNAL_SERVER_ERROR, "Can't upload your image");
 
     const { hash } = util.bcrypt;
 
@@ -62,7 +48,7 @@ export default {
         password: hash(password),
         image: uploaded[0]!,
       },
-      { fields: ["username", "email", "password", "image"] }
+      { fields: ["username", "email", "password", "image"] },
     );
     await UserSetting.create(
       {
@@ -73,29 +59,14 @@ export default {
         disableAnimations: false,
       },
       {
-        fields: [
-          "userId",
-          "theme",
-          "locale",
-          "forceTheme",
-          "disableAnimations",
-        ],
-      }
+        fields: ["userId", "theme", "locale", "forceTheme", "disableAnimations"],
+      },
     );
 
     res.status(StatusCodes.CREATED).json({ success: true });
   },
-  async signIn(
-    req: Request,
-    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>,
-    next: NextFunction
-  ) {
-    const user = (await authenticate(
-      "local",
-      req,
-      res,
-      next
-    )) as Tables["User"];
+  async signIn(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>, next: NextFunction) {
+    const user = (await authenticate("local", req, res, next)) as Tables["User"];
 
     const { sign } = util.jwt;
     const { UserSetting, Store } = model.db;
@@ -126,7 +97,7 @@ export default {
           sameSite: IS_PRODUCTION,
           secure: IS_PRODUCTION,
           path: "/",
-        })
+        }),
       )
       .json({
         success: true,
@@ -137,10 +108,7 @@ export default {
         },
       });
   },
-  async signOut(
-    req: Request,
-    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
-  ) {
+  async signOut(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
     req.logOut((err) => {
       const { toBoolean } = schema.validators;
       if (toBoolean.parse(err)) throw err;
@@ -150,17 +118,8 @@ export default {
       res.status(StatusCodes.OK).json({ success: true });
     });
   },
-  async me(
-    req: Request,
-    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>,
-    next: NextFunction
-  ) {
-    const user = (await authenticate(
-      "bearer",
-      req,
-      res,
-      next
-    )) as Tables["User"];
+  async me(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>, next: NextFunction) {
+    const user = (await authenticate("bearer", req, res, next)) as Tables["User"];
 
     const { sign } = util.jwt;
     const { UserSetting, Store } = model.db;
@@ -191,7 +150,7 @@ export default {
           sameSite: IS_PRODUCTION,
           secure: IS_PRODUCTION,
           path: "/",
-        })
+        }),
       )
       .json({
         success: true,
@@ -202,17 +161,13 @@ export default {
         },
       });
   },
-  async verifyEmail(
-    req: Request,
-    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
-  ) {
+  async verifyEmail(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
     const { Query } = VerifyEmail;
     const { token } = Query.parse(req.query);
     const { verify } = util.jwt;
 
     const id = (verify(token) as string | null) ?? "";
-    if (id.length === 0)
-      throw APIError.controller(StatusCodes.BAD_REQUEST, "Invalid token");
+    if (id.length === 0) throw APIError.controller(StatusCodes.BAD_REQUEST, "Invalid token");
 
     const { isUUID } = schema.validators;
     const parsedId = isUUID.parse(id);
@@ -225,17 +180,13 @@ export default {
         where: { id: parsedId },
         limit: 1,
         returning: true,
-      }
+      },
     );
-    if (user.length === 0)
-      throw APIError.controller(StatusCodes.NOT_FOUND, "User not found");
+    if (user.length === 0) throw APIError.controller(StatusCodes.NOT_FOUND, "User not found");
 
     res.status(StatusCodes.OK).json({ success: true });
   },
-  async forgotPassword(
-    req: Request,
-    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>
-  ) {
+  async forgotPassword(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
     const { user } = req;
     const { Body } = ForgotPassword;
     const { password } = Body.parse(req.body);
@@ -243,8 +194,7 @@ export default {
     const { hash } = util.bcrypt;
     await user!.update({ password: hash(password) });
 
-    if (user!.dataValues.emailVerified === null)
-      await user!.update({ emailVerified: new Date() });
+    if (user!.dataValues.emailVerified === null) await user!.update({ emailVerified: new Date() });
 
     res.status(StatusCodes.OK).json({ success: true });
   },
