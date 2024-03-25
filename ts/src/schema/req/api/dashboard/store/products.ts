@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ENUM, VALUES } from "../../../../constant/index.js";
+import { ENUM, VALUES } from "../../../../../constant/index.js";
 
 const { QUALITY } = ENUM;
 const { MIN, MAX, COLOR } = VALUES.LENGTH;

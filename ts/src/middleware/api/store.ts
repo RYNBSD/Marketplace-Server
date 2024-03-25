@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
-import type { Tables, TResponse } from "../../types/index.js";
+import type { TResponse } from "../../types/index.js";
 import { StatusCodes } from "http-status-codes";
 import { model } from "../../model/index.js";
 import { APIError } from "../../error/index.js";

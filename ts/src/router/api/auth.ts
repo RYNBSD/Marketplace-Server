@@ -20,7 +20,7 @@ auth.post(
   "/sign-up",
   handleAsync(csrf),
   handleAsync(notAuthenticated),
-  upload.single(UPLOAD.IMAGE),
+  handleAsync(upload.single(UPLOAD.IMAGE)),
   handleAsync(signUp),
 );
 

@@ -31,10 +31,10 @@ user.post(
   "/become-seller",
   handleAsync(csrf),
   handleAsync(isAuthenticated),
-  upload.single(IMAGE),
+  handleAsync(upload.single(IMAGE)),
   handleAsync(becomeSeller),
 );
 
-user.put("/", handleAsync(csrf), handleAsync(isAuthenticated), upload.single(IMAGE), handleAsync(update));
+user.put("/", handleAsync(csrf), handleAsync(isAuthenticated), handleAsync(upload.single(IMAGE)), handleAsync(update));
 
 user.delete("/", handleAsync(isAuthenticated), handleAsync(deleteUser));

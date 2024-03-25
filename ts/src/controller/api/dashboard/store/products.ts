@@ -1,16 +1,16 @@
 import type { Request, Response } from "express";
-import type { TResponse } from "../../../types/index.js";
+import type { TResponse } from "../../../../types/index.js";
 import { QueryTypes } from "sequelize";
 import { StatusCodes } from "http-status-codes";
-import { schema } from "../../../schema/index.js";
-import { model } from "../../../model/index.js";
-import { APIError } from "../../../error/index.js";
-import { lib } from "../../../lib/index.js";
+import { schema } from "../../../../schema/index.js";
+import { model } from "../../../../model/index.js";
+import { APIError } from "../../../../error/index.js";
+import { lib } from "../../../../lib/index.js";
 
-const { Create, Update, Delete } = schema.req.api.dashboard.product;
+const { Create, Delete } = schema.req.api.dashboard.store.products;
 
 export default {
-  async all(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
+  async all(_req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
     res.status(StatusCodes.OK).json({ success: true });
   },
   async product(_req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
@@ -123,7 +123,7 @@ export default {
 
     res.status(StatusCodes.OK).json({ success: true });
   },
-  async update(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
+  async update(_req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
     res.status(StatusCodes.OK).json({ success: true });
   },
   async delete(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {

@@ -2,7 +2,7 @@ import { z } from "zod";
 import { VALUES } from "../../../constant/index.js";
 import { StoreId, CategoryId } from "../../id.js";
 
-const { MIN, MAX, LIMIT } = VALUES.LENGTH;
+const { MIN, LIMIT } = VALUES.LENGTH;
 
 export default {
   Search: {
@@ -25,10 +25,5 @@ export default {
   },
   Home: {
     Params: StoreId,
-  },
-  Update: {
-    Body: z.object({
-      name: z.string().trim().min(MIN.REQUIRED).max(MAX.STORE.NAME),
-    }),
   },
 } as const;

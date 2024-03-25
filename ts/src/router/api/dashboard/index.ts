@@ -1,15 +1,9 @@
 import { Router } from "express";
 
-const [{ stats }, { category }, { product }] = await Promise.all([
-  import("./stats.js"),
-  import("./category.js"),
-  import("./product.js"),
-]);
+const [{ store }, { admin }] = await Promise.all([import("./store/index.js"), import("./admin/index.js")]);
 
 export const dashboard = Router();
 
-dashboard.use("/stats", stats);
+dashboard.use("/store", store);
 
-dashboard.use("/category", category);
-
-dashboard.use("/product", product);
+dashboard.use("/admin", admin);

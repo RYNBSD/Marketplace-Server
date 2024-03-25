@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { VALUES } from "../../../../constant/index.js";
+import { VALUES } from "../../../../../constant/index.js";
 
 const { MIN, MAX } = VALUES.LENGTH;
 

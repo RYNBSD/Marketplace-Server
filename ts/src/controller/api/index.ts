@@ -1,8 +1,8 @@
-const [{ default: auth }, { default: user }, { default: store }, { default: dashboard }] = await Promise.all([
+const [{ default: auth }, { default: user }, { default: stores }, { default: dashboard }] = await Promise.all([
   import("./auth.js"),
   import("./user.js"),
-  import("./store.js"),
+  import("./stores.js"),
   import("./dashboard/index.js"),
 ]);
 
-export default { auth, user, store, dashboard } as const;
+export default { auth, user, stores, dashboard } as const;

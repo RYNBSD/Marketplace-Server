@@ -1,13 +1,13 @@
 import type { Request, Response } from "express";
-import type { TResponse } from "../../../types/index.js";
+import type { TResponse } from "../../../../types/index.js";
 import { QueryTypes } from "sequelize";
 import { StatusCodes } from "http-status-codes";
-import { model } from "../../../model/index.js";
-import { APIError } from "../../../error/index.js";
-import { lib } from "../../../lib/index.js";
-import { schema } from "../../../schema/index.js";
+import { model } from "../../../../model/index.js";
+import { APIError } from "../../../../error/index.js";
+import { lib } from "../../../../lib/index.js";
+import { schema } from "../../../../schema/index.js";
 
-const { Create, Update, Delete } = schema.req.api.dashboard.category;
+const { Create, Update, Delete } = schema.req.api.dashboard.store.categories;
 
 export default {
   async all(_req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
@@ -26,7 +26,7 @@ export default {
       },
     });
   },
-  async category(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
+  async category(_req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
     const { category } = res.locals;
 
     const c = await sequelize.query(``, {

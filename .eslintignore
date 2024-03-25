@@ -2,3 +2,5 @@ node_modules
 js
 build
 public
+.eslintrc.cjs
+esbuild.config.js

@@ -2,13 +2,11 @@ import type { Request, Response } from "express";
 import type { TResponse } from "../../types/index.js";
 import { Op } from "sequelize";
 import { StatusCodes } from "http-status-codes";
-import { APIError } from "../../error/index.js";
 import { schema } from "../../schema/index.js";
-import { lib } from "../../lib/index.js";
 import { model } from "../../model/index.js";
 import { KEYS, VALUES } from "../../constant/index.js";
 
-const { Search, Stores, Categories, Products, Home, Update } = schema.req.api.store;
+const { Search, Stores, Categories, Products, Home } = schema.req.api.store;
 const { DB } = KEYS;
 const { NULL, LENGTH } = VALUES;
 
@@ -60,7 +58,7 @@ export default {
       },
     });
   },
-  async stores(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
+  async all(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
     const { Query } = Stores;
     const { lastStoreId = NULL.UUID, limit } = Query.parse(req.query);
 
@@ -267,68 +265,5 @@ export default {
     });
 
     res.status(StatusCodes.OK).json({ success: true, data: { product: fullProduct!.dataValues } });
-  },
-  async profile(_req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
-    const { store } = res.locals;
-
-    const { Category, Product } = model.db;
-
-    const categories = await Category.findAll({
-      attributes: ["id"],
-      where: { storeId: store!.dataValues.id },
-    });
-
-    const products = await Product.findAll({
-      attributes: ["categoryId"],
-      where: {
-        [Op.or]: {
-          categoryId: categories.map((category) => category.dataValues.id),
-        },
-      },
-    });
-
-    res.status(StatusCodes.OK).json({
-      success: true,
-      data: {
-        store: store!.dataValues,
-        count: {
-          categories: categories.length,
-          products: products.length,
-        },
-      },
-    });
-  },
-  async update(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
-    const { Body } = Update;
-    const { name } = Body.parse(req.body);
-
-    const { store } = res.locals;
-    if (store === undefined)
-      throw APIError.server(StatusCodes.INTERNAL_SERVER_ERROR, "Unprovided local store (seller:update)");
-
-    let newImage = store.dataValues.image;
-    const image = req.file ?? null;
-
-    if (image !== null) {
-      const { FileConverter, FileUploader } = lib.file;
-
-      const converted = await new FileConverter(image.buffer).convert();
-      if (converted.length === 0) throw APIError.controller(StatusCodes.UNSUPPORTED_MEDIA_TYPE, "Invalid image format");
-
-      const uploaded = await new FileUploader(...converted).upload();
-      if (uploaded.length === 0) throw APIError.server(StatusCodes.INTERNAL_SERVER_ERROR, "Can't upload your image");
-
-      newImage = uploaded[0]!;
-    }
-
-    await store.update({ name, image: newImage });
-    res.status(StatusCodes.OK).json({ success: true });
-  },
-  async delete(_: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
-    const { store } = res.locals;
-    if (store === null)
-      throw APIError.server(StatusCodes.INTERNAL_SERVER_ERROR, "Unprovided local store (seller:update)");
-
-    res.status(StatusCodes.OK).json({ success: true });
   },
 } as const;
