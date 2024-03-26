@@ -42,7 +42,7 @@ export default {
     const { Body } = schema.req.security.access.Email.Middleware;
     const { code, password, confirmPassword } = Body.parse(req.body);
 
-    if (password !== confirmPassword) throw APIError.controller(StatusCodes.CONFLICT, "Passwords not equal");
+    if (Object.is(password, confirmPassword)) throw APIError.controller(StatusCodes.CONFLICT, "Passwords not equal");
 
     const { access } = util;
 

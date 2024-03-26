@@ -5,6 +5,7 @@ import compression from "compression";
 import hpp from "hpp";
 import session from "express-session";
 import morgan from "morgan";
+import { simpleCsrf } from "express-simple-csrf";
 import helmet from "helmet";
 import timeout from "connect-timeout";
 import methodOverride from "method-override";
@@ -20,7 +21,6 @@ import { fileURLToPath } from "url";
 import path from "path";
 import { randomUUID } from "crypto";
 import { ENV, KEYS, VALUES } from "./src/constant/index.js";
-import { config } from "./src/config/index.js";
 import { util } from "./src/util/index.js";
 import { schema } from "./src/schema/index.js";
 
@@ -63,9 +63,11 @@ if (!IS_PRODUCTION) {
   await import("colors");
 }
 
+const { config } = await import("./src/config/index.js");
 const {
   db,
   tmp,
+  cookie,
   session: { initStore },
   swagger,
 } = config;
@@ -140,15 +142,10 @@ app.use(
     secret: ENV.SESSION.SECRET,
     resave: false,
     saveUninitialized: false,
-    cookie: {
-      maxAge: TIME.MINUTE * 15,
-      sameSite: IS_PRODUCTION,
-      httpOnly: IS_PRODUCTION,
-      secure: IS_PRODUCTION,
-      path: "/",
-    },
+    cookie: cookie.options,
   }),
 );
+app.use(simpleCsrf({ cookieOptions: cookie.options }));
 app.use(passport.initialize());
 app.use(passport.session());
 

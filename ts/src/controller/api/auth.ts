@@ -9,6 +9,7 @@ import { model } from "../../model/index.js";
 import { util } from "../../util/index.js";
 import { lib } from "../../lib/index.js";
 import { KEYS, VALUES } from "../../constant/index.js";
+import { config } from "../../config/index.js";
 
 const { COOKIE } = KEYS;
 const { SignUp, VerifyEmail, ForgotPassword } = schema.req.api.auth;
@@ -87,18 +88,11 @@ export default {
       limit: 1,
     });
 
+    const { cookie } = config;
+
     res
       .status(StatusCodes.OK)
-      .setHeader(
-        "Set-Cookie",
-        serialize(COOKIE.AUTHORIZATION, sign(user.dataValues.id), {
-          maxAge: VALUES.TIME.MONTH,
-          httpOnly: IS_PRODUCTION,
-          sameSite: IS_PRODUCTION,
-          secure: IS_PRODUCTION,
-          path: "/",
-        }),
-      )
+      .setHeader("Set-Cookie", serialize(COOKIE.AUTHORIZATION, sign(user.dataValues.id), cookie.options))
       .json({
         success: true,
         data: {
@@ -140,18 +134,11 @@ export default {
       limit: 1,
     });
 
+    const { cookie } = config;
+
     res
       .status(StatusCodes.OK)
-      .setHeader(
-        "Set-Cookie",
-        serialize(COOKIE.AUTHORIZATION, sign(user.dataValues.id), {
-          maxAge: VALUES.TIME.MONTH,
-          httpOnly: IS_PRODUCTION,
-          sameSite: IS_PRODUCTION,
-          secure: IS_PRODUCTION,
-          path: "/",
-        }),
-      )
+      .setHeader("Set-Cookie", serialize(COOKIE.AUTHORIZATION, sign(user.dataValues.id), cookie.options))
       .json({
         success: true,
         data: {
