@@ -12,7 +12,6 @@ const {
 const { handleAsync } = util.fn;
 const {
   fn: { isAuthenticated, isSeller },
-  security: { csrf },
 } = middleware;
 const { profile, update, delete: deleteSeller } = controller.api.dashboard.store;
 
@@ -20,14 +19,7 @@ export const store = Router();
 
 store.get("/", handleAsync(isAuthenticated), handleAsync(isSeller), handleAsync(profile));
 
-store.put(
-  "/",
-  handleAsync(csrf),
-  handleAsync(isAuthenticated),
-  handleAsync(isSeller),
-  upload.single(IMAGE),
-  handleAsync(update),
-);
+store.put("/", handleAsync(isAuthenticated), handleAsync(isSeller), upload.single(IMAGE), handleAsync(update));
 
 store.delete("/", handleAsync(isAuthenticated), handleAsync(isSeller), handleAsync(deleteSeller));
 

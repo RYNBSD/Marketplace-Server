@@ -13,7 +13,6 @@ const { upload } = config;
 const { handleAsync } = util.fn;
 const {
   fn: { isAuthenticated },
-  security: { csrf },
 } = middleware;
 const { profile, orders, order, setting, becomeSeller, update, delete: deleteUser } = controller.api.user;
 
@@ -27,14 +26,8 @@ user.get(`/orders/:${PARAMS.ID.ORDER}`, handleAsync(isAuthenticated), handleAsyn
 
 user.patch("/setting", handleAsync(isAuthenticated), handleAsync(upload.none()), handleAsync(setting));
 
-user.post(
-  "/become-seller",
-  handleAsync(csrf),
-  handleAsync(isAuthenticated),
-  handleAsync(upload.single(IMAGE)),
-  handleAsync(becomeSeller),
-);
+user.post("/become-seller", handleAsync(isAuthenticated), handleAsync(upload.single(IMAGE)), handleAsync(becomeSeller));
 
-user.put("/", handleAsync(csrf), handleAsync(isAuthenticated), handleAsync(upload.single(IMAGE)), handleAsync(update));
+user.put("/", handleAsync(isAuthenticated), handleAsync(upload.single(IMAGE)), handleAsync(update));
 
 user.delete("/", handleAsync(isAuthenticated), handleAsync(deleteUser));

@@ -8,24 +8,6 @@ import { schema } from "../../schema/index.js";
 import { APIError } from "../../error/index.js";
 
 export default {
-  async csrf(req: Request, _res: Response<never, TResponse["Locals"]>, next: NextFunction) {
-    const {
-      fn: { getHeader },
-      csrf,
-    } = util;
-
-    const token = getHeader(req.headers, KEYS.HTTP.HEADERS.CSRF);
-    if (token instanceof Array) throw APIError.middleware(StatusCodes.BAD_REQUEST, "Too many CSRF token");
-    if (token.length === 0) throw APIError.middleware(StatusCodes.BAD_REQUEST, "Empty CSRF token");
-
-    const secret = req.session.csrf?.secret ?? "";
-    if (secret.length === 0) throw APIError.middleware(StatusCodes.BAD_REQUEST, "Empty CSRF secret");
-
-    if (!csrf.verify(secret, token)) throw APIError.middleware(StatusCodes.BAD_REQUEST, "Invalid CSRF");
-
-    req.session.csrf = { secret: "" };
-    return next();
-  },
   async access(req: Request, _res: Response<never, TResponse["Locals"]>, next: NextFunction) {
     const { getHeader } = util.fn;
 

@@ -8,7 +8,7 @@ import { authenticate } from "../../passport/fn.js";
 import { model } from "../../model/index.js";
 import { util } from "../../util/index.js";
 import { lib } from "../../lib/index.js";
-import { KEYS, VALUES } from "../../constant/index.js";
+import { KEYS } from "../../constant/index.js";
 import { config } from "../../config/index.js";
 
 const { COOKIE } = KEYS;
