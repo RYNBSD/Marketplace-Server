@@ -128,7 +128,7 @@ export default {
     });
 
     const store = await Store.findOne({
-      attributes: ["id"],
+      attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
       where: { userId: user.dataValues.id },
       plain: true,
       limit: 1,
