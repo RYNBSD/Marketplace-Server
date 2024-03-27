@@ -1,17 +1,17 @@
-import type { Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import type { TResponse } from "./src/types/index.js";
 import express from "express";
 import compression from "compression";
 import hpp from "hpp";
 import session from "express-session";
 import morgan from "morgan";
-import { simpleCsrf } from "express-simple-csrf";
 import helmet from "helmet";
 import timeout from "connect-timeout";
 import methodOverride from "method-override";
 import { rateLimit } from "express-rate-limit";
-import cors from "cors";
+import { simpleCsrf } from "express-simple-csrf";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 import responseTime from "response-time";
 import { StatusCodes } from "http-status-codes";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -145,7 +145,7 @@ app.use(
     cookie: cookie.options,
   }),
 );
-app.use(simpleCsrf({ cookieOptions: cookie.options }));
+app.use(simpleCsrf({ cookieOptions: cookie.options, debug: !IS_PRODUCTION }));
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -153,9 +153,9 @@ app.use(`/v${PACKAGE.VERSION}`, router);
 app.use(express.static(path.join(__root, KEYS.GLOBAL.PUBLIC), { etag: true }));
 app.use("/docs", docs.serve, docs.ui);
 app.all("*", async (_, res: Response<TResponse["Body"]["Fail"]>) =>
-  res.sendStatus(StatusCodes.NOT_FOUND).json({ success: false }),
+  res.status(StatusCodes.NOT_FOUND).json({ success: false }),
 );
-app.use(async (error: unknown, _req: Request, res: Response<TResponse["Body"]["Fail"]>) => {
+app.use(async (error: unknown, _req: Request, res: Response<TResponse["Body"]["Fail"]>, _next: NextFunction) => {
   await BaseError.handleError(error);
   res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
     success: false,
