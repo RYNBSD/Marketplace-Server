@@ -1,11 +1,9 @@
-import type session from "express-session";
-import SessionStore from "connect-mongodb-session";
-import RateLimit from "express-rate-limit";
+import SessionStore from "connect-mongo";
+import { rateLimit } from "express-rate-limit";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import LimiterStore from "rate-limit-mongo";
 import { ENV, KEYS, VALUES } from "../constant/index.js";
-import { cookieOptions } from "./options.js";
 
 const { MONGO } = ENV;
 const { COLLECTIONS } = KEYS.DB;
@@ -15,7 +13,7 @@ export default {
   initLimiter() {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    return RateLimit({
+    return rateLimit({
       store: new LimiterStore({
         uri: MONGO.URI,
         collectionName: COLLECTIONS.RATE_LIMIT,
@@ -24,23 +22,16 @@ export default {
         expireTimeMs: 15 * 60 * 1000,
         errorHandler: console.error.bind(null, "rate-limit-mongo"),
       }),
-      limit: 100,
+      limit: 1000,
       windowMs: TIME.MINUTE,
     });
   },
-  initSession(s: typeof session) {
-    const MongoStore = SessionStore(s);
-
-    const store = new MongoStore({
-      uri: MONGO.URI,
-      collection: COLLECTIONS.SESSION,
-      expires: cookieOptions.maxAge,
+  initSession() {
+    const store = SessionStore.create({
+      mongoUrl: MONGO.URI,
+      collectionName: COLLECTIONS.SESSION,
     });
 
-    store.on("error", (error) => {
-      throw error;
-    });
-
-    return { sessionStore: store };
+    return store;
   },
 } as const;

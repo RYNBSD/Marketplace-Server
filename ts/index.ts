@@ -74,7 +74,6 @@ const {
 await tmp.initTmpDir();
 await db.connect();
 const docs = swagger.init();
-const { sessionStore } = initSession(session);
 const { model } = await import("./src/model/index.js");
 const { passport } = await import("./src/passport/index.js");
 const { router } = await import("./src/router/index.js");
@@ -132,7 +131,7 @@ app.use(hpp());
 app.use(
   session({
     genid: () => randomUUID(),
-    store: sessionStore,
+    store: initSession(),
     name: COOKIE.SESSION,
     secret: ENV.SESSION.SECRET,
     resave: false,
