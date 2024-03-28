@@ -58,6 +58,11 @@ export default {
       SERVER_ERROR: "ServerError",
       SESSION: "Session",
     },
+    COLLECTIONS: {
+      RATE_LIMIT: "RateLimit",
+      SESSION: "Session",
+      SOCKET: "Socket",
+    },
     // MODELS: {
     //   USER: "user",
     //   USER_SETTING: "user-setting",

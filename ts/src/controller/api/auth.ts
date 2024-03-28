@@ -88,11 +88,11 @@ export default {
       limit: 1,
     });
 
-    const { cookie } = config;
+    const { options } = config;
 
     res
       .status(StatusCodes.OK)
-      .setHeader("Set-Cookie", serialize(COOKIE.AUTHORIZATION, sign(user.dataValues.id), cookie.options))
+      .setHeader("Set-Cookie", serialize(COOKIE.AUTHORIZATION, sign(user.dataValues.id), options.cookieOptions))
       .json({
         success: true,
         data: {
@@ -134,11 +134,11 @@ export default {
       limit: 1,
     });
 
-    const { cookie } = config;
+    const { options } = config;
 
     res
       .status(StatusCodes.OK)
-      .setHeader("Set-Cookie", serialize(COOKIE.AUTHORIZATION, sign(user.dataValues.id), cookie.options))
+      .setHeader("Set-Cookie", serialize(COOKIE.AUTHORIZATION, sign(user.dataValues.id), options.cookieOptions))
       .json({
         success: true,
         data: {

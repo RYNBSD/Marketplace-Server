@@ -28,6 +28,8 @@ declare global {
       DB_PASSWORD: string;
       DB_HOST: string;
 
+      MONGODB_URI: string;
+
       MAIL_USER: string;
       MAIL_PASS: string;
     }

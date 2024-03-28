@@ -1,5 +1,5 @@
 {
-  "ignore": ["README", "./**/*.json"],
+  "ignore": ["README", "./**/*.json", "./node_modules", "./ts", "./diagram", "./build", "./__test__"],
   "events": {
     "start": "clear || cls"
   }

@@ -12,6 +12,9 @@ export default {
     DB_PASSWORD: process.env.DB_PASSWORD,
     DB_HOST: process.env.DB_HOST,
   },
+  MONGO: {
+    URI: process.env.MONGODB_URI,
+  },
   COOKIE: {
     SECRET: process.env.COOKIE_SECRET,
     PARSER: process.env.COOKIE_PARSER,

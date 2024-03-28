@@ -1,4 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
+import type { RateLimitRequestHandler } from "express-rate-limit";
 import type { TResponse } from "./src/types/index.js";
 import express from "express";
 import compression from "compression";
@@ -8,7 +9,6 @@ import morgan from "morgan";
 import helmet from "helmet";
 import timeout from "connect-timeout";
 import methodOverride from "method-override";
-import { rateLimit } from "express-rate-limit";
 import { simpleCsrf } from "express-simple-csrf";
 import cookieParser from "cookie-parser";
 import cors from "cors";
@@ -67,14 +67,14 @@ const { config } = await import("./src/config/index.js");
 const {
   db,
   tmp,
-  cookie,
-  session: { initStore },
+  app: { initLimiter, initSession },
   swagger,
+  options: configOptions,
 } = config;
 await tmp.initTmpDir();
 await db.connect();
 const docs = swagger.init();
-const { sessionStore } = initStore(session.Store);
+const { sessionStore } = initSession(session);
 const { model } = await import("./src/model/index.js");
 const { passport } = await import("./src/passport/index.js");
 const { router } = await import("./src/router/index.js");
@@ -105,12 +105,7 @@ app.use(
   }),
 );
 app.use(cors({ credentials: true }));
-app.use(
-  rateLimit({
-    windowMs: TIME.MINUTE,
-    limit: 1000,
-  }),
-);
+app.use(initLimiter() as RateLimitRequestHandler);
 app.use(
   compression({
     level: 9,
@@ -142,10 +137,10 @@ app.use(
     secret: ENV.SESSION.SECRET,
     resave: false,
     saveUninitialized: false,
-    cookie: cookie.options,
+    cookie: configOptions.cookieOptions,
   }),
 );
-app.use(simpleCsrf({ cookieOptions: cookie.options, debug: !IS_PRODUCTION }));
+app.use(simpleCsrf({ cookieOptions: configOptions.cookieOptions, debug: !IS_PRODUCTION }));
 app.use(passport.initialize());
 app.use(passport.session());
 
