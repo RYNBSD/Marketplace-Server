@@ -18,29 +18,38 @@ export default {
   async profile(_req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
     const { store } = res.locals;
 
-    const { Category, Product } = model.db;
+    const { Category, Product, StoreSetting } = model.db;
 
     const categories = await Category.findAll({
       attributes: ["id"],
       where: { storeId: store!.dataValues.id },
     });
 
-    const products = await Product.findAll({
+    const products = await Product.count({
       attributes: ["categoryId"],
       where: {
         [Op.or]: {
           categoryId: categories.map((category) => category.dataValues.id),
         },
       },
+      group: "categoryId",
+    });
+
+    const setting = await StoreSetting.findOne({
+      attributes: ["theme"],
+      where: { storeId: store!.dataValues.id },
+      plain: true,
+      limit: 1,
     });
 
     res.status(StatusCodes.OK).json({
       success: true,
       data: {
         store: store!.dataValues,
+        setting: setting!.dataValues,
         count: {
           categories: categories.length,
-          products: products.length,
+          products,
         },
       },
     });
@@ -54,9 +63,9 @@ export default {
       throw APIError.server(StatusCodes.INTERNAL_SERVER_ERROR, "Unprovided local store (seller:update)");
 
     let newImage = store.dataValues.image;
-    const image = req.file ?? null;
+    const image = req.file;
 
-    if (image !== null) {
+    if (image !== undefined && image.buffer.length > 0) {
       const { FileConverter, FileUploader } = lib.file;
 
       const converted = await new FileConverter(image.buffer).convert();
@@ -69,13 +78,32 @@ export default {
     }
 
     await store.update({ name, image: newImage });
-    res.status(StatusCodes.OK).json({ success: true });
+    res.status(StatusCodes.OK).json({ success: true, data: { store: store!.dataValues } });
   },
   async delete(_: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
     const { store } = res.locals;
-    if (store === null)
-      throw APIError.server(StatusCodes.INTERNAL_SERVER_ERROR, "Unprovided local store (seller:update)");
 
+    const { Category, Product } = model.db;
+    const categories = await Category.findAll({
+      attributes: ["id"],
+      where: { storeId: store!.dataValues.id },
+    });
+
+    const deleteProductsPromise = Product.destroy({
+      where: {
+        [Op.or]: {
+          categoryId: categories.map((category) => category.dataValues.id),
+        },
+      },
+    });
+
+    const deleteCategoriesPromise = Category.destroy({
+      where: {
+        storeId: store!.dataValues.id,
+      },
+    });
+
+    await Promise.all([deleteProductsPromise, deleteCategoriesPromise, store!.destroy()]);
     res.status(StatusCodes.OK).json({ success: true });
   },
   categories,

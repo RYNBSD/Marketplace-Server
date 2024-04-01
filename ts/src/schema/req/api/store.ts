@@ -8,13 +8,13 @@ export default {
   Search: {
     Query: z.object({
       s: z.string().trim().min(MIN.REQUIRED),
-      limit: z.number().min(MIN.REQUIRED).default(LIMIT),
+      limit: z.coerce.number().min(MIN.REQUIRED).default(LIMIT),
     }),
   },
   Stores: {
     Query: z.object({
       lastStoreId: z.string().trim().min(MIN.REQUIRED).uuid().optional(),
-      limit: z.number().min(MIN.REQUIRED).default(LIMIT),
+      limit: z.coerce.number().min(MIN.REQUIRED).default(LIMIT),
     }),
   },
   Categories: {

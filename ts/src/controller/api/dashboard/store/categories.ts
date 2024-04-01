@@ -7,16 +7,22 @@ import { APIError } from "../../../../error/index.js";
 import { lib } from "../../../../lib/index.js";
 import { schema } from "../../../../schema/index.js";
 
-const { Create, Update, Delete } = schema.req.api.dashboard.store.categories;
+const { All, Create, Update, Delete } = schema.req.api.dashboard.store.categories;
 
 export default {
-  async all(_req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
+  async all(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
+    const { Query } = All;
+    const { page, limit } = Query.parse(req.query);
+
     const { store } = res.locals;
     const { Category } = model.db;
 
     const categories = await Category.findAll({
       attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
       where: { storeId: store!.dataValues.id },
+      offset: (page - 1) * limit,
+      limit,
+      order: [["createdAt", "DESC"]],
     });
 
     res.status(StatusCodes.OK).json({
@@ -62,7 +68,7 @@ export default {
       { fields: ["image", "name", "nameAr", "storeId"], returning: true },
     );
 
-    res.status(StatusCodes.OK).json({ success: true, data: { category: category.dataValues } });
+    res.status(StatusCodes.CREATED).json({ success: true, data: { category: category.dataValues } });
   },
   async update(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
     const { Body } = Update;

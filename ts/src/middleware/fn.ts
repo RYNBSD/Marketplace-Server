@@ -23,12 +23,11 @@ export async function notAuthenticated(req: Request, _res: Response<never, TResp
 /** Check if user is seller */
 export async function isSeller(req: Request, res: Response<never, TResponse["Locals"]>, next: NextFunction) {
   const { user } = req;
-  if (user === undefined)
-    throw APIError.server(StatusCodes.INTERNAL_SERVER_ERROR, "Unprovided user in isSeller middleware");
 
   const { Store } = model.db;
   const store = await Store.findOne({
-    where: { userId: user.dataValues.id },
+    attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
+    where: { userId: user!.dataValues.id },
     limit: 1,
     plain: true,
   });

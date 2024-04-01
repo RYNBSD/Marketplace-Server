@@ -119,7 +119,6 @@ app.use(
     },
   }),
 );
-
 app.use(methodOverride(HTTP.HEADERS.METHOD_OVERRIDE));
 app.use(morgan(IS_PRODUCTION ? "combined" : "dev"));
 app.use(express.urlencoded({ extended: true }));
