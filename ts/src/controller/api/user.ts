@@ -71,9 +71,22 @@ export default {
     const checkStoreName = await Store.findOne({
       attributes: ["name"],
       where: { name },
+      paranoid: false,
+      plain: true,
       limit: 1,
     });
     if (checkStoreName !== null) throw APIError.controller(StatusCodes.BAD_REQUEST, "Store name already exists");
+
+    const { user } = req;
+
+    const checkUserStore = await Store.findOne({
+      attributes: ["userId"],
+      where: { userId: user!.dataValues.id },
+      paranoid: false,
+      plain: true,
+      limit: 1,
+    });
+    if (checkUserStore !== null) throw APIError.controller(StatusCodes.BAD_REQUEST, "You have a store already");
 
     const image = req.file;
     if (image === undefined || image.buffer.length === 0)
@@ -86,7 +99,6 @@ export default {
     const uploaded = await new FileUploader(...converted).upload();
     if (uploaded.length === 0) throw APIError.server(StatusCodes.INTERNAL_SERVER_ERROR, "Can't upload your image");
 
-    const { user } = req;
     const { StoreSetting } = model.db;
 
     const store = await Store.create(
