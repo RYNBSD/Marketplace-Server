@@ -23,6 +23,7 @@ import { ENV, KEYS, VALUES } from "./src/constant/index.js";
 import { util } from "./src/util/index.js";
 import { schema } from "./src/schema/index.js";
 import { model } from "./src/model/index.js";
+import { config } from "./src/config/index.js";
 import { BaseError } from "./src/error/index.js";
 import { router } from "./src/router/index.js";
 import { passport } from "./src/passport/index.js";
@@ -60,7 +61,6 @@ if (!IS_PRODUCTION) {
   app.use(errorhandler({ log: true }));
 }
 
-const { config } = await import("./src/config/index.js");
 const {
   tmp,
   app: { initLimiter, initSession },
@@ -157,6 +157,4 @@ process.on("uncaughtException", async (error) => {
   process.exit(1);
 });
 
-app.listen(ENV.NODE.PORT, async () => {
-  if (!IS_PRODUCTION) console.log("Starting".bgGreen.white);
-});
+export default app;
