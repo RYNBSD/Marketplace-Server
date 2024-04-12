@@ -20,7 +20,7 @@ export async function notAuthenticated(req: Request, _res: Response<never, TResp
   return next();
 }
 
-/** Check if user is seller */
+/** Check if user is seller @deprecated */
 export async function isSeller(req: Request, res: Response<never, TResponse["Locals"]>, next: NextFunction) {
   const { user } = req;
 

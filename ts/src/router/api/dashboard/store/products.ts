@@ -19,12 +19,7 @@ products.get(`/:${REQUEST.PARAMS.ID.PRODUCT}`, handleAsync(isProductOwner), hand
 
 products.post(
   "/",
-  handleAsync(
-    upload.fields([
-      { name: "model", maxCount: 1 },
-      { name: "images", maxCount: 25 },
-    ]),
-  ),
+  handleAsync(upload.fields([{ name: "models", maxCount: 1 }, { name: "images" }])),
   handleAsync(create),
 );
 

@@ -114,13 +114,13 @@ export default {
     if (categories.length === 0)
       throw APIError.middleware(StatusCodes.FORBIDDEN, "This store don't have any categories");
 
-    const categoryId = categories.map((category) => category.dataValues.id);
+    const categoriesId = categories.map((category) => category.dataValues.id);
     const { Product } = model.db;
 
     const product = await Product.findOne({
       attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
       where: {
-        categoryId,
+        categoryId: categoriesId,
         id: productId,
       },
       limit: 1,
