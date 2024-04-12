@@ -3,6 +3,8 @@ import { ENV } from "../constant/index.js";
 
 export default {
   async connect() {
+    if (global.sequelize instanceof Sequelize) return;
+
     global.sequelize = new Sequelize(ENV.SEQUELIZE.DB_DATABASE, ENV.SEQUELIZE.DB_USERNAME, ENV.SEQUELIZE.DB_PASSWORD, {
       host: ENV.SEQUELIZE.DB_HOST,
       dialect: "postgres",
@@ -15,12 +17,14 @@ export default {
       benchmark: !IS_PRODUCTION,
     });
     await global.sequelize.authenticate();
-    await import("../model/index.js");
   },
   async close() {
-    await global.sequelize.close();
+    await global.sequelize?.close();
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    global.sequelize = undefined;
   },
   async init() {
-    await global.sequelize.sync({ force: !IS_PRODUCTION });
+    if (global.sequelize instanceof Sequelize) await global.sequelize.sync({ force: !IS_PRODUCTION });
   },
 } as const;

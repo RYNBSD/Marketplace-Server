@@ -6,13 +6,10 @@ import { model } from "../../../../model/index.js";
 import { APIError } from "../../../../error/index.js";
 import { lib } from "../../../../lib/index.js";
 import { schema } from "../../../../schema/index.js";
+import categories from "./categories.js";
+import products from "./products.js";
 
 const { Update } = schema.req.api.dashboard.store;
-
-const [{ default: categories }, { default: products }] = await Promise.all([
-  import("./categories.js"),
-  import("./products.js"),
-]);
 
 export default {
   async profile(_req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {

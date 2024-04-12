@@ -1,8 +1,6 @@
-const [user, store, category, product] = await Promise.all([
-  import("./user.js"),
-  import("./store.js"),
-  import("./category.js"),
-  import("./product.js"),
-]);
+import * as user from "./user.js";
+import * as store from "./store.js";
+import * as category from "./category.js";
+import * as product from "./product.js";
 
 export default { user, store, category, product } as const;

@@ -1,9 +1,7 @@
-const [{ default: auth }, { default: user }, { default: store }, { default: dashboard }] = await Promise.all([
-  import("./auth.js"),
-  import("./user.js"),
-  import("./store.js"),
-  import("./dashboard/index.js"),
-]);
+import auth from "./auth.js";
+import user from "./user.js";
+import store from "./store.js";
+import dashboard from "./dashboard/index.js";
 
 export default {
   auth,

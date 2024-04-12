@@ -1,5 +1,7 @@
 import { ENV, type KEYS } from "../constant/index.js";
 import { getReasonPhrase, StatusCodes, ReasonPhrases } from "http-status-codes";
+import { lib } from "../lib/index.js";
+import { model } from "../model/index.js";
 import { schema } from "../schema/index.js";
 
 const { toString } = schema.validators;
@@ -26,8 +28,6 @@ export class BaseError extends Error {
       console.error(error);
       return;
     }
-
-    const [{ lib }, { model }] = await Promise.all([import("../lib/index.js"), import("../model/index.js")]);
 
     type NewErrorType = {
       message: string;

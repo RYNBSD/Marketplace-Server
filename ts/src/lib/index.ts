@@ -1,13 +1,7 @@
-const [{ default: FileConverter }, { default: FileUploader }, { default: Mail }] = await Promise.all([
-  import("./file/converter.js"),
-  import("./file/uploader.js"),
-  import("./mail.js"),
-]);
+import file from "./file/index.js";
+import Mail from "./mail.js";
 
 export const lib = {
-  file: {
-    FileConverter,
-    FileUploader,
-  },
+  file,
   Mail,
 };

@@ -7,11 +7,11 @@
   "scripts": {
     "test": "cls && cross-env NODE_ENV=\"test\" jest",
     "start": "cross-env NODE_ENV=\"production\" node ./build/index.js",
-    "dev": "cross-env NODE_ENV=\"development\" concurrently \"npx tsc --watch\" \"nodemon ./js/index.js\"",
+    "dev": "cross-env NODE_ENV=\"development\" concurrently \"tsc -w\" \"nodemon ./js/index.js\"",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "code:check": "yarn lint && tsc",
-    "build": "yarn code:check && node esbuild.config.js"
+    "build": "node esbuild.config.js"
   },
   "engines": {
     "node": "20.10.0"

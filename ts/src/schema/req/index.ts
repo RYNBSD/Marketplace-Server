@@ -1,7 +1,5 @@
-const [{ default: api }, { default: security }] = await Promise.all([
-  import("./api/index.js"),
-  import("./security/index.js"),
-]);
+import api from "./api/index.js";
+import security from "./security/index.js";
 
 export default {
   api,

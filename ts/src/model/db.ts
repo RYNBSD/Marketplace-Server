@@ -1,9 +1,13 @@
 import type { Tables } from "../types/index.js";
 import { DataTypes } from "sequelize";
 import { ENUM, KEYS, VALUES } from "../constant/index.js";
+import { config } from "../config/index.js";
 
 const { DB } = KEYS;
 const { MAX } = VALUES.LENGTH;
+const { db } = config;
+
+await db.connect();
 
 export const User = sequelize.define<Tables["User"]>(
   "user",
@@ -685,3 +689,5 @@ export const ServerError = sequelize.define<Tables["ServerError"]>(
   },
   { tableName: DB.TABLES.SERVER_ERROR, timestamps: true },
 );
+
+await db.init();

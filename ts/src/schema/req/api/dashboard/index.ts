@@ -1,7 +1,5 @@
-const [{ default: store }, { default: admin }] = await Promise.all([
-  import("./store/index.js"),
-  import("./admin/index.js"),
-]);
+import store from "./store/index.js";
+import admin from "./admin/index.js";
 
 export default {
   store,

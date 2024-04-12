@@ -1,12 +1,9 @@
 import { z } from "zod";
+import categories from "./categories.js";
+import products from "./products.js";
 import { VALUES } from "../../../../../constant/index.js";
 
 const { MIN, MAX } = VALUES.LENGTH;
-
-const [{ default: categories }, { default: products }] = await Promise.all([
-  import("./categories.js"),
-  import("./products.js"),
-]);
 
 export default {
   Update: {

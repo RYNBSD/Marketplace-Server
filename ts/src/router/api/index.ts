@@ -1,11 +1,9 @@
 import { Router } from "express";
 
-const [{ auth }, { user }, { stores }, { dashboard }] = await Promise.all([
-  import("./auth.js"),
-  import("./user.js"),
-  import("./stores.js"),
-  import("./dashboard/index.js"),
-]);
+import { auth } from "./auth.js";
+import { user } from "./user.js";
+import { stores } from "./stores.js";
+import { dashboard } from "./dashboard/index.js";
 
 export const api = Router();
 

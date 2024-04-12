@@ -1,6 +1,6 @@
 import { Router } from "express";
-
-const [{ user }, { store }] = await Promise.all([import("./user.js"), import("./store.js")]);
+import { user } from "./user.js";
+import { store } from "./store.js";
 
 export const validate = Router();
 

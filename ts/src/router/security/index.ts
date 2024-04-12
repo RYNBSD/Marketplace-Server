@@ -1,6 +1,6 @@
 import { Router } from "express";
-
-const [{ access }, { validate }] = await Promise.all([import("./access.js"), import("./validate/index.js")]);
+import { access } from "./access.js";
+import { validate } from "./validate/index.js";
 
 export const security = Router();
 

@@ -1,4 +1,7 @@
 import { Router } from "express";
+import { stats } from "./stats.js";
+import { categories } from "./categories.js";
+import { products } from "./products.js";
 import { util } from "../../../../util/index.js";
 import { middleware } from "../../../../middleware/index.js";
 import { config } from "../../../../config/index.js";
@@ -22,12 +25,6 @@ store.get("/", handleAsync(isAuthenticated), handleAsync(isSeller), handleAsync(
 store.put("/", handleAsync(isAuthenticated), handleAsync(isSeller), upload.single(IMAGE), handleAsync(update));
 
 store.delete("/", handleAsync(isAuthenticated), handleAsync(isSeller), handleAsync(deleteSeller));
-
-const [{ stats }, { categories }, { products }] = await Promise.all([
-  import("./stats.js"),
-  import("./categories.js"),
-  import("./products.js"),
-]);
 
 store.use("/stats", stats);
 
