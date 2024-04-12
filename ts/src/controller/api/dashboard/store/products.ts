@@ -14,7 +14,7 @@ export default {
     res.status(StatusCodes.OK).json({ success: true });
   },
   async product(_req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
-    const { product } = res.locals;
+    const product = res.locals.product!;
 
     const p = await sequelize.query(``, {
       type: QueryTypes.SELECT,
@@ -22,7 +22,7 @@ export default {
       nest: true,
       plain: true,
       bind: {
-        id: product!.dataValues.id,
+        id: product.dataValues.id,
       },
     });
 
@@ -166,15 +166,158 @@ export default {
 
     res.status(StatusCodes.OK).json({ success: true });
   },
-  async update(_req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
+  async update(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
+    const product = res.locals.product!;
+
+    const { FileConverter, FileUploader } = lib.file;
+    const { models = [], images = [] } = req.files as Partial<{
+      [fieldname: string]: Express.Multer.File[];
+    }>;
+
+    const converted = await new FileConverter(
+      ...models.map((model) => model.buffer),
+      ...images.map((image) => image.buffer),
+    ).convert();
+    if (converted.length === 0 && models.length > 0 && images.length > 0)
+      throw APIError.controller(StatusCodes.UNSUPPORTED_MEDIA_TYPE, "Invalid provided files");
+
+    const uploaded = await new FileUploader(...converted).upload();
+    if (uploaded.length === 0 && converted.length > 0)
+      throw APIError.server(StatusCodes.INTERNAL_SERVER_ERROR, "Can't save your files");
+
+    const { Body } = Create;
+    const {
+      title,
+      titleAr,
+      description,
+      descriptionAr,
+      quality,
+      stock,
+      price,
+      discount,
+      categoryId,
+      infos,
+      tags,
+      sizes,
+      colors,
+    } = Body.parse(req.body);
+
+    const { ProductColor, ProductImage, ProductSize, ProductInfo, ProductTag, Tag } = model.db;
+
+    product.update(
+      {
+        title,
+        titleAr,
+        description,
+        descriptionAr,
+        quality,
+        stock,
+        price,
+        discount,
+        categoryId,
+        model: uploaded.find((file) => file.endsWith(".glb")) ?? product.dataValues.model,
+      },
+      {
+        fields: [
+          "title",
+          "titleAr",
+          "description",
+          "descriptionAr",
+          "quality",
+          "stock",
+          "price",
+          "discount",
+          "categoryId",
+          "model",
+        ],
+      },
+    );
+
+    await Promise.all([
+      ProductInfo.destroy({ force: false, where: { productId: product.dataValues.id } }),
+      ProductColor.destroy({ force: false, where: { productId: product.dataValues.id } }),
+      ProductImage.destroy({ force: false, where: { productId: product.dataValues.id } }),
+      ProductSize.destroy({ force: false, where: { productId: product.dataValues.id } }),
+      ProductTag.destroy({ force: false, where: { productId: product.dataValues.id } }),
+    ]);
+
+    const infosArr = infos
+      .split(",")
+      .map((info) => info.trim())
+      .filter((info) => info.length > 0);
+    if (infosArr.length % 2 !== 0)
+      throw APIError.controller(StatusCodes.BAD_REQUEST, "Please provide both the english and arabic version in infos");
+
+    const sizesArr = sizes
+      .split(",")
+      .map((size) => size.trim())
+      .filter((size) => size.length > 0);
+
+    const tagsArr = tags
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter((tag) => tag.length > 0);
+
+    const colorsArr = colors
+      .split(",")
+      .map((color) => color.trim())
+      .filter((color) => color.length > 0);
+
+    const { store } = res.locals;
+    const tagsId = await Promise.all(
+      tagsArr.map((tag) =>
+        Tag.findOrCreate({
+          attributes: ["id"],
+          where: { tag },
+          fields: ["tag", "storeId"],
+          defaults: { tag, storeId: store!.dataValues.id },
+        }),
+      ),
+    );
+
+    const createInfos = [];
+    for (let i = 0; i < infosArr.length; i += 2) {
+      const info = infosArr[i]!;
+      const infoAr = infosArr[i + 1]!;
+
+      createInfos.push(
+        ProductInfo.create(
+          { info, infoAr, productId: product.dataValues.id },
+          { fields: ["info", "infoAr", "productId"] },
+        ),
+      );
+    }
+
+    const uploadedImages = uploaded.filter((upload) => upload.endsWith(".webp"));
+
+    await Promise.all([
+      ...createInfos,
+      ProductColor.bulkCreate(
+        colorsArr.map((color) => ({ color, productId: product.dataValues.id })),
+        { fields: ["color", "productId"] },
+      ),
+      ProductImage.bulkCreate(
+        uploadedImages.map((image) => ({ image, productId: product.dataValues.id })),
+        { fields: ["image", "productId"] },
+      ),
+      ProductSize.bulkCreate(
+        sizesArr.map((size) => ({ size, productId: product.dataValues.id })),
+        { fields: ["size", "productId"] },
+      ),
+      ProductTag.bulkCreate(
+        tagsId.map(([tagId]) => ({ tagId: tagId.dataValues.id, productId: product.dataValues.id })),
+        { fields: ["tagId", "productId"] },
+      ),
+    ]);
+
     res.status(StatusCodes.OK).json({ success: true });
   },
   async delete(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
     const { Query } = Delete;
     const { force } = Query.parse(req.query);
-    const { product } = res.locals;
+    const product = res.locals.product!;
 
-    await product!.destroy({ force });
+    await product.destroy({ force });
     res.status(StatusCodes.OK).json({ success: true });
   },
 } as const;
