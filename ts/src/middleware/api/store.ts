@@ -71,7 +71,7 @@ export default {
     const { Store } = model.db;
     const store = await Store.findOne({
       attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
-      where: { id: user.dataValues.id },
+      where: { userId: user.dataValues.id },
       limit: 1,
       plain: true,
     });

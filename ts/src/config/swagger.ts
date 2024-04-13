@@ -5,6 +5,7 @@ import { VALUES } from "../constant/index.js";
 const { PACKAGE } = VALUES;
 
 const options: swaggerJsdoc.Options = {
+  failOnErrors: true,
   definition: {
     openapi: "3.1.0",
     info: {
@@ -27,12 +28,14 @@ const options: swaggerJsdoc.Options = {
       },
     ],
   },
-  apis: ["../router/**/*.js", "../schema/**/*.js"],
+  apis: ["**/*.ts"],
 };
 
 export default {
   init() {
     const json = swaggerJsdoc(options);
+    console.log("Swagger json: ", json);
+
     const ui = swaggerUi.setup(json, { explorer: true });
     return {
       json,

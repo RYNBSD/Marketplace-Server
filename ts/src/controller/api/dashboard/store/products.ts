@@ -1,6 +1,6 @@
-import type { Request, Response } from "express";
+import type { Request, Response, NextFunction } from "express";
 import type { TResponse } from "../../../../types/index.js";
-import { QueryTypes } from "sequelize";
+import { QueryTypes, type Transaction } from "sequelize";
 import { StatusCodes } from "http-status-codes";
 import { schema } from "../../../../schema/index.js";
 import { model } from "../../../../model/index.js";
@@ -28,7 +28,12 @@ export default {
 
     res.status(StatusCodes.OK).json({ success: true, data: { product: p } });
   },
-  async create(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
+  async create(
+    req: Request,
+    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>,
+    _next: NextFunction,
+    transaction: Transaction,
+  ) {
     const files = req.files;
     if (files === undefined) throw APIError.controller(StatusCodes.BAD_REQUEST, "Please, provide images");
 
@@ -92,6 +97,7 @@ export default {
           "model",
         ],
         returning: true,
+        transaction,
       },
     );
 
@@ -125,6 +131,7 @@ export default {
           where: { tag },
           fields: ["tag", "storeId"],
           defaults: { tag, storeId: store!.dataValues.id },
+          transaction,
         }),
       ),
     );
@@ -134,34 +141,33 @@ export default {
       const info = infosArr[i]!;
       const infoAr = infosArr[i + 1]!;
 
-      createInfos.push(
-        ProductInfo.create(
-          { info, infoAr, productId: product.dataValues.id },
-          { fields: ["info", "infoAr", "productId"] },
-        ),
-      );
+      createInfos.push({ info, infoAr, productId: product.dataValues.id });
     }
 
     const uploadedImages = uploaded.filter((upload) => upload.endsWith(".webp"));
 
     await Promise.all([
-      ...createInfos,
+      ProductInfo.bulkCreate(createInfos, { fields: ["info", "infoAr", "productId"], transaction }),
       ProductColor.bulkCreate(
         colorsArr.map((color) => ({ color, productId: product.dataValues.id })),
-        { fields: ["color", "productId"] },
-      ),
-      ProductImage.bulkCreate(
-        uploadedImages.map((image) => ({ image, productId: product.dataValues.id })),
-        { fields: ["image", "productId"] },
+        { fields: ["color", "productId"], transaction },
       ),
       ProductSize.bulkCreate(
         sizesArr.map((size) => ({ size, productId: product.dataValues.id })),
-        { fields: ["size", "productId"] },
+        { fields: ["size", "productId"], transaction },
       ),
       ProductTag.bulkCreate(
         tagsId.map(([tagId]) => ({ tagId: tagId.dataValues.id, productId: product.dataValues.id })),
-        { fields: ["tagId", "productId"] },
+        { fields: ["tagId", "productId"], transaction },
       ),
+      ProductImage.bulkCreate(
+        uploadedImages.map((image) => ({ image, productId: product.dataValues.id })),
+        { fields: ["image", "productId"], transaction },
+      ).catch((err) => {
+        throw APIError.server(StatusCodes.INTERNAL_SERVER_ERROR, err?.message ?? "Can't store images", {
+          files: uploaded,
+        });
+      }),
     ]);
 
     res.status(StatusCodes.OK).json({ success: true });
