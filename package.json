@@ -2,7 +2,7 @@
   "name": "server",
   "version": "1.0.0",
   "description": "",
-  "main": "./build/index.js",
+  "main": "./ts/index.ts",
   "type": "module",
   "scripts": {
     "test": "cls && cross-env NODE_ENV=\"test\" jest",
@@ -59,7 +59,7 @@
     "pg-hstore": "^2.3.4",
     "rate-limit-mongo": "^2.3.2",
     "response-time": "^2.3.2",
-    "sequelize": "^6.37.1",
+    "sequelize": "6.37.2",
     "sharp": "0.32.6",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.0",

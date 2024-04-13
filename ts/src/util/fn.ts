@@ -1,12 +1,12 @@
 import type { IncomingHttpHeaders } from "node:http";
 import type { Request, Response, NextFunction, RequestHandler } from "express";
+import type { Transaction } from "sequelize";
 import type { TResponse } from "../types/index.js";
 import { StatusCodes } from "http-status-codes";
 import { ZodError } from "zod";
 import { MulterError } from "multer";
 import { VALUES } from "../constant/index.js";
 import { BaseError } from "../error/index.js";
-import type { Transaction } from "sequelize";
 
 type HandleAsyncFn =
   | ((req: Request, res: Response<any, any>, next: NextFunction, transaction: Transaction) => Promise<void>)
@@ -19,8 +19,8 @@ export function handleAsync(fn: HandleAsyncFn) {
       await fn(req, res, next, transaction);
       await transaction.commit();
     } catch (error) {
-      await transaction.rollback();
-      await BaseError.handleError(error);
+      await Promise.all([transaction.rollback(), BaseError.handleError(error)]);
+
       let status: StatusCodes = StatusCodes.BAD_REQUEST;
       let message = "";
 

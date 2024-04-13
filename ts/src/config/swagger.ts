@@ -34,8 +34,6 @@ const options: swaggerJsdoc.Options = {
 export default {
   init() {
     const json = swaggerJsdoc(options);
-    console.log("Swagger json: ", json);
-
     const ui = swaggerUi.setup(json, { explorer: true });
     return {
       json,

@@ -42,6 +42,9 @@ export const User = sequelize.define<Tables["User"]>(
     paranoid: true,
   },
 );
+User.addHook("afterDestroy", async (user) => {
+  await Promise.all([Store.destroy({ force: false, where: { userId: user.dataValues.id } })]);
+});
 
 export const UserSetting = sequelize.define<Tables["UserSetting"]>(
   "user-setting",
@@ -110,6 +113,13 @@ export const Store = sequelize.define<Tables["Store"]>(
   },
   { tableName: DB.TABLES.STORE.TABLE, timestamps: true, paranoid: true },
 );
+Store.addHook("afterDestroy", async (store) => {
+  await Promise.all([
+    // StoreSetting.destroy({ force: false, where: { storeId: store.dataValues.id } }),
+    StoreLink.destroy({ force: false, where: { storeId: store.dataValues.id } }),
+    Category.destroy({ force: false, where: { storeId: store.dataValues.id } }),
+  ]);
+});
 
 export const StoreSetting = sequelize.define<Tables["StoreSetting"]>(
   "seller-setting",
@@ -229,6 +239,9 @@ export const Category = sequelize.define<Tables["Category"]>(
     paranoid: true,
   },
 );
+Category.addHook("afterDestroy", async (category) => {
+  await Promise.all([Product.destroy({ force: false, where: { categoryId: category.dataValues.id } })]);
+});
 
 export const CategoryViewer = sequelize.define<Tables["CategoryViewer"]>(
   "category-viewer",
@@ -318,6 +331,16 @@ export const Product = sequelize.define<Tables["Product"]>(
     paranoid: true,
   },
 );
+Product.addHook("afterDestroy", async (product) => {
+  await Promise.all([
+    ProductInfo.destroy({ force: false, where: { productId: product.dataValues.id } }),
+    ProductImage.destroy({ force: false, where: { productId: product.dataValues.id } }),
+    ProductColor.destroy({ force: false, where: { productId: product.dataValues.id } }),
+    ProductSize.destroy({ force: false, where: { productId: product.dataValues.id } }),
+    ProductRating.destroy({ force: false, where: { productId: product.dataValues.id } }),
+    ProductTag.destroy({ force: false, where: { productId: product.dataValues.id } }),
+  ]);
+});
 
 export const ProductInfo = sequelize.define<Tables["ProductInfo"]>(
   "product-info",
@@ -534,6 +557,9 @@ export const Tag = sequelize.define<Tables["Tag"]>(
     updatedAt: false,
   },
 );
+Tag.addHook("afterDestroy", async (tag) => {
+  await Promise.all([ProductTag.destroy({ force: false, where: { tagId: tag.dataValues.id } })]);
+});
 
 export const ProductTag = sequelize.define<Tables["ProductTag"]>(
   "product-tag",

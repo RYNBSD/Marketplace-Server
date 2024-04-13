@@ -77,10 +77,10 @@ export class BaseError extends Error {
           `New error - ${newError.isOperational ? "Catch" : "Urgent"} - Status: ${newError.statusCode}`,
           Mail.errorTemplate(newError),
         ).send(),
+        FileUploader.remove(...files),
         ServerError.create(newError, {
           fields: ["message", "stack", "statusCode", "isOperational", "handler"],
         }),
-        FileUploader.remove(...files),
       ]);
     } catch (error) {
       if (!IS_PRODUCTION) console.error(error);
