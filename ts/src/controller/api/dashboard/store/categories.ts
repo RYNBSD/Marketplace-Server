@@ -6,44 +6,42 @@ import { model } from "../../../../model/index.js";
 import { APIError } from "../../../../error/index.js";
 import { lib } from "../../../../lib/index.js";
 import { schema } from "../../../../schema/index.js";
+import { service } from "../../../../service/index.js";
 
-const { All, Create, Update } = schema.req.api.dashboard.store.categories;
+const { /* All, */ Create, Update } = schema.req.api.dashboard.store.categories;
+const { category } = service;
 
 export default {
-  async all(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
-    const { Query } = All;
-    const { page, limit } = Query.parse(req.query);
+  async all(_req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
+    const store = res.locals.store!;
+    // const { Query } = All;
+    // const { page, limit } = Query.parse(req.query);
 
-    const { store } = res.locals;
-    const { Category } = model.db;
+    // const { Category } = model.db;
 
-    const categories = await Category.findAll({
-      attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
-      where: { storeId: store!.dataValues.id },
-      offset: (page - 1) * limit,
-      limit,
-      order: [["createdAt", "DESC"]],
-    });
+    // const categories = await Category.findAll({
+    //   attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
+    //   where: { storeId: store!.dataValues.id },
+    //   offset: (page - 1) * limit,
+    //   limit,
+    //   order: [["createdAt", "DESC"]],
+    // });
 
+    const categories = await category.all(store.dataValues.id);
     res.status(StatusCodes.OK).json({
       success: true,
       data: {
-        categories: categories.map((category) => category.dataValues),
+        categories,
       },
     });
   },
   async category(_req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
-    const { category } = res.locals;
-
-    const c = await sequelize.query(``, {
-      type: QueryTypes.SELECT,
-      raw: true,
-      bind: {
-        id: category!.dataValues.id,
-      },
-    });
-
-    res.status(StatusCodes.OK).json({ success: true, data: { c } });
+    const localCategory = res.locals.category!;
+    const [products, one] = await Promise.all([
+      category.products(localCategory.dataValues.id),
+      category.one(localCategory.dataValues.id),
+    ]);
+    res.status(StatusCodes.OK).json({ success: true, data: { category: one, products } });
   },
   async create(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
     const { Body } = Create;
