@@ -1,6 +1,6 @@
-import type { Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import type { TResponse } from "../../../../types/index.js";
-import { Op } from "sequelize";
+import { Op, type Transaction } from "sequelize";
 import { StatusCodes } from "http-status-codes";
 import { model } from "../../../../model/index.js";
 import { APIError } from "../../../../error/index.js";
@@ -77,30 +77,14 @@ export default {
     await store.update({ name, image: newImage });
     res.status(StatusCodes.OK).json({ success: true, data: { store: store!.dataValues } });
   },
-  async delete(_: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
-    const { store } = res.locals;
-
-    const { Category, Product } = model.db;
-    const categories = await Category.findAll({
-      attributes: ["id"],
-      where: { storeId: store!.dataValues.id },
-    });
-
-    const deleteProductsPromise = Product.destroy({
-      where: {
-        [Op.or]: {
-          categoryId: categories.map((category) => category.dataValues.id),
-        },
-      },
-    });
-
-    const deleteCategoriesPromise = Category.destroy({
-      where: {
-        storeId: store!.dataValues.id,
-      },
-    });
-
-    await Promise.all([deleteProductsPromise, deleteCategoriesPromise, store!.destroy()]);
+  async delete(
+    _req: Request,
+    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>,
+    _next: NextFunction,
+    transaction: Transaction,
+  ) {
+    const store = res.locals.store!;
+    await store.destroy({ force: false, transaction });
     res.status(StatusCodes.OK).json({ success: true });
   },
   categories,

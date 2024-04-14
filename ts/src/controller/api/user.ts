@@ -1,4 +1,5 @@
-import type { Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
+import type { Transaction } from "sequelize";
 import type { TResponse } from "../../types/index.js";
 import { StatusCodes } from "http-status-codes";
 import { APIError } from "../../error/index.js";
@@ -6,7 +7,7 @@ import { model } from "../../model/index.js";
 import { schema } from "../../schema/index.js";
 import { lib } from "../../lib/index.js";
 
-const { Setting, BecomeSeller, Update, Delete } = schema.req.api.user;
+const { Setting, BecomeSeller, Update } = schema.req.api.user;
 
 export default {
   async profile(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
@@ -154,47 +155,14 @@ export default {
       },
     });
   },
-  async delete(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
-    const { user } = req;
-    const { Query } = Delete;
-    const { force = false } = Query.parse(req.query);
-
-    const { Store } = model.db;
-    const store = await Store.findOne({
-      attributes: ["userId", "id"],
-      where: { userId: user!.dataValues.id },
-      plain: true,
-      limit: 1,
-    });
-
-    const deletePromises: Promise<unknown>[] = [];
-
-    if (store !== null) {
-      const { Category, Product } = model.db;
-
-      const categoryIds = await Category.findAll({
-        attributes: ["id"],
-        where: { storeId: store.dataValues.id },
-      });
-
-      const products = Product.destroy({
-        force,
-        where: {
-          categoryId: categoryIds.map((category) => category.dataValues.id),
-        },
-      });
-      deletePromises.push(products);
-
-      const category = Category.destroy({
-        force,
-        where: { storeId: store.dataValues.id },
-      });
-      deletePromises.push(category);
-      deletePromises.push(store.destroy({ force }));
-    }
-    deletePromises.push(user!.destroy({ force }));
-
-    await Promise.all(deletePromises);
+  async delete(
+    req: Request,
+    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>,
+    _next: NextFunction,
+    transaction: Transaction,
+  ) {
+    const user = req.user!;
+    await user.destroy({ force: false, transaction });
     res.status(StatusCodes.OK).json({ success: true });
   },
 } as const;

@@ -39,9 +39,4 @@ export default {
       colors: z.string().trim(),
     }),
   },
-  Delete: {
-    Query: z.object({
-      force: z.coerce.boolean().optional().default(false),
-    }),
-  },
 } as const;

@@ -23,9 +23,4 @@ export default {
       username: z.string().trim().min(MIN.REQUIRED).max(MAX.USER.USERNAME),
     }),
   },
-  Delete: {
-    Query: z.object({
-      force: z.coerce.boolean().optional().default(false),
-    }),
-  },
 } as const;

@@ -9,7 +9,7 @@ import { lib } from "../../../../lib/index.js";
 import { service } from "../../../../service/index.js";
 
 const { product } = service;
-const { Create, Delete } = schema.req.api.dashboard.store.products;
+const { Create } = schema.req.api.dashboard.store.products;
 
 export default {
   async all(_req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
@@ -346,16 +346,13 @@ export default {
     res.status(StatusCodes.OK).json({ success: true });
   },
   async delete(
-    req: Request,
+    _req: Request,
     res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>,
     _next: NextFunction,
     transaction: Transaction,
   ) {
-    const { Query } = Delete;
-    const { force } = Query.parse(req.query);
     const product = res.locals.product!;
-
-    await product.destroy({ force, transaction });
+    await product.destroy({ force: false, transaction });
     res.status(StatusCodes.OK).json({ success: true });
   },
 } as const;

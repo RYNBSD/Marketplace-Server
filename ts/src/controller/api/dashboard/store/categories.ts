@@ -1,13 +1,13 @@
-import type { Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import type { TResponse } from "../../../../types/index.js";
-import { QueryTypes } from "sequelize";
+import { QueryTypes, type Transaction } from "sequelize";
 import { StatusCodes } from "http-status-codes";
 import { model } from "../../../../model/index.js";
 import { APIError } from "../../../../error/index.js";
 import { lib } from "../../../../lib/index.js";
 import { schema } from "../../../../schema/index.js";
 
-const { All, Create, Update, Delete } = schema.req.api.dashboard.store.categories;
+const { All, Create, Update } = schema.req.api.dashboard.store.categories;
 
 export default {
   async all(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
@@ -94,21 +94,14 @@ export default {
     await category!.update({ name, nameAr, image: newImage });
     res.status(StatusCodes.OK).json({ success: true, data: { category: category!.dataValues } });
   },
-  async delete(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
-    const { Query } = Delete;
-    const { force } = Query.parse(req.query);
-    const { category } = res.locals;
-
-    const { Product } = model.db;
-
-    await Promise.all([
-      Product.destroy({
-        where: { categoryId: category!.dataValues.id },
-        force,
-      }),
-      category!.destroy({ force }),
-    ]);
-
+  async delete(
+    _req: Request,
+    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>,
+    _next: NextFunction,
+    transaction: Transaction,
+  ) {
+    const category = res.locals.category!;
+    await category.destroy({ force: false, transaction });
     res.status(StatusCodes.OK).json({ success: true });
   },
 } as const;
