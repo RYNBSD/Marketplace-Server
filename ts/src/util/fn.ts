@@ -19,7 +19,7 @@ export function handleAsync(fn: HandleAsyncFn) {
       await fn(req, res, next, transaction);
       await transaction.commit();
     } catch (error) {
-      await Promise.all([transaction.rollback(), BaseError.handleError(error)]);
+      await Promise.all([BaseError.handleError(error), transaction.rollback()]);
 
       let status: StatusCodes = StatusCodes.BAD_REQUEST;
       let message = "";

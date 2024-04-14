@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
+import type { Transaction } from "sequelize";
 import type { TResponse } from "../../../../types/index.js";
-import { QueryTypes, type Transaction } from "sequelize";
 import { StatusCodes } from "http-status-codes";
 import { schema } from "../../../../schema/index.js";
 import { model } from "../../../../model/index.js";
@@ -9,44 +9,23 @@ import { lib } from "../../../../lib/index.js";
 import { service } from "../../../../service/index.js";
 
 const { product } = service;
-const { Create } = schema.req.api.dashboard.store.products;
+const { Create, Update } = schema.req.api.dashboard.store.products;
 
 export default {
   async all(_req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
     const store = res.locals.store!;
-    const { Category } = model.db;
-
-    const categories = await Category.findAll({
-      attributes: ["id"],
-      where: { storeId: store.dataValues.id },
-    });
-
-    const categoriesId = categories.map((category) => category.dataValues.id);
-    const products = await Promise.all(categoriesId.map((id) => product.all(id)));
-
+    const products = await product.all(store.dataValues.id);
     res.status(StatusCodes.OK).json({
       success: true,
       data: {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        products: [].concat(...products),
+        products,
       },
     });
   },
   async product(_req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
-    const product = res.locals.product!;
-
-    const p = await sequelize.query(``, {
-      type: QueryTypes.SELECT,
-      raw: true,
-      nest: true,
-      plain: true,
-      bind: {
-        id: product.dataValues.id,
-      },
-    });
-
-    res.status(StatusCodes.OK).json({ success: true, data: { product: p } });
+    const localProduct = res.locals.product!;
+    const one = await product.one(localProduct.dataValues.id);
+    res.status(StatusCodes.OK).json({ success: true, data: { product: one } });
   },
   async create(
     req: Request,
@@ -61,6 +40,8 @@ export default {
     const { models = [], images = [] } = files as {
       [fieldname: string]: Express.Multer.File[];
     };
+
+    if (images.length === 0) throw APIError.controller(StatusCodes.BAD_REQUEST, "Please provide at least one image");
 
     const converted = await new FileConverter(
       ...models.map((model) => model.buffer),
@@ -199,8 +180,6 @@ export default {
     _next: NextFunction,
     transaction: Transaction,
   ) {
-    const product = res.locals.product!;
-
     const { FileConverter, FileUploader } = lib.file;
     const { models = [], images = [] } = req.files as Partial<{
       [fieldname: string]: Express.Multer.File[];
@@ -210,14 +189,14 @@ export default {
       ...models.map((model) => model.buffer),
       ...images.map((image) => image.buffer),
     ).convert();
-    if (converted.length === 0 && models.length > 0 && images.length > 0)
+    if (converted.length === 0 && (models.length > 0 || images.length > 0))
       throw APIError.controller(StatusCodes.UNSUPPORTED_MEDIA_TYPE, "Invalid provided files");
 
     const uploaded = await new FileUploader(...converted).upload();
     if (uploaded.length === 0 && converted.length > 0)
       throw APIError.server(StatusCodes.INTERNAL_SERVER_ERROR, "Can't save your files");
 
-    const { Body } = Create;
+    const { Body } = Update;
     const {
       title,
       titleAr,
@@ -236,6 +215,7 @@ export default {
 
     const { ProductColor, ProductImage, ProductSize, ProductInfo, ProductTag, Tag } = model.db;
 
+    const product = res.locals.product!;
     product.update(
       {
         title,
@@ -296,14 +276,14 @@ export default {
       .map((color) => color.trim())
       .filter((color) => color.length > 0);
 
-    const { store } = res.locals;
+    const store = res.locals.store!;
     const tagsId = await Promise.all(
       tagsArr.map((tag) =>
         Tag.findOrCreate({
           attributes: ["id"],
           where: { tag },
           fields: ["tag", "storeId"],
-          defaults: { tag, storeId: store!.dataValues.id },
+          defaults: { tag, storeId: store.dataValues.id },
           transaction,
         }),
       ),
@@ -318,8 +298,19 @@ export default {
     }
 
     const uploadedImages = uploaded.filter((upload) => upload.endsWith(".webp"));
+    const createImagesPromises = uploadedImages.map((image) =>
+      ProductImage.create(
+        { image, productId: product.dataValues.id },
+        { fields: ["image", "productId"], transaction },
+      ).catch((e) => {
+        throw APIError.server(StatusCodes.INTERNAL_SERVER_ERROR, e?.message ?? "Can't save images", {
+          files: uploaded,
+        });
+      }),
+    );
 
     await Promise.all([
+      ...createImagesPromises,
       ProductInfo.bulkCreate(createInfos, { fields: ["info", "infoAr", "productId"], transaction }),
       ProductColor.bulkCreate(
         colorsArr.map((color) => ({ color, productId: product.dataValues.id })),
@@ -333,14 +324,6 @@ export default {
         tagsId.map(([tagId]) => ({ tagId: tagId.dataValues.id, productId: product.dataValues.id })),
         { fields: ["tagId", "productId"], transaction },
       ),
-      ProductImage.bulkCreate(
-        uploadedImages.map((image) => ({ image, productId: product.dataValues.id })),
-        { fields: ["image", "productId"], transaction },
-      ).catch((e) => {
-        throw APIError.server(StatusCodes.INTERNAL_SERVER_ERROR, e?.message ?? "Can't save images", {
-          files: uploaded,
-        });
-      }),
     ]);
 
     res.status(StatusCodes.OK).json({ success: true });
