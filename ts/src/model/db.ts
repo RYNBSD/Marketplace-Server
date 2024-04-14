@@ -8,7 +8,7 @@ const { MAX } = VALUES.LENGTH;
 export const User = sequelize.define<Tables["User"]>(
   "user",
   {
-    id: {
+    [DB.ID.PRIMARY_KEY.ID]: {
       primaryKey: true,
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
@@ -49,7 +49,7 @@ User.addHook("afterDestroy", async (user) => {
 export const UserSetting = sequelize.define<Tables["UserSetting"]>(
   "user-setting",
   {
-    userId: {
+    [DB.ID.FOREIGN_KEY.USER]: {
       primaryKey: true,
       type: DataTypes.UUID,
       references: {
@@ -83,11 +83,12 @@ export const UserSetting = sequelize.define<Tables["UserSetting"]>(
     timestamps: true,
   },
 );
+User.hasOne(UserSetting, { foreignKey: DB.ID.FOREIGN_KEY.USER })
 
 export const Store = sequelize.define<Tables["Store"]>(
   "seller",
   {
-    id: {
+    [DB.ID.PRIMARY_KEY.ID]: {
       primaryKey: true,
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
@@ -101,7 +102,7 @@ export const Store = sequelize.define<Tables["Store"]>(
       type: DataTypes.STRING(MAX.IMAGE),
       allowNull: false,
     },
-    userId: {
+    [DB.ID.FOREIGN_KEY.USER]: {
       type: DataTypes.UUID,
       allowNull: false,
       unique: true,
@@ -113,6 +114,7 @@ export const Store = sequelize.define<Tables["Store"]>(
   },
   { tableName: DB.TABLES.STORE.TABLE, timestamps: true, paranoid: true },
 );
+User.hasOne(Store, { foreignKey: DB.ID.FOREIGN_KEY.USER })
 Store.addHook("afterDestroy", async (store) => {
   await Promise.all([
     // StoreSetting.destroy({ force: false, where: { storeId: store.dataValues.id } }),
@@ -124,7 +126,7 @@ Store.addHook("afterDestroy", async (store) => {
 export const StoreSetting = sequelize.define<Tables["StoreSetting"]>(
   "seller-setting",
   {
-    storeId: {
+    [DB.ID.FOREIGN_KEY.STORE]: {
       primaryKey: true,
       type: DataTypes.UUID,
       references: {
@@ -143,11 +145,12 @@ export const StoreSetting = sequelize.define<Tables["StoreSetting"]>(
     timestamps: true,
   },
 );
+Store.hasOne(StoreSetting, { foreignKey: DB.ID.FOREIGN_KEY.STORE })
 
 export const StoreLink = sequelize.define<Tables["StoreLink"]>(
   "seller-link",
   {
-    id: {
+    [DB.ID.PRIMARY_KEY.ID]: {
       primaryKey: true,
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
@@ -160,7 +163,7 @@ export const StoreLink = sequelize.define<Tables["StoreLink"]>(
       type: DataTypes.STRING(MAX.STORE.LINK),
       allowNull: false,
     },
-    storeId: {
+    [DB.ID.FOREIGN_KEY.STORE]: {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
@@ -175,16 +178,17 @@ export const StoreLink = sequelize.define<Tables["StoreLink"]>(
     paranoid: true,
   },
 );
+Store.hasMany(StoreLink, { foreignKey: DB.ID.FOREIGN_KEY.STORE })
 
 export const StoreViewer = sequelize.define<Tables["StoreViewer"]>(
   "seller-viewer",
   {
-    id: {
+    [DB.ID.PRIMARY_KEY.ID]: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
-    userId: {
+    [DB.ID.FOREIGN_KEY.USER]: {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
@@ -192,7 +196,7 @@ export const StoreViewer = sequelize.define<Tables["StoreViewer"]>(
         key: "id",
       },
     },
-    storeId: {
+    [DB.ID.FOREIGN_KEY.STORE]: {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
@@ -203,11 +207,13 @@ export const StoreViewer = sequelize.define<Tables["StoreViewer"]>(
   },
   { tableName: DB.TABLES.STORE.VIEWER, createdAt: true, updatedAt: false },
 );
+Store.hasMany(StoreViewer, { foreignKey: DB.ID.FOREIGN_KEY.STORE })
+User.hasMany(StoreViewer, { foreignKey: DB.ID.FOREIGN_KEY.USER })
 
 export const Category = sequelize.define<Tables["Category"]>(
   "category",
   {
-    id: {
+    [DB.ID.PRIMARY_KEY.ID]: {
       primaryKey: true,
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
@@ -224,7 +230,7 @@ export const Category = sequelize.define<Tables["Category"]>(
       type: DataTypes.STRING(MAX.IMAGE),
       allowNull: false,
     },
-    storeId: {
+    [DB.ID.FOREIGN_KEY.STORE]: {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
@@ -239,6 +245,7 @@ export const Category = sequelize.define<Tables["Category"]>(
     paranoid: true,
   },
 );
+Store.hasMany(Category, { foreignKey: DB.ID.FOREIGN_KEY.STORE })
 Category.addHook("afterDestroy", async (category) => {
   await Promise.all([Product.destroy({ force: false, where: { categoryId: category.dataValues.id } })]);
 });
@@ -246,12 +253,12 @@ Category.addHook("afterDestroy", async (category) => {
 export const CategoryViewer = sequelize.define<Tables["CategoryViewer"]>(
   "category-viewer",
   {
-    id: {
+    [DB.ID.PRIMARY_KEY.ID]: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
-    userId: {
+    [DB.ID.FOREIGN_KEY.USER]: {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
@@ -259,7 +266,7 @@ export const CategoryViewer = sequelize.define<Tables["CategoryViewer"]>(
         key: "id",
       },
     },
-    categoryId: {
+    [DB.ID.FOREIGN_KEY.CATEGORY]: {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
@@ -270,11 +277,13 @@ export const CategoryViewer = sequelize.define<Tables["CategoryViewer"]>(
   },
   { tableName: DB.TABLES.CATEGORY.VIEWER, createdAt: true, updatedAt: false },
 );
+Category.hasMany(CategoryViewer, { foreignKey: DB.ID.FOREIGN_KEY.CATEGORY })
+User.hasMany(CategoryViewer, { foreignKey: DB.ID.FOREIGN_KEY.USER })
 
 export const Product = sequelize.define<Tables["Product"]>(
   "product",
   {
-    id: {
+    [DB.ID.PRIMARY_KEY.ID]: {
       primaryKey: true,
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
@@ -316,7 +325,7 @@ export const Product = sequelize.define<Tables["Product"]>(
       allowNull: false,
       defaultValue: 0,
     },
-    categoryId: {
+    [DB.ID.FOREIGN_KEY.CATEGORY]: {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
@@ -331,6 +340,7 @@ export const Product = sequelize.define<Tables["Product"]>(
     paranoid: true,
   },
 );
+Category.hasMany(Product, { foreignKey: DB.ID.FOREIGN_KEY.CATEGORY })
 Product.addHook("afterDestroy", async (product) => {
   await Promise.all([
     ProductInfo.destroy({ force: false, where: { productId: product.dataValues.id } }),
@@ -345,7 +355,7 @@ Product.addHook("afterDestroy", async (product) => {
 export const ProductInfo = sequelize.define<Tables["ProductInfo"]>(
   "product-info",
   {
-    id: {
+    [DB.ID.PRIMARY_KEY.ID]: {
       primaryKey: true,
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
@@ -358,7 +368,7 @@ export const ProductInfo = sequelize.define<Tables["ProductInfo"]>(
       type: DataTypes.STRING(MAX.PRODUCT.INFO),
       allowNull: false,
     },
-    productId: {
+    [DB.ID.FOREIGN_KEY.PRODUCT]: {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
@@ -373,11 +383,12 @@ export const ProductInfo = sequelize.define<Tables["ProductInfo"]>(
     paranoid: true,
   },
 );
+Product.hasMany(ProductInfo, { foreignKey: DB.ID.FOREIGN_KEY.PRODUCT })
 
 export const ProductImage = sequelize.define<Tables["ProductImage"]>(
   "product-image",
   {
-    id: {
+    [DB.ID.PRIMARY_KEY.ID]: {
       primaryKey: true,
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
@@ -386,7 +397,7 @@ export const ProductImage = sequelize.define<Tables["ProductImage"]>(
       type: DataTypes.STRING(MAX.IMAGE),
       allowNull: false,
     },
-    productId: {
+    [DB.ID.FOREIGN_KEY.PRODUCT]: {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
@@ -402,11 +413,12 @@ export const ProductImage = sequelize.define<Tables["ProductImage"]>(
     paranoid: true,
   },
 );
+Product.hasMany(ProductImage, { foreignKey: DB.ID.FOREIGN_KEY.PRODUCT })
 
 export const ProductRating = sequelize.define<Tables["ProductRating"]>(
   "product-rating",
   {
-    userId: {
+    [DB.ID.FOREIGN_KEY.USER]: {
       primaryKey: true,
       type: DataTypes.UUID,
       allowNull: false,
@@ -415,7 +427,7 @@ export const ProductRating = sequelize.define<Tables["ProductRating"]>(
         key: "id",
       },
     },
-    productId: {
+    [DB.ID.FOREIGN_KEY.PRODUCT]: {
       primaryKey: true,
       type: DataTypes.UUID,
       allowNull: false,
@@ -439,11 +451,13 @@ export const ProductRating = sequelize.define<Tables["ProductRating"]>(
     paranoid: true,
   },
 );
+Product.hasMany(ProductRating, { foreignKey: DB.ID.FOREIGN_KEY.PRODUCT })
+User.hasMany(ProductRating, { foreignKey: DB.ID.FOREIGN_KEY.USER })
 
 export const ProductSize = sequelize.define<Tables["ProductSize"]>(
   "product-size",
   {
-    id: {
+    [DB.ID.PRIMARY_KEY.ID]: {
       primaryKey: true,
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
@@ -455,7 +469,7 @@ export const ProductSize = sequelize.define<Tables["ProductSize"]>(
       },
       allowNull: false,
     },
-    productId: {
+    [DB.ID.FOREIGN_KEY.PRODUCT]: {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
@@ -471,11 +485,12 @@ export const ProductSize = sequelize.define<Tables["ProductSize"]>(
     paranoid: true,
   },
 );
+Product.hasMany(ProductSize, { foreignKey: DB.ID.FOREIGN_KEY.PRODUCT })
 
 export const ProductColor = sequelize.define<Tables["ProductColor"]>(
   "product-color",
   {
-    id: {
+    [DB.ID.PRIMARY_KEY.ID]: {
       primaryKey: true,
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
@@ -484,7 +499,7 @@ export const ProductColor = sequelize.define<Tables["ProductColor"]>(
       type: DataTypes.STRING(MAX.PRODUCT.COLOR),
       allowNull: false,
     },
-    productId: {
+    [DB.ID.FOREIGN_KEY.PRODUCT]: {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
@@ -500,16 +515,17 @@ export const ProductColor = sequelize.define<Tables["ProductColor"]>(
     paranoid: true,
   },
 );
+Product.hasMany(ProductColor, { foreignKey: DB.ID.FOREIGN_KEY.PRODUCT })
 
 export const ProductViewer = sequelize.define<Tables["ProductViewer"]>(
   "product-viewer",
   {
-    id: {
+    [DB.ID.PRIMARY_KEY.ID]: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
-    userId: {
+    [DB.ID.FOREIGN_KEY.USER]: {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
@@ -517,7 +533,7 @@ export const ProductViewer = sequelize.define<Tables["ProductViewer"]>(
         key: "id",
       },
     },
-    productId: {
+    [DB.ID.FOREIGN_KEY.PRODUCT]: {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
@@ -528,11 +544,13 @@ export const ProductViewer = sequelize.define<Tables["ProductViewer"]>(
   },
   { tableName: DB.TABLES.PRODUCT.VIEWER, createdAt: true, updatedAt: false },
 );
+Product.hasMany(ProductViewer, { foreignKey: DB.ID.FOREIGN_KEY.PRODUCT })
+User.hasMany(ProductViewer, { foreignKey: DB.ID.FOREIGN_KEY.PRODUCT })
 
 export const Tag = sequelize.define<Tables["Tag"]>(
   "tag",
   {
-    id: {
+    [DB.ID.PRIMARY_KEY.ID]: {
       primaryKey: true,
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
@@ -542,7 +560,7 @@ export const Tag = sequelize.define<Tables["Tag"]>(
       unique: true,
       allowNull: false,
     },
-    storeId: {
+    [DB.ID.FOREIGN_KEY.STORE]: {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
@@ -557,6 +575,7 @@ export const Tag = sequelize.define<Tables["Tag"]>(
     updatedAt: false,
   },
 );
+Store.hasMany(Tag, { foreignKey: DB.ID.FOREIGN_KEY.STORE })
 Tag.addHook("afterDestroy", async (tag) => {
   await Promise.all([ProductTag.destroy({ force: false, where: { tagId: tag.dataValues.id } })]);
 });
@@ -564,7 +583,7 @@ Tag.addHook("afterDestroy", async (tag) => {
 export const ProductTag = sequelize.define<Tables["ProductTag"]>(
   "product-tag",
   {
-    tagId: {
+    [DB.ID.FOREIGN_KEY.TAG]: {
       primaryKey: true,
       type: DataTypes.UUID,
       allowNull: false,
@@ -573,7 +592,7 @@ export const ProductTag = sequelize.define<Tables["ProductTag"]>(
         key: "id",
       },
     },
-    productId: {
+    [DB.ID.FOREIGN_KEY.PRODUCT]: {
       primaryKey: true,
       type: DataTypes.UUID,
       allowNull: false,
@@ -590,11 +609,13 @@ export const ProductTag = sequelize.define<Tables["ProductTag"]>(
     paranoid: true,
   },
 );
+Product.hasMany(ProductTag, { foreignKey: DB.ID.FOREIGN_KEY.PRODUCT })
+Tag.hasMany(ProductTag, { foreignKey: DB.ID.FOREIGN_KEY.TAG })
 
 export const Order = sequelize.define<Tables["Order"]>(
   "order",
   {
-    id: {
+    [DB.ID.PRIMARY_KEY.ID]: {
       primaryKey: true,
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
@@ -612,7 +633,7 @@ export const Order = sequelize.define<Tables["Order"]>(
       defaultValue: ENUM.ORDER_STATUS[0],
       allowNull: false,
     },
-    userId: {
+    [DB.ID.FOREIGN_KEY.USER]: {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
@@ -620,7 +641,7 @@ export const Order = sequelize.define<Tables["Order"]>(
         key: "id",
       },
     },
-    productId: {
+    [DB.ID.FOREIGN_KEY.PRODUCT]: {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
@@ -646,11 +667,13 @@ export const Order = sequelize.define<Tables["Order"]>(
     timestamps: true,
   },
 );
+Product.hasMany(Order, { foreignKey: DB.ID.FOREIGN_KEY.PRODUCT })
+User.hasMany(Order, { foreignKey: DB.ID.FOREIGN_KEY.USER })
 
 export const ResponseTime = sequelize.define<Tables["ResponseTime"]>(
   "response-time",
   {
-    id: {
+    [DB.ID.PRIMARY_KEY.ID]: {
       type: DataTypes.BIGINT.UNSIGNED,
       autoIncrement: true,
       primaryKey: true,
@@ -683,7 +706,7 @@ export const ResponseTime = sequelize.define<Tables["ResponseTime"]>(
 export const ServerError = sequelize.define<Tables["ServerError"]>(
   "server-error",
   {
-    id: {
+    [DB.ID.PRIMARY_KEY.ID]: {
       type: DataTypes.BIGINT.UNSIGNED,
       autoIncrement: true,
       primaryKey: true,

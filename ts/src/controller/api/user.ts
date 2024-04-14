@@ -14,18 +14,20 @@ export default {
     const { user } = req;
     const { UserSetting, Store } = model.db;
 
-    const setting = await UserSetting.findOne({
-      attributes: ["theme", "locale", "forceTheme", "disableAnimations"],
-      where: { userId: user!.dataValues.id },
-      plain: true,
-      limit: 1,
-    });
-    const store = await Store.findOne({
-      attributes: ["id", "name", "image"],
-      where: { userId: user!.dataValues.id },
-      plain: true,
-      limit: 1,
-    });
+    const [setting, store] = await Promise.all([
+      UserSetting.findOne({
+        attributes: ["theme", "locale", "forceTheme", "disableAnimations"],
+        where: { userId: user!.dataValues.id },
+        plain: true,
+        limit: 1,
+      }),
+      Store.findOne({
+        attributes: ["id", "name", "image"],
+        where: { userId: user!.dataValues.id },
+        plain: true,
+        limit: 1,
+      }),
+    ]);
 
     res.status(StatusCodes.OK).json({
       success: true,
@@ -46,7 +48,7 @@ export default {
   },
   async setting(req: Request, res: Response<TResponse["Body"]["Success"]>) {
     const { Body } = Setting;
-    const { user } = req;
+    const user = req.user!;
 
     const { theme, locale, disableAnimations, forceTheme } = Body.parse(req.body);
     const { UserSetting } = model.db;
@@ -54,7 +56,7 @@ export default {
     const [_, setting] = await UserSetting.update(
       { theme, locale, disableAnimations, forceTheme },
       {
-        where: { userId: user!.dataValues.id },
+        where: { userId: user.dataValues.id },
         fields: ["theme", "locale", "forceTheme", "disableAnimations"],
         returning: true,
         limit: 1,
@@ -101,7 +103,6 @@ export default {
     if (uploaded.length === 0) throw APIError.server(StatusCodes.INTERNAL_SERVER_ERROR, "Can't upload your image");
 
     const { StoreSetting } = model.db;
-
     const store = await Store.create(
       {
         name,

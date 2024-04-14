@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import type { TResponse } from "../../types/index.js";
 import { Op } from "sequelize";
+// import Fuse, { type IFuseOptions } from "fuse.js";
 import { StatusCodes } from "http-status-codes";
 import { schema } from "../../schema/index.js";
 import { model } from "../../model/index.js";
@@ -14,40 +15,68 @@ export default {
   async search(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
     const { Query } = Search;
     const { s, limit } = Query.parse(req.query);
-    const { Store, Category, Product } = model.db;
+    const { Store, Category, Product, ProductImage } = model.db;
+
+    const keys = s
+      .split(/\s/)
+      .filter((s) => s.length > 0)
+      .map((s) => ({ [Op.iLike]: `%${s}%` }));
 
     const [sellers, categories, products] = await Promise.all([
       Store.findAll({
         attributes: ["id", "image", "name"],
-        where: { name: { [Op.iLike]: `%${s}%` } },
-        order: ["createdAt", "DESC"],
+        where: { [Op.or]: keys.map((key) => ({ name: key })) },
+        order: [["createdAt", "DESC"]],
         limit,
       }),
       Category.findAll({
         attributes: ["id", "name", "nameAr", "image"],
         where: {
-          [Op.or]: {
-            nameAr: { [Op.iLike]: `%${s}%` },
-            name: { [Op.iLike]: `%${s}%` },
-          },
+          [Op.or]: [...keys.map((key) => ({ nameAr: key })), ...keys.map((key) => ({ name: key }))],
         },
-        order: ["createdAt", "DESC"],
+        order: [["createdAt", "DESC"]],
         limit,
       }),
       Product.findAll({
         attributes: ["id", "title", "titleAr", "description", "descriptionAr"],
         where: {
-          [Op.or]: {
-            title: { [Op.iLike]: `%${s}%` },
-            titleAr: { [Op.iLike]: `%${s}%` },
-            description: { [Op.iLike]: `%${s}%` },
-            descriptionAr: { [Op.iLike]: `%${s}%` },
-          },
+          [Op.or]: [
+            ...keys.map((key) => ({ title: key })),
+            ...keys.map((key) => ({ titleAr: key })),
+            ...keys.map((key) => ({ description: key })),
+            ...keys.map((key) => ({ descriptionAr: key })),
+          ],
         },
-        order: ["createdAt", "DESC"],
+        include: {
+          attributes: ["image"],
+          model: ProductImage,
+          required: true,
+          limit: 1,
+        },
+        order: [["createdAt", "DESC"]],
         limit,
       }),
     ]);
+
+    //   const fuseOptions: IFuseOptions<any> = {
+    //     // The list of keys to search in the data
+    //     keys: ["name", "nameAr", "title", "titleAr", "description", "descriptionAr"],
+    //     // Should search queries be sorted
+    //     shouldSort: true,
+    //     // Search in a specific threshold
+    //     threshold: 0.4,
+    //     // Minimum number of characters before starting a search
+    //     minMatchCharLength: 2,
+    //     // Determine the number of search results returned
+    //     includeScore: true,
+    //     // Use extended search in the pattern (allows the use of wildcards)
+    //     useExtendedSearch: true,
+    //     // The location where the matched keys will be stored in each result item
+    //     includeMatches: true,
+    //     // Whether to ignore special characters
+    //     ignoreLocation: true,
+    // };
+    //   const [] = new Fuse()
 
     res.status(StatusCodes.OK).json({
       success: true,
@@ -129,6 +158,7 @@ export default {
       query,
     } = model;
 
+    // TODO: use services instande of model.query
     const categories = await query.category.withProductsCount(store!.dataValues.id);
 
     const products = await Product.findAll({
@@ -160,7 +190,6 @@ export default {
   },
   async category(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
     const { category } = res.locals;
-
     const { user } = req;
     if (user !== undefined) {
       const { CategoryViewer } = model.db;

@@ -27,6 +27,18 @@ export default {
   },
   DB: {
     CASCADE: "CASCADE",
+    ID: {
+      PRIMARY_KEY: {
+        ID: "id",
+      },
+      FOREIGN_KEY: {
+        USER: "userId",
+        STORE: "storeId",
+        CATEGORY: "categoryId",
+        PRODUCT: "productId",
+        TAG: "tagId"
+      }
+    },
     TABLES: {
       USER: {
         TABLE: "User",

@@ -2,7 +2,7 @@ import { QueryTypes } from "sequelize";
 
 export async function all(storeId: string) {
   return sequelize.query(
-    `SELECT "C"."name", "C"."nameAr", "C"."image"
+    `SELECT "C"."id", "C"."name", "C"."nameAr", "C"."image"
     FROM "Category" AS "C"
     WHERE "C"."storeId" = $storeId`,
     {
@@ -15,7 +15,7 @@ export async function all(storeId: string) {
 
 export async function one(id: string) {
   return sequelize.query(
-    `SELECT "C"."name", "C"."nameAr", "C"."image"
+    `SELECT "C"."id", "C"."name", "C"."nameAr", "C"."image"
     FROM "Category" AS "C"
     WHERE "C"."id" = $id
     LIMIT 1`,
