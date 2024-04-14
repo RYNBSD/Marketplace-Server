@@ -36,8 +36,8 @@ export default {
         STORE: "storeId",
         CATEGORY: "categoryId",
         PRODUCT: "productId",
-        TAG: "tagId"
-      }
+        TAG: "tagId",
+      },
     },
     TABLES: {
       USER: {
