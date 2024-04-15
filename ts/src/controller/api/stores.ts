@@ -18,25 +18,11 @@ export default {
     const { Store, Category, Product, ProductImage } = model.db;
 
     const keys = s
-      .split(/\s/)
-      .filter((s) => s.length > 0)
+      .split(/\s+/)
+      .filter((s) => /^[a-zA-Z0-9،-٩]+$/.test(s))
       .map((s) => ({ [Op.iLike]: `%${s}%` }));
 
-    const [sellers, categories, products] = await Promise.all([
-      Store.findAll({
-        attributes: ["id", "image", "name"],
-        where: { [Op.or]: keys.map((key) => ({ name: key })) },
-        order: [["createdAt", "DESC"]],
-        limit,
-      }),
-      Category.findAll({
-        attributes: ["id", "name", "nameAr", "image"],
-        where: {
-          [Op.or]: [...keys.map((key) => ({ nameAr: key })), ...keys.map((key) => ({ name: key }))],
-        },
-        order: [["createdAt", "DESC"]],
-        limit,
-      }),
+    const [products, categories, stores] = await Promise.all([
       Product.findAll({
         attributes: ["id", "title", "titleAr", "description", "descriptionAr"],
         where: {
@@ -48,12 +34,29 @@ export default {
           ],
         },
         include: {
+          as: DB.MODELS.PRODUCT.IMAGE,
           attributes: ["image"],
           model: ProductImage,
           required: true,
           limit: 1,
         },
         order: [["createdAt", "DESC"]],
+        limit,
+      }),
+      Category.findAll({
+        attributes: ["id", "name", "nameAr", "image"],
+        where: {
+          [Op.or]: [...keys.map((key) => ({ nameAr: key })), ...keys.map((key) => ({ name: key }))],
+        },
+        order: [["createdAt", "DESC"]],
+        raw: true,
+        limit,
+      }),
+      Store.findAll({
+        attributes: ["id", "image", "name"],
+        where: { [Op.or]: keys.map((key) => ({ name: key })) },
+        order: [["createdAt", "DESC"]],
+        raw: true,
         limit,
       }),
     ]);
@@ -78,12 +81,23 @@ export default {
     // };
     //   const [] = new Fuse()
 
+    console.log(stores, categories, products);
     res.status(StatusCodes.OK).json({
       success: true,
       data: {
-        sellers: sellers.map((seller) => seller.dataValues),
-        categories: categories.map((category) => category.dataValues),
-        products: products.map((product) => product.dataValues).map((product) => product),
+        stores,
+        categories,
+        products: products.map((product) => {
+          const { dataValues } = product;
+
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          dataValues.image = dataValues[DB.MODELS.PRODUCT.IMAGE][0].image;
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          delete dataValues[DB.MODELS.PRODUCT.IMAGE];
+          return dataValues;
+        }),
       },
     });
   },

@@ -14,8 +14,8 @@ if (!IS_PRODUCTION) {
 
 await db.connect();
 const { default: app } = await import("./app.js");
+await db.init();
 
 app.listen(process.env.PORT, async () => {
-  await db.init();
   if (!IS_PRODUCTION) console.log("Starting".bgGreen.white);
 });

@@ -413,7 +413,7 @@ export const ProductImage = sequelize.define<Tables["ProductImage"]>(
     paranoid: true,
   },
 );
-Product.hasMany(ProductImage, { foreignKey: ID.FOREIGN_KEY.PRODUCT });
+Product.hasMany(ProductImage, { foreignKey: ID.FOREIGN_KEY.PRODUCT, as: MODELS.PRODUCT.IMAGE });
 
 export const ProductRating = sequelize.define<Tables["ProductRating"]>(
   MODELS.PRODUCT.RATING,
