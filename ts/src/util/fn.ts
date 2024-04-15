@@ -2,9 +2,9 @@ import type { IncomingHttpHeaders } from "node:http";
 import type { Request, Response, NextFunction, RequestHandler } from "express";
 import type { Transaction } from "sequelize";
 import type { TResponse } from "../types/index.js";
-import { StatusCodes } from "http-status-codes";
-import { ZodError } from "zod";
 import { MulterError } from "multer";
+import { ZodError } from "zod";
+import { StatusCodes } from "http-status-codes";
 import { VALUES } from "../constant/index.js";
 import { BaseError } from "../error/index.js";
 
@@ -28,10 +28,7 @@ export function handleAsync(fn: HandleAsyncFn) {
         status = error.statusCode;
         message = error.message;
       } else if (error instanceof ZodError) {
-        message = error
-          .format()
-          ._errors.map((error) => error + ";")
-          .join("");
+        message = error.format()._errors.join(";");
       } else if (error instanceof MulterError) {
         status = StatusCodes.FORBIDDEN;
         message = error.message;

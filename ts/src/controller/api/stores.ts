@@ -83,7 +83,7 @@ export default {
       data: {
         sellers: sellers.map((seller) => seller.dataValues),
         categories: categories.map((category) => category.dataValues),
-        products: products.map((product) => product.dataValues),
+        products: products.map((product) => product.dataValues).map((product) => product),
       },
     });
   },

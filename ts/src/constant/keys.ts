@@ -68,20 +68,45 @@ export default {
       ORDER: "Order",
       RESPONSE_TIME: "ResponseTime",
       SERVER_ERROR: "ServerError",
-      SESSION: "Session",
+      // SESSION: "Session",
     },
+    MODELS: {
+      USER: {
+        MODEL: "user",
+        SETTING: "user-setting",
+      },
+      STORE: {
+        MODEL: "store",
+        SETTING: "store-setting",
+        LINK: "store-link",
+        VIEWER: "store-viewer",
+      },
+      CATEGORY: {
+        MODEL: "category",
+        VIEWER: "category-viewer",
+      },
+      PRODUCT: {
+        MODEL: "product",
+        INFO: "product-info",
+        IMAGE: "product-image",
+        RATING: "product-rating",
+        SIZE: "product-size",
+        COLOR: "product-color",
+        VIEWER: "product-viewer",
+        TAG: "product-tag",
+      },
+      TAG: "tag",
+      ORDER: "order",
+      RESPONSE_TIME: "response-time",
+      SERVER_ERROR: "server-error",
+    },
+  },
+  CACHE: {
     COLLECTIONS: {
       RATE_LIMIT: "RateLimit",
       SESSION: "Session",
       SOCKET: "Socket",
     },
-    // MODELS: {
-    //   USER: "user",
-    //   USER_SETTING: "user-setting",
-    //   STORE: "seller",
-    //   STORE_SETTING: "seller-setting",
-    //   STORE_LINK: "",
-    // }
   },
   REQUEST: {
     PARAMS: {

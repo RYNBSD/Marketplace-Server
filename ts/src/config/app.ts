@@ -6,7 +6,7 @@ import LimiterStore from "rate-limit-mongo";
 import { ENV, KEYS, VALUES } from "../constant/index.js";
 
 const { MONGO } = ENV;
-const { COLLECTIONS } = KEYS.DB;
+const { COLLECTIONS } = KEYS.CACHE;
 const { TIME } = VALUES;
 
 export default {
