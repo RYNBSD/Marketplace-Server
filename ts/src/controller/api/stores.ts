@@ -81,7 +81,6 @@ export default {
     // };
     //   const [] = new Fuse()
 
-    console.log(stores, categories, products);
     res.status(StatusCodes.OK).json({
       success: true,
       data: {
@@ -115,13 +114,14 @@ export default {
 
     const stores = await Store.findAll({
       attributes: ["id", "image", "name"],
+      raw: true,
       offset,
       limit,
     });
 
     res.status(StatusCodes.OK).json({
       success: true,
-      data: { stores: stores.map((store) => store.dataValues) },
+      data: { stores },
     });
   },
   async categories(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
