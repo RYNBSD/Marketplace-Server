@@ -1,4 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
+import type { Transaction } from "sequelize";
 import type { TResponse, Tables } from "../../types/index.js";
 import { StatusCodes } from "http-status-codes";
 import { serialize } from "cookie";
@@ -15,7 +16,12 @@ const { COOKIE } = KEYS;
 const { SignUp, VerifyEmail, ForgotPassword } = schema.req.api.auth;
 
 export default {
-  async signUp(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
+  async signUp(
+    req: Request,
+    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>,
+    _next: NextFunction,
+    transaction: Transaction,
+  ) {
     const { Body } = SignUp;
     const { username, email, password, theme, locale } = Body.parse(req.body);
 
@@ -49,7 +55,7 @@ export default {
         password: hash(password),
         image: uploaded[0]!,
       },
-      { fields: ["username", "email", "password", "image"] },
+      { fields: ["username", "email", "password", "image"], transaction },
     );
     await UserSetting.create(
       {
@@ -61,6 +67,7 @@ export default {
       },
       {
         fields: ["userId", "theme", "locale", "forceTheme", "disableAnimations"],
+        transaction,
       },
     );
 
@@ -173,7 +180,12 @@ export default {
 
     res.status(StatusCodes.OK).json({ success: true });
   },
-  async forgotPassword(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
+  async forgotPassword(
+    req: Request,
+    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>,
+    _next: NextFunction,
+    transaction: Transaction,
+  ) {
     const { user } = req;
     const { Body } = ForgotPassword;
     const { password } = Body.parse(req.body);
@@ -181,7 +193,8 @@ export default {
     const { hash } = util.bcrypt;
     await user!.update({ password: hash(password) });
 
-    if (user!.dataValues.emailVerified === null) await user!.update({ emailVerified: new Date() });
+    if (user!.dataValues.emailVerified === null)
+      await user!.update({ emailVerified: new Date() }, { fields: ["emailVerified"], transaction });
 
     res.status(StatusCodes.OK).json({ success: true });
   },

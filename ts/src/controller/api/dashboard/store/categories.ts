@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
+import type { Transaction } from "sequelize";
 import type { TResponse } from "../../../../types/index.js";
-import { QueryTypes, type Transaction } from "sequelize";
 import { StatusCodes } from "http-status-codes";
 import { model } from "../../../../model/index.js";
 import { APIError } from "../../../../error/index.js";
@@ -43,7 +43,12 @@ export default {
     ]);
     res.status(StatusCodes.OK).json({ success: true, data: { category: one, products } });
   },
-  async create(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
+  async create(
+    req: Request,
+    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>,
+    _next: NextFunction,
+    transaction: Transaction,
+  ) {
     const { Body } = Create;
     const { name, nameAr } = Body.parse(req.body);
 
@@ -63,12 +68,17 @@ export default {
 
     const category = await Category.create(
       { image: uploaded[0]!, name, nameAr, storeId: store!.dataValues.id },
-      { fields: ["image", "name", "nameAr", "storeId"], returning: true },
+      { fields: ["image", "name", "nameAr", "storeId"], returning: true, transaction },
     );
 
     res.status(StatusCodes.CREATED).json({ success: true, data: { category: category.dataValues } });
   },
-  async update(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
+  async update(
+    req: Request,
+    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>,
+    _next: NextFunction,
+    transaction: Transaction,
+  ) {
     const { Body } = Update;
     const { name, nameAr } = Body.parse(req.body);
 
@@ -89,7 +99,7 @@ export default {
       newImage = uploaded[0]!;
     }
 
-    await category!.update({ name, nameAr, image: newImage });
+    await category!.update({ name, nameAr, image: newImage }, { fields: ["name", "nameAr", "image"], transaction });
     res.status(StatusCodes.OK).json({ success: true, data: { category: category!.dataValues } });
   },
   async delete(

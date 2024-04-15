@@ -51,7 +51,12 @@ export default {
       },
     });
   },
-  async update(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
+  async update(
+    req: Request,
+    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>,
+    _next: NextFunction,
+    transaction: Transaction,
+  ) {
     const { Body } = Update;
     const { name } = Body.parse(req.body);
 
@@ -74,7 +79,7 @@ export default {
       newImage = uploaded[0]!;
     }
 
-    await store.update({ name, image: newImage });
+    await store.update({ name, image: newImage }, { fields: ["name", "image"], transaction });
     res.status(StatusCodes.OK).json({ success: true, data: { store: store!.dataValues } });
   },
   async delete(

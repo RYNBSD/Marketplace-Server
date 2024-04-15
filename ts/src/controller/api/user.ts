@@ -46,7 +46,12 @@ export default {
     req;
     res.status(StatusCodes.OK).json({ success: true });
   },
-  async setting(req: Request, res: Response<TResponse["Body"]["Success"]>) {
+  async setting(
+    req: Request,
+    res: Response<TResponse["Body"]["Success"]>,
+    _next: NextFunction,
+    transaction: Transaction,
+  ) {
     const { Body } = Setting;
     const user = req.user!;
 
@@ -59,13 +64,19 @@ export default {
         where: { userId: user.dataValues.id },
         fields: ["theme", "locale", "forceTheme", "disableAnimations"],
         returning: true,
+        transaction,
         limit: 1,
       },
     );
 
     res.status(StatusCodes.OK).json({ success: true, data: { setting: setting[0]!.dataValues } });
   },
-  async becomeSeller(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
+  async becomeSeller(
+    req: Request,
+    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>,
+    _next: NextFunction,
+    transaction: Transaction,
+  ) {
     const { Body } = BecomeSeller;
     const { name, theme } = Body.parse(req.body);
 
@@ -109,14 +120,14 @@ export default {
         image: uploaded[0]!,
         userId: user!.dataValues.id,
       },
-      { fields: ["name", "image", "userId"] },
+      { fields: ["name", "image", "userId"], transaction },
     );
     const setting = await StoreSetting.create(
       {
         theme,
         storeId: store.dataValues.id,
       },
-      { fields: ["theme", "storeId"] },
+      { fields: ["theme", "storeId"], transaction },
     );
 
     res.status(StatusCodes.CREATED).json({
@@ -127,7 +138,12 @@ export default {
       },
     });
   },
-  async update(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
+  async update(
+    req: Request,
+    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>,
+    _next: NextFunction,
+    transaction: Transaction,
+  ) {
     const { user } = req;
     const { Body } = Update;
     const { username } = Body.parse(req.body);
@@ -148,7 +164,10 @@ export default {
       newImage = uploaded[0]!;
     }
 
-    await user!.update({ username, image: newImage || user!.dataValues.image });
+    await user!.update(
+      { username, image: newImage || user!.dataValues.image },
+      { fields: ["username", "image"], transaction },
+    );
     res.status(StatusCodes.OK).json({
       success: true,
       data: {
