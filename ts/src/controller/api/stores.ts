@@ -6,10 +6,11 @@ import { StatusCodes } from "http-status-codes";
 import { schema } from "../../schema/index.js";
 import { model } from "../../model/index.js";
 import { KEYS, VALUES } from "../../constant/index.js";
+import { service } from "../../service/index.js";
 
-const { Search, Stores, Categories, Products, Home } = schema.req.api.store;
+const { Search, Categories, Products, Home } = schema.req.api.store;
 const { DB } = KEYS;
-const { NULL, LENGTH } = VALUES;
+const { LENGTH } = VALUES;
 
 export default {
   async search(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
@@ -100,24 +101,9 @@ export default {
       },
     });
   },
-  async all(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
-    const { Query } = Stores;
-    const { lastStoreId = NULL.UUID, limit } = Query.parse(req.query);
-
-    const {
-      db: { Store },
-      fn: { tableIndex },
-    } = model;
-    const { TABLES } = DB;
-
-    const offset = await tableIndex(TABLES.STORE.TABLE, lastStoreId);
-
-    const stores = await Store.findAll({
-      attributes: ["id", "image", "name"],
-      raw: true,
-      offset,
-      limit,
-    });
+  async all(_req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
+    const { store } = service;
+    const stores = await store.all();
 
     res.status(StatusCodes.OK).json({
       success: true,
@@ -126,34 +112,26 @@ export default {
   },
   async categories(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
     const { Query } = Categories;
-    const { storeId } = Query.parse(req.query) ?? { storeId: "" };
+    const { storeId } = Query.parse(req.query);
 
-    const { Category, Store } = model.db;
-
-    const categories = await Category.findAll({
-      attributes: ["id", "image", "name", "nameAr"],
-      where: { storeId },
-      order: ["createdAt", "DESC"],
-      include: {
-        attributes: [["id", "storeId"]],
-        model: Store,
-        separate: true,
-        required: true,
-      },
-    });
+    const { category } = service;
+    const categories = await category.all(storeId);
 
     res.status(StatusCodes.OK).json({
       success: true,
       data: {
-        categories: categories.map((category) => category.dataValues),
+        categories,
       },
     });
   },
   async products(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
     const { Query } = Products;
-    const q = Query.parse(req.query);
+    const { storeId, categoryId } = Query.parse(req.query);
 
-    res.status(StatusCodes.OK).json({ success: true });
+    const { product } = service;
+    const products = await product.all({ storeId, categoryId });
+
+    res.status(StatusCodes.OK).json({ success: true, data: { products } });
   },
   /** Store home page (landing page) */
   async home(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {

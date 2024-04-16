@@ -17,15 +17,15 @@ type Category = z.infer<typeof schema.db.Category> & CreateOptionalIdString;
 type CategoryViewer = z.infer<typeof schema.db.CategoryViewer> & CreateOptionalIdString;
 
 type Product = z.infer<typeof schema.db.Product> & CreateOptionalIdString;
-type ProductInfo = z.infer<typeof schema.db.ProductInfo> & CreateOptionalIdString;
-type ProductImage = z.infer<typeof schema.db.ProductImage> & CreateOptionalIdString;
+type ProductInfo = z.infer<typeof schema.db.ProductInfo> & CreateOptionalIdNumber;
+type ProductImage = z.infer<typeof schema.db.ProductImage> & CreateOptionalIdNumber;
 type ProductRating = z.infer<typeof schema.db.ProductRating>;
-type ProductSizes = z.infer<typeof schema.db.ProductSize> & CreateOptionalIdString;
-type ProductColor = z.infer<typeof schema.db.ProductColor> & CreateOptionalIdString;
+type ProductSizes = z.infer<typeof schema.db.ProductSize> & CreateOptionalIdNumber;
+type ProductColor = z.infer<typeof schema.db.ProductColor> & CreateOptionalIdNumber;
 type ProductViewer = z.infer<typeof schema.db.ProductViewer> & CreateOptionalIdString;
 
 type Tag = z.infer<typeof schema.db.Tag> & CreateOptionalIdString;
-type ProductTag = z.infer<typeof schema.db.ProductTag>;
+type ProductTag = z.infer<typeof schema.db.ProductTag> & CreateOptionalIdNumber;
 
 type Order = z.infer<typeof schema.db.Order> & CreateOptionalIdString;
 

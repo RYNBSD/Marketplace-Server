@@ -33,6 +33,7 @@ export default {
       price: z.coerce.number().min(MIN.REQUIRED),
       discount: z.coerce.number().min(0).max(100),
       categoryId: z.string().trim().min(MIN.REQUIRED).uuid(),
+      deletedImages: z.string().trim(),
       infos: z.string().trim(),
       sizes: z.string().trim(),
       tags: z.string().trim(),

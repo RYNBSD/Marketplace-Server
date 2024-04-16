@@ -14,7 +14,7 @@ const { Create, Update } = schema.req.api.dashboard.store.products;
 export default {
   async all(_req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
     const store = res.locals.store!;
-    const products = await product.all(store.dataValues.id);
+    const products = await product.all({ storeId: store.dataValues.id });
     res.status(StatusCodes.OK).json({
       success: true,
       data: {
@@ -25,7 +25,7 @@ export default {
   async product(_req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
     const localProduct = res.locals.product!;
     const one = await product.one(localProduct.dataValues.id);
-    res.status(StatusCodes.OK).json({ success: true, data: { product: one } });
+    res.status(StatusCodes.OK).json({ success: true, data: { ...one } });
   },
   async create(
     req: Request,
@@ -33,6 +33,23 @@ export default {
     _next: NextFunction,
     transaction: Transaction,
   ) {
+    const { Body } = Create;
+    const {
+      title,
+      titleAr,
+      description,
+      descriptionAr,
+      quality,
+      stock,
+      price,
+      discount,
+      categoryId,
+      infos,
+      tags,
+      sizes,
+      colors,
+    } = Body.parse(req.body);
+
     const files = req.files;
     if (files === undefined) throw APIError.controller(StatusCodes.BAD_REQUEST, "Please, provide images");
 
@@ -52,25 +69,7 @@ export default {
     const uploaded = await new FileUploader(...converted).upload();
     if (uploaded.length === 0) throw APIError.server(StatusCodes.INTERNAL_SERVER_ERROR, "Can't save your files");
 
-    const { Body } = Create;
-    const {
-      title,
-      titleAr,
-      description,
-      descriptionAr,
-      quality,
-      stock,
-      price,
-      discount,
-      categoryId,
-      infos,
-      tags,
-      sizes,
-      colors,
-    } = Body.parse(req.body);
-
     const { Product, ProductColor, ProductImage, ProductSize, ProductInfo, ProductTag, Tag } = model.db;
-
     const product = await Product.create(
       {
         title,
@@ -100,7 +99,11 @@ export default {
         returning: true,
         transaction,
       },
-    );
+    ).catch((e) => {
+      throw APIError.server(StatusCodes.INTERNAL_SERVER_ERROR, e?.message ?? "Can't create product", {
+        files: uploaded,
+      });
+    });
 
     const infosArr = infos
       .split(",")
@@ -135,7 +138,11 @@ export default {
           transaction,
         }),
       ),
-    );
+    ).catch((e) => {
+      throw APIError.server(StatusCodes.INTERNAL_SERVER_ERROR, e?.message ?? "Can't find or create tag", {
+        files: uploaded,
+      });
+    });
 
     const createInfos = [];
     for (let i = 0; i < infosArr.length; i += 2) {
@@ -146,16 +153,12 @@ export default {
     }
 
     const uploadedImages = uploaded.filter((upload) => upload.endsWith(".webp"));
-    const createImagesPromises = uploadedImages.map((image) =>
-      ProductImage.create(
-        { image, productId: product.dataValues.id },
-        { fields: ["image", "productId"], transaction },
-      ).catch((e) => {
-        throw APIError.server(StatusCodes.INTERNAL_SERVER_ERROR, e?.message ?? "Can't save image", { files: uploaded });
-      }),
-    );
 
     await Promise.all([
+      ProductImage.bulkCreate(
+        uploadedImages.map((image) => ({ image, productId: product.dataValues.id })),
+        { fields: ["image", "productId"], transaction },
+      ),
       ProductInfo.bulkCreate(createInfos, { fields: ["info", "infoAr", "productId"], transaction }),
       ProductColor.bulkCreate(
         colorsArr.map((color) => ({ color, productId: product.dataValues.id })),
@@ -169,8 +172,11 @@ export default {
         tagsId.map(([tagId]) => ({ tagId: tagId.dataValues.id, productId: product.dataValues.id })),
         { fields: ["tagId", "productId"], transaction },
       ),
-      ...createImagesPromises,
-    ]);
+    ]).catch((e) => {
+      throw APIError.server(StatusCodes.INTERNAL_SERVER_ERROR, e?.message ?? "Can't complete product promises", {
+        files: uploaded,
+      });
+    });
 
     res.status(StatusCodes.CREATED).json({ success: true });
   },
@@ -180,6 +186,24 @@ export default {
     _next: NextFunction,
     transaction: Transaction,
   ) {
+    const { Body } = Update;
+    const {
+      title,
+      titleAr,
+      description,
+      descriptionAr,
+      quality,
+      stock,
+      price,
+      discount,
+      categoryId,
+      deletedImages,
+      infos,
+      tags,
+      sizes,
+      colors,
+    } = Body.parse(req.body);
+
     const { FileConverter, FileUploader } = lib.file;
     const { models = [], images = [] } = req.files as Partial<{
       [fieldname: string]: Express.Multer.File[];
@@ -196,63 +220,65 @@ export default {
     if (uploaded.length === 0 && converted.length > 0)
       throw APIError.server(StatusCodes.INTERNAL_SERVER_ERROR, "Can't save your files");
 
-    const { Body } = Update;
-    const {
-      title,
-      titleAr,
-      description,
-      descriptionAr,
-      quality,
-      stock,
-      price,
-      discount,
-      categoryId,
-      infos,
-      tags,
-      sizes,
-      colors,
-    } = Body.parse(req.body);
-
     const { ProductColor, ProductImage, ProductSize, ProductInfo, ProductTag, Tag } = model.db;
-
     const product = res.locals.product!;
-    product.update(
-      {
-        title,
-        titleAr,
-        description,
-        descriptionAr,
-        quality,
-        stock,
-        price,
-        discount,
-        categoryId,
-        model: uploaded.find((file) => file.endsWith(".glb")) ?? product.dataValues.model,
-      },
-      {
-        fields: [
-          "title",
-          "titleAr",
-          "description",
-          "descriptionAr",
-          "quality",
-          "stock",
-          "price",
-          "discount",
-          "categoryId",
-          "model",
-        ],
-        transaction,
-      },
-    );
+    await product
+      .update(
+        {
+          title,
+          titleAr,
+          description,
+          descriptionAr,
+          quality,
+          stock,
+          price,
+          discount,
+          categoryId,
+          model: uploaded.find((file) => file.endsWith(".glb")) ?? product.dataValues.model,
+        },
+        {
+          fields: [
+            "title",
+            "titleAr",
+            "description",
+            "descriptionAr",
+            "quality",
+            "stock",
+            "price",
+            "discount",
+            "categoryId",
+            "model",
+          ],
+          transaction,
+        },
+      )
+      .catch((e) => {
+        throw APIError.server(StatusCodes.INTERNAL_SERVER_ERROR, e?.message ?? "Can't update product", {
+          files: uploaded,
+        });
+      });
 
     await Promise.all([
       ProductInfo.destroy({ force: false, where: { productId: product.dataValues.id }, transaction }),
       ProductColor.destroy({ force: false, where: { productId: product.dataValues.id }, transaction }),
-      ProductImage.destroy({ force: false, where: { productId: product.dataValues.id }, transaction }),
       ProductSize.destroy({ force: false, where: { productId: product.dataValues.id }, transaction }),
       ProductTag.destroy({ force: false, where: { productId: product.dataValues.id }, transaction }),
-    ]);
+      ProductImage.destroy({
+        force: false,
+        where: {
+          productId: product.dataValues.id,
+          id: deletedImages
+            .split(",")
+            .map((image) => image.trim())
+            .filter((image) => image.length > 0),
+        },
+        transaction,
+      }),
+    ]).catch((e) => {
+      throw APIError.server(StatusCodes.INTERNAL_SERVER_ERROR, e?.message ?? "Can't complete delete product promise", {
+        files: uploaded,
+      });
+    });
 
     const infosArr = infos
       .split(",")
@@ -287,7 +313,11 @@ export default {
           transaction,
         }),
       ),
-    );
+    ).catch((e) => {
+      throw APIError.server(StatusCodes.INTERNAL_SERVER_ERROR, e?.message ?? "Can't find or create tag", {
+        files: uploaded,
+      });
+    });
 
     const createInfos = [];
     for (let i = 0; i < infosArr.length; i += 2) {
@@ -298,19 +328,12 @@ export default {
     }
 
     const uploadedImages = uploaded.filter((upload) => upload.endsWith(".webp"));
-    const createImagesPromises = uploadedImages.map((image) =>
-      ProductImage.create(
-        { image, productId: product.dataValues.id },
-        { fields: ["image", "productId"], transaction },
-      ).catch((e) => {
-        throw APIError.server(StatusCodes.INTERNAL_SERVER_ERROR, e?.message ?? "Can't save images", {
-          files: uploaded,
-        });
-      }),
-    );
 
     await Promise.all([
-      ...createImagesPromises,
+      ProductImage.bulkCreate(
+        uploadedImages.map((image) => ({ image, productId: product.dataValues.id })),
+        { fields: ["image", "productId"], transaction },
+      ),
       ProductInfo.bulkCreate(createInfos, { fields: ["info", "infoAr", "productId"], transaction }),
       ProductColor.bulkCreate(
         colorsArr.map((color) => ({ color, productId: product.dataValues.id })),
@@ -324,7 +347,11 @@ export default {
         tagsId.map(([tagId]) => ({ tagId: tagId.dataValues.id, productId: product.dataValues.id })),
         { fields: ["tagId", "productId"], transaction },
       ),
-    ]);
+    ]).catch((e) => {
+      throw APIError.server(StatusCodes.INTERNAL_SERVER_ERROR, e?.message ?? "Can't complete product promises", {
+        files: uploaded,
+      });
+    });
 
     res.status(StatusCodes.OK).json({ success: true });
   },

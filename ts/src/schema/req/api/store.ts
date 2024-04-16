@@ -18,10 +18,10 @@ export default {
     }),
   },
   Categories: {
-    Query: StoreId.optional(),
+    Query: StoreId.optional().default({ storeId: "" }),
   },
   Products: {
-    Query: z.object({}).merge(StoreId).merge(CategoryId).optional(),
+    Query: z.object({}).merge(StoreId).merge(CategoryId).optional().default({ storeId: "", categoryId: "" }),
   },
   Home: {
     Params: StoreId,

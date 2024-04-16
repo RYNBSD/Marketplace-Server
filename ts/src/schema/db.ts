@@ -92,7 +92,7 @@ export const ProductInfo = z
     info: z.string(),
     infoAr: z.string(),
   })
-  .merge(IdUUID)
+  .merge(IdInt)
   .merge(ProductId)
   .strict();
 
@@ -100,7 +100,7 @@ export const ProductImage = z
   .object({
     image: z.string(),
   })
-  .merge(IdUUID)
+  .merge(IdInt)
   .merge(ProductId)
   .strict();
 
@@ -117,7 +117,7 @@ export const ProductSize = z
   .object({
     size: z.string(),
   })
-  .merge(IdUUID)
+  .merge(IdInt)
   .merge(ProductId)
   .strict();
 
@@ -125,7 +125,7 @@ export const ProductColor = z
   .object({
     color: z.string(),
   })
-  .merge(IdUUID)
+  .merge(IdInt)
   .merge(ProductId)
   .strict();
 

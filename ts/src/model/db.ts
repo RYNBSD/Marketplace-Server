@@ -357,8 +357,8 @@ export const ProductInfo = sequelize.define<Tables["ProductInfo"]>(
   {
     [ID.PRIMARY_KEY.ID]: {
       primaryKey: true,
-      type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4,
+      type: DataTypes.BIGINT.UNSIGNED,
+      autoIncrement: true,
     },
     info: {
       type: DataTypes.STRING(MAX.PRODUCT.INFO),
@@ -390,8 +390,8 @@ export const ProductImage = sequelize.define<Tables["ProductImage"]>(
   {
     [ID.PRIMARY_KEY.ID]: {
       primaryKey: true,
-      type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4,
+      type: DataTypes.BIGINT.UNSIGNED,
+      autoIncrement: true,
     },
     image: {
       type: DataTypes.STRING(MAX.IMAGE),
@@ -459,8 +459,8 @@ export const ProductSize = sequelize.define<Tables["ProductSize"]>(
   {
     [ID.PRIMARY_KEY.ID]: {
       primaryKey: true,
-      type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4,
+      type: DataTypes.BIGINT.UNSIGNED,
+      autoIncrement: true,
     },
     size: {
       type: DataTypes.STRING(MAX.PRODUCT.SIZE),
@@ -492,8 +492,8 @@ export const ProductColor = sequelize.define<Tables["ProductColor"]>(
   {
     [ID.PRIMARY_KEY.ID]: {
       primaryKey: true,
-      type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4,
+      type: DataTypes.BIGINT.UNSIGNED,
+      autoIncrement: true,
     },
     color: {
       type: DataTypes.STRING(MAX.PRODUCT.COLOR),
@@ -583,8 +583,12 @@ Tag.addHook("afterDestroy", async (tag) => {
 export const ProductTag = sequelize.define<Tables["ProductTag"]>(
   MODELS.PRODUCT.TAG,
   {
-    [ID.FOREIGN_KEY.TAG]: {
+    [ID.PRIMARY_KEY.ID]: {
       primaryKey: true,
+      type: DataTypes.BIGINT.UNSIGNED,
+      autoIncrement: true,
+    },
+    [ID.FOREIGN_KEY.TAG]: {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
@@ -593,7 +597,6 @@ export const ProductTag = sequelize.define<Tables["ProductTag"]>(
       },
     },
     [ID.FOREIGN_KEY.PRODUCT]: {
-      primaryKey: true,
       type: DataTypes.UUID,
       allowNull: false,
       references: {

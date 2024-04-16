@@ -1,18 +1,21 @@
 import { QueryTypes } from "sequelize";
+import { VALUES } from "../constant/index.js";
 
-export async function all(storeId: string) {
+const { NULL } = VALUES;
+
+export async function all({ storeId, categoryId }: { storeId?: string; categoryId?: string }) {
   return sequelize.query(
     `
     SELECT "P"."id", "P"."title", "P"."description", "P"."titleAr","P"."descriptionAr", ARRAY_AGG("PI"."image") AS "images"
     FROM "Product" AS "P"
     INNER JOIN "ProductImage" AS "PI" ON "PI"."productId" = "P"."id"
     INNER JOIN "Category" AS "C" ON "C"."id" = "P"."categoryId"
-    WHERE "C"."storeId" = $storeId
+    WHERE "C"."storeId" = $storeId OR "C"."id" = $categoryId
     GROUP BY "P"."id"
   `,
     {
       type: QueryTypes.SELECT,
-      bind: { storeId },
+      bind: { storeId: storeId ?? NULL.UUID, categoryId: categoryId ?? NULL.UUID },
       raw: true,
     },
   );
@@ -34,7 +37,7 @@ export async function one(id: string) {
     LEFT JOIN "ProductColor" AS "PC" ON "PC"."productId" = "P"."id"
     LEFT JOIN "ProductSize" AS "PS" ON "PS"."productId" = "P"."id"
     LEFT JOIN "ProductInfo" AS "PIn" ON "PIn"."productId" = "P"."id"
-    INNER JOIN "Tag" AS "T" ON "T"."id" = "PT"."tagId"
+    LEFT JOIN "Tag" AS "T" ON "T"."id" = "PT"."tagId"
     WHERE "P"."id" = $id
     GROUP BY "P"."id", "C"."id"
     LIMIT 1`,
