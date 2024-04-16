@@ -27,8 +27,8 @@ export async function one(id: string) {
     "P"."description" AS "product.description", "P"."descriptionAr" AS "product.descriptionAr",
     "P"."quality" AS "product.quality", "P"."stock" AS "product.stock", "P"."model" AS "product.model",
     "P"."price" AS "product.price", "P"."discount" AS "product.discount",
-    ARRAY_AGG("PI"."image") AS "product.images", ARRAY_AGG("PIn"."info") AS "product.infos", ARRAY_AGG("PIn"."infoAr") AS "product.infosAr",
-    ARRAY_AGG("PC"."color") AS "product.colors", ARRAY_AGG("PS"."size") AS "product.sizes", ARRAY_AGG("T"."tag") AS "product.tags",
+    ARRAY_AGG(DISTINCT "PI"."image") AS "product.images", ARRAY_AGG(DISTINCT "PIn"."info") AS "product.infos", ARRAY_AGG(DISTINCT "PIn"."infoAr") AS "product.infosAr",
+    ARRAY_AGG(DISTINCT "PC"."color") AS "product.colors", ARRAY_AGG(DISTINCT "PS"."size") AS "product.sizes", ARRAY_AGG(DISTINCT "T"."tag") AS "product.tags",
     "C"."id" AS "category.id", "C"."name" AS "category.name", "C"."nameAr" AS "category.nameAr", "C"."image" AS "category.image"
     FROM "Product" AS "P"
     INNER JOIN "Category" AS "C" ON "C"."id" = "P"."categoryId"
@@ -38,7 +38,7 @@ export async function one(id: string) {
     LEFT JOIN "ProductSize" AS "PS" ON "PS"."productId" = "P"."id"
     LEFT JOIN "ProductInfo" AS "PIn" ON "PIn"."productId" = "P"."id"
     LEFT JOIN "Tag" AS "T" ON "T"."id" = "PT"."tagId"
-    WHERE "P"."id" = $id
+    WHERE "P"."id" = $id AND "P"."deletedAt" IS NULL
     GROUP BY "P"."id", "C"."id"
     LIMIT 1`,
     {
