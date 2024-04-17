@@ -43,7 +43,7 @@ export const Store = z
 
 export const StoreSetting = z
   .object({
-    theme: z.enum(ENUM.THEMES),
+    // theme: z.enum(ENUM.THEMES),
   })
   .merge(StoreId)
   .strict();

@@ -117,7 +117,6 @@ export const Store = sequelize.define<Tables["Store"]>(
 User.hasOne(Store, { foreignKey: ID.FOREIGN_KEY.USER, as: MODELS.STORE.MODEL });
 Store.addHook("afterDestroy", async (store) => {
   await Promise.all([
-    // StoreSetting.destroy({ force: false, where: { storeId: store.dataValues.id } }),
     StoreLink.destroy({ force: false, where: { storeId: store.dataValues.id } }),
     Category.destroy({ force: false, where: { storeId: store.dataValues.id } }),
   ]);
@@ -134,11 +133,11 @@ export const StoreSetting = sequelize.define<Tables["StoreSetting"]>(
         key: "id",
       },
     },
-    theme: {
-      type: DataTypes.ENUM(...ENUM.THEMES),
-      defaultValue: ENUM.THEMES[0],
-      allowNull: false,
-    },
+    // theme: {
+    //   type: DataTypes.ENUM(...ENUM.THEMES),
+    //   defaultValue: ENUM.THEMES[0],
+    //   allowNull: false,
+    // },
   },
   {
     tableName: TABLES.STORE.SETTING,

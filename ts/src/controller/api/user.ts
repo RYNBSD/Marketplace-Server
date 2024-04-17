@@ -78,7 +78,7 @@ export default {
     transaction: Transaction,
   ) {
     const { Body } = BecomeSeller;
-    const { name, theme } = Body.parse(req.body);
+    const { name } = Body.parse(req.body);
 
     const { Store } = model.db;
 
@@ -124,10 +124,9 @@ export default {
     );
     const setting = await StoreSetting.create(
       {
-        theme,
         storeId: store.dataValues.id,
       },
-      { fields: ["theme", "storeId"], transaction },
+      { fields: ["storeId"], transaction },
     );
 
     res.status(StatusCodes.CREATED).json({

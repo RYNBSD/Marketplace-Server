@@ -15,7 +15,7 @@ export default {
   BecomeSeller: {
     Body: z.object({
       name: z.string().trim().min(MIN.REQUIRED).max(MAX.STORE.NAME),
-      theme: z.enum(ENUM.THEMES),
+      // theme: z.enum(ENUM.THEMES),
     }),
   },
   Update: {

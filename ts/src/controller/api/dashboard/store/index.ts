@@ -15,7 +15,7 @@ export default {
   async profile(_req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
     const { store } = res.locals;
 
-    const { Category, Product, StoreSetting } = model.db;
+    const { Category, Product } = model.db;
 
     const categories = await Category.findAll({
       attributes: ["id"],
@@ -32,18 +32,10 @@ export default {
       group: "categoryId",
     });
 
-    const setting = await StoreSetting.findOne({
-      attributes: ["theme"],
-      where: { storeId: store!.dataValues.id },
-      plain: true,
-      limit: 1,
-    });
-
     res.status(StatusCodes.OK).json({
       success: true,
       data: {
         store: store!.dataValues,
-        setting: setting!.dataValues,
         count: {
           categories: categories.length,
           products,

@@ -10,7 +10,7 @@ export async function all({ storeId, categoryId }: { storeId?: string; categoryI
     FROM "Product" AS "P"
     INNER JOIN "ProductImage" AS "PI" ON "PI"."productId" = "P"."id"
     INNER JOIN "Category" AS "C" ON "C"."id" = "P"."categoryId"
-    WHERE "C"."storeId" = $storeId OR "C"."id" = $categoryId
+    WHERE "C"."storeId" = $storeId OR "C"."id" = $categoryId  AND "P"."deletedAt" IS NULL AND "PI"."deletedAt" IS NULL AND "C"."deletedAt" IS NULL
     GROUP BY "P"."id"
   `,
     {
@@ -38,7 +38,9 @@ export async function one(id: string) {
     LEFT JOIN "ProductSize" AS "PS" ON "PS"."productId" = "P"."id"
     LEFT JOIN "ProductInfo" AS "PIn" ON "PIn"."productId" = "P"."id"
     LEFT JOIN "Tag" AS "T" ON "T"."id" = "PT"."tagId"
-    WHERE "P"."id" = $id AND "P"."deletedAt" IS NULL
+    WHERE "P"."id" = $id AND "P"."deletedAt" IS NULL AND "C"."deletedAt" IS NULL
+    AND "PI"."deletedAt" IS NULL AND "PT"."deletedAt" IS NULL AND "PC"."deletedAt" IS NULL  AND "PS"."deletedAt" IS NULL
+    AND "PIn"."deletedAt" IS NULL
     GROUP BY "P"."id", "C"."id"
     LIMIT 1`,
     {
@@ -56,7 +58,7 @@ export async function viewers(productId: string) {
     `SELECT "U"."id", "U"."username", "U"."image", COUNT("U"."id") AS "views"
     FROM "User" AS "U"
     INNER JOIN "ProductViewer" AS "PV" ON "PV"."userId" = "U"."id"
-    WHERE "PV"."productId" = $productId
+    WHERE "PV"."productId" = $productId AND "U"."deletedAt" IS NULL
     GROUP BY "U"."id"`,
     { type: QueryTypes.SELECT, bind: { productId }, raw: true },
   );
