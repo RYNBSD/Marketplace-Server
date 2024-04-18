@@ -7,10 +7,7 @@ import fileType, { type FileExtension } from "file-type";
 import { StatusCodes } from "http-status-codes";
 import { APIError } from "../../error/index.js";
 import { schema } from "../../schema/index.js";
-
-import * as imageExtensions from "image-extensions/image-extensions.json" with { type: "json" };
-import * as videoExtensions from "video-extensions/video-extensions.json" with { type: "json" };
-import * as audioExtensions from "audio-extensions/audioExtensions.json" with { type: "json" };
+import { EXTENSIONS } from "../../constant/enum.js";
 
 const { toBoolean } = schema.validators;
 
@@ -126,15 +123,15 @@ export default class FileConverter extends FileTmp {
     const ext = await this.format(buffer);
     let type: SupportedFileTypes;
 
-    if (imageExtensions.default.includes(ext)) type = "image";
+    if (EXTENSIONS.IMAGES.includes(ext)) type = "image";
     else if (ext === "glb") type = "model";
-    else if (videoExtensions.default.includes(ext)) {
+    else if (EXTENSIONS.VIDEO.includes(ext)) {
       type = "video";
       const input = await this.bufferToFile(buffer, ext as FileExtension);
       const metadata = await this.ffprobeMetadata(input);
       const duration = Math.floor(metadata.format.duration ?? Infinity);
       if (duration > 60) return null;
-    } else if (audioExtensions.default.includes(ext)) {
+    } else if (EXTENSIONS.AUDIO.includes(ext)) {
       type = "audio";
       const input = await this.bufferToFile(buffer, ext as FileExtension);
       const metadata = await this.ffprobeMetadata(input);

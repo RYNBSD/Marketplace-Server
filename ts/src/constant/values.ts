@@ -1,4 +1,5 @@
-import * as packageJson from "../../../package.json" with { type: "json" };
+// import * as packageJson from "../../../package.json" with { type: "json" };
+const { default: packageJson } = await import("../../../package.json", { with: { type: "json" } });
 
 export default {
   TIME: {
@@ -12,7 +13,7 @@ export default {
     YEAR: 1000 * 60 * 60 * 24 * 30 * 12,
   },
   PACKAGE: {
-    VERSION: packageJson.default.version.substring(0, 1),
+    VERSION: packageJson.version.substring(0, 1),
   },
   LENGTH: {
     LIMIT: 25,

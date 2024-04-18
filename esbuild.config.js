@@ -23,11 +23,11 @@ buildSync({
     bundle: true,
     logLimit: 0,
     drop: ["console", "debugger"],
-    // loader: {
-    //     ".json": "json",
-    //     ".node": "file"
-    // },
-    // outExtension: {
-    //     ".js": ".mjs"
-    // }
+    loader: {
+        // ".json": "file",
+        // ".node": "file"
+    },
+    outExtension: {
+        ".js": ".mjs"
+    }
 })
