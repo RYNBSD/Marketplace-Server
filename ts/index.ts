@@ -16,22 +16,22 @@ if (!IS_PRODUCTION) {
 
 const PUBLIC = "public";
 const PUBLIC_PATH = path.join(__root, PUBLIC);
-if (existsSync(PUBLIC_PATH)) {
+if (!existsSync(PUBLIC_PATH)) {
   if (!IS_PRODUCTION) rmSync(PUBLIC_PATH, { recursive: true, force: true });
   mkdirSync(PUBLIC_PATH);
 }
 
 const UPLOAD = "upload";
-const UPLOAD_PATH = path.join(__root, PUBLIC, UPLOAD);
-if (existsSync(UPLOAD_PATH)) mkdirSync(UPLOAD_PATH);
+const UPLOAD_PATH = path.join(PUBLIC_PATH, UPLOAD);
+if (!existsSync(UPLOAD_PATH)) mkdirSync(UPLOAD_PATH);
 
 const IMAGE = "image";
-const IMAGE_PATH = path.join(__root, PUBLIC, UPLOAD, IMAGE);
-if (existsSync(IMAGE_PATH)) mkdirSync(IMAGE_PATH);
+const IMAGE_PATH = path.join(UPLOAD_PATH, IMAGE);
+if (!existsSync(IMAGE_PATH)) mkdirSync(IMAGE_PATH);
 
 const MODEL = "model";
-const MODEL_PATH = path.join(__root, PUBLIC, UPLOAD, MODEL);
-if (existsSync(MODEL_PATH)) mkdirSync(MODEL_PATH);
+const MODEL_PATH = path.join(UPLOAD_PATH, MODEL);
+if (!existsSync(MODEL_PATH)) mkdirSync(MODEL_PATH);
 
 await db.connect();
 const { default: app } = await import("./app.js");
