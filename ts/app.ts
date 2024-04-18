@@ -9,7 +9,7 @@ import morgan from "morgan";
 import helmet from "helmet";
 import timeout from "connect-timeout";
 import methodOverride from "method-override";
-import { simpleCsrf } from "express-simple-csrf";
+// import { simpleCsrf } from "express-simple-csrf";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import responseTime from "response-time";
@@ -130,7 +130,13 @@ app.use(
     cookie: configOptions.cookieOptions,
   }),
 );
-app.use(simpleCsrf({ cookieOptions: configOptions.cookieOptions, debug: !IS_PRODUCTION }));
+// app.use(
+//   simpleCsrf({
+//     ignoreMethods: ["GET", "HEAD", "OPTIONS", "DELETE", "PATCH"],
+//     cookieOptions: configOptions.cookieOptions,
+//     debug: !IS_PRODUCTION,
+//   }),
+// );
 app.use(passport.initialize());
 app.use(passport.session());
 

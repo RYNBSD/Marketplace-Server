@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { VALUES } from "../../../constant/index.js";
-import { StoreId, CategoryId } from "../../id.js";
+import { StoreId } from "../../id.js";
 
 const { MIN, LIMIT } = VALUES.LENGTH;
 
@@ -17,12 +17,12 @@ export default {
       limit: z.coerce.number().min(MIN.REQUIRED).default(LIMIT),
     }),
   },
-  Categories: {
-    Query: StoreId.optional().default({ storeId: "" }),
-  },
-  Products: {
-    Query: z.object({}).merge(StoreId).merge(CategoryId).optional().default({ storeId: "", categoryId: "" }),
-  },
+  // Categories: {
+  //   Query: StoreId.optional().default({ storeId: "" }),
+  // },
+  // Products: {
+  //   Query: z.object({}).merge(StoreId).merge(CategoryId).optional().default({ storeId: "", categoryId: "" }),
+  // },
   Home: {
     Params: StoreId,
   },

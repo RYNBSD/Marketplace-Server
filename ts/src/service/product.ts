@@ -6,7 +6,7 @@ const { NULL } = VALUES;
 export async function all({ storeId, categoryId }: { storeId?: string; categoryId?: string }) {
   return sequelize.query(
     `
-    SELECT "P"."id", "P"."title", "P"."description", "P"."titleAr","P"."descriptionAr", ARRAY_AGG("PI"."image") AS "images"
+    SELECT "P"."id", "P"."title", "P"."description", "P"."titleAr","P"."descriptionAr", ARRAY_AGG(DISTINCT "PI"."image") AS "images"
     FROM "Product" AS "P"
     INNER JOIN "ProductImage" AS "PI" ON "PI"."productId" = "P"."id"
     INNER JOIN "Category" AS "C" ON "C"."id" = "P"."categoryId"

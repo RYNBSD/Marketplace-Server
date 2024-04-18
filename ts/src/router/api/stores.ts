@@ -19,10 +19,8 @@ export const stores = Router();
 
 stores.get("/search", handleAsync(search));
 
-/** Fetch all products from deferent sellers */
 stores.get("/", handleAsync(all));
 
-/** Fetch all categories from deferent sellers */
 stores.get("/categories");
 
 stores.get("/products");

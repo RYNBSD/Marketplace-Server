@@ -1,16 +1,14 @@
-import type { Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import type { TResponse } from "../../types/index.js";
-import { Op } from "sequelize";
+import { Op, type Transaction } from "sequelize";
 // import Fuse, { type IFuseOptions } from "fuse.js";
 import { StatusCodes } from "http-status-codes";
 import { schema } from "../../schema/index.js";
 import { model } from "../../model/index.js";
-import { KEYS, VALUES } from "../../constant/index.js";
-import { service } from "../../service/index.js";
+import { KEYS } from "../../constant/index.js";
 
-const { Search, Categories, Products, Home } = schema.req.api.store;
+const { Search, Home } = schema.req.api.store;
 const { DB } = KEYS;
-const { LENGTH } = VALUES;
 
 export default {
   async search(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
@@ -102,20 +100,27 @@ export default {
     });
   },
   async all(_req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
-    const { store } = service;
-    const stores = await store.all();
+    const { Store } = model.db;
+    const stores = Store.findAll({
+      attributes: ["id", "name", "image"],
+      limit: 25,
+      raw: true,
+      order: [["createdAt", "DESC"]],
+    });
 
     res.status(StatusCodes.OK).json({
       success: true,
       data: { stores },
     });
   },
-  async categories(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
-    const { Query } = Categories;
-    const { storeId } = Query.parse(req.query);
-
-    const { category } = service;
-    const categories = await category.all(storeId);
+  async categories(_req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
+    const { Category } = model.db;
+    const categories = Category.findAll({
+      attributes: ["id", "name", "nameAr", "image"],
+      limit: 25,
+      raw: true,
+      order: [["createdAr", "DESC"]],
+    });
 
     res.status(StatusCodes.OK).json({
       success: true,
@@ -124,45 +129,72 @@ export default {
       },
     });
   },
-  async products(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
-    const { Query } = Products;
-    const { storeId, categoryId } = Query.parse(req.query);
+  async products(_req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
+    const { Product, ProductImage } = model.db;
+    const products = await Product.findAll({
+      attributes: ["id", "title", "titleAr", "description", "descriptionAr"],
+      include: {
+        as: DB.MODELS.PRODUCT.IMAGE,
+        attributes: ["image"],
+        model: ProductImage,
+        required: true,
+        limit: 1,
+      },
+      order: [["createdAt", "DESC"]],
+      limit: 25,
+    });
 
-    const { product } = service;
-    const products = await product.all({ storeId, categoryId });
+    res.status(StatusCodes.OK).json({
+      success: true,
+      data: {
+        products: products.map((product) => {
+          const { dataValues } = product;
 
-    res.status(StatusCodes.OK).json({ success: true, data: { products } });
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          dataValues.image = dataValues[DB.MODELS.PRODUCT.IMAGE][0].image;
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          delete dataValues[DB.MODELS.PRODUCT.IMAGE];
+          return dataValues;
+        }),
+      },
+    });
   },
   /** Store home page (landing page) */
-  async home(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
+  async home(
+    req: Request,
+    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>,
+    _next: NextFunction,
+    transaction: Transaction,
+  ) {
     const { Params } = Home;
     const { storeId } = Params.parse(req.params);
 
     const { user } = req;
     if (user !== undefined) {
       const { StoreViewer } = model.db;
-      await StoreViewer.create({ userId: user.dataValues.id, storeId }, { fields: ["userId", "storeId"] });
+      await StoreViewer.create({ userId: user.dataValues.id, storeId }, { fields: ["userId", "storeId"], transaction });
     }
 
     const { store } = res.locals;
-    const {
-      db: { Product, ProductImage },
-      query,
-    } = model;
+    const { Category, Product, ProductImage } = model.db;
 
-    // TODO: use services instande of model.query
-    const categories = await query.category.withProductsCount(store!.dataValues.id);
+    const categories = await Category.findAll({
+      attributes: ["id", "name", "nameAr", "image"],
+      order: [["createAt", "DESC"]],
+    });
+
+    const categoriesArr = categories.map((category) => category.dataValues.id);
 
     const products = await Product.findAll({
       attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
       where: {
-        [Op.or]: {
-          categoryId: categories.map((category) => category.id),
-        },
+        categoryId: categoriesArr,
       },
-      limit: LENGTH.LIMIT,
-      order: ["createdAt", "DESC"],
+      order: [["createdAt", "DESC"]],
       include: {
+        as: DB.MODELS.PRODUCT.IMAGE,
         attributes: ["image"],
         model: ProductImage,
         separate: true,
@@ -175,19 +207,34 @@ export default {
       success: true,
       data: {
         store: store!.dataValues,
-        categories,
-        products: products.map((product) => product.dataValues),
+        categories: categoriesArr,
+        products: products.map((product) => {
+          const { dataValues } = product;
+
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          dataValues.image = dataValues[DB.MODELS.PRODUCT.IMAGE][0].image;
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          delete dataValues[DB.MODELS.PRODUCT.IMAGE];
+          return dataValues;
+        }),
       },
     });
   },
-  async category(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
+  async category(
+    req: Request,
+    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>,
+    _next: NextFunction,
+    transaction: Transaction,
+  ) {
     const { category } = res.locals;
     const { user } = req;
     if (user !== undefined) {
       const { CategoryViewer } = model.db;
       await CategoryViewer.create(
         { userId: user.dataValues.id, categoryId: category!.dataValues.id },
-        { fields: ["userId", "categoryId"] },
+        { fields: ["userId", "categoryId"], transaction },
       );
     }
 
@@ -212,14 +259,19 @@ export default {
       },
     });
   },
-  async product(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
+  async product(
+    req: Request,
+    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>,
+    _next: NextFunction,
+    transaction: Transaction,
+  ) {
     const { product } = res.locals;
     const { user } = req;
     if (user !== undefined) {
       const { ProductViewer } = model.db;
       await ProductViewer.create(
         { userId: user.dataValues.id, productId: product!.dataValues.id },
-        { fields: ["userId", "productId"] },
+        { fields: ["userId", "productId"], transaction },
       );
     }
 
