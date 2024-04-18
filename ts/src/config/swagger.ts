@@ -4,7 +4,7 @@ import { VALUES } from "../constant/index.js";
 import path from "node:path";
 
 const { PACKAGE } = VALUES;
-const APIs_PATH = path.join(__root, "ts/**/*.ts")
+const APIs_PATH = path.join(__root, "ts/**/*.ts");
 
 const options: swaggerJsdoc.Options = {
   failOnErrors: true,
