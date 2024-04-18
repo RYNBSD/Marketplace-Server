@@ -8,9 +8,9 @@ import { StatusCodes } from "http-status-codes";
 import { APIError } from "../../error/index.js";
 import { schema } from "../../schema/index.js";
 
-import imageExtensions from "image-extensions/image-extensions.json" assert { type: "json" };
-import videoExtensions from "video-extensions/video-extensions.json" assert { type: "json" };
-import audioExtensions from "audio-extensions/audioExtensions.json" assert { type: "json" };
+import * as imageExtensions from "image-extensions/image-extensions.json" with { type: "json" };
+import * as videoExtensions from "video-extensions/video-extensions.json" with { type: "json" };
+import * as audioExtensions from "audio-extensions/audioExtensions.json" with { type: "json" };
 
 const { toBoolean } = schema.validators;
 
@@ -126,15 +126,15 @@ export default class FileConverter extends FileTmp {
     const ext = await this.format(buffer);
     let type: SupportedFileTypes;
 
-    if (imageExtensions.includes(ext)) type = "image";
+    if (imageExtensions.default.includes(ext)) type = "image";
     else if (ext === "glb") type = "model";
-    else if (videoExtensions.includes(ext)) {
+    else if (videoExtensions.default.includes(ext)) {
       type = "video";
       const input = await this.bufferToFile(buffer, ext as FileExtension);
       const metadata = await this.ffprobeMetadata(input);
       const duration = Math.floor(metadata.format.duration ?? Infinity);
       if (duration > 60) return null;
-    } else if (audioExtensions.includes(ext)) {
+    } else if (audioExtensions.default.includes(ext)) {
       type = "audio";
       const input = await this.bufferToFile(buffer, ext as FileExtension);
       const metadata = await this.ffprobeMetadata(input);

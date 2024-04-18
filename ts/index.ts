@@ -1,9 +1,9 @@
-import { fileURLToPath } from "url";
+import { fileURLToPath } from "node:url";
 import path from "node:path";
 import process from "node:process";
 import { existsSync } from "node:fs";
+import { mkdirSync, rmSync } from "node:fs";
 import db from "./src/config/db.js";
-import { mkdirSync, rmSync } from "fs";
 
 global.IS_PRODUCTION = process.env.NODE_ENV === "production";
 global.__filename = fileURLToPath(import.meta.url);

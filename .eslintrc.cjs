@@ -26,6 +26,7 @@ module.exports = {
     "@typescript-eslint/no-explicit-any": "warn",
     "@typescript-eslint/no-unused-vars": "warn",
     "@typescript-eslint/strict-boolean-expressions": "error",
+    "@typescript-eslint/no-var-requires": "warn",
     "prettier/prettier": "error",
   },
 };
