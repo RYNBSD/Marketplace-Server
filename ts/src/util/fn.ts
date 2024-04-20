@@ -28,7 +28,7 @@ export function handleAsync(fn: HandleAsyncFn) {
         status = error.statusCode;
         message = error.message;
       } else if (error instanceof ZodError) {
-        message = error.format()._errors.join(";");
+        message = error.flatten().formErrors.join(";");
       } else if (error instanceof MulterError) {
         status = StatusCodes.FORBIDDEN;
         message = error.message;

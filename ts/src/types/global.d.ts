@@ -28,6 +28,7 @@ declare global {
       DB_PASSWORD: string;
       DB_HOST: string;
 
+      POSTGRESQL_URI: string;
       MONGODB_URI: string;
 
       MAIL_USER: string;

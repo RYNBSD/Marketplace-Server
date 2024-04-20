@@ -5,20 +5,23 @@ export default {
   async connect() {
     if (global.sequelize instanceof Sequelize) return;
 
-    global.sequelize = new Sequelize(ENV.SEQUELIZE.DB_DATABASE, ENV.SEQUELIZE.DB_USERNAME, ENV.SEQUELIZE.DB_PASSWORD, {
-      host: ENV.SEQUELIZE.DB_HOST,
-      benchmark: !IS_PRODUCTION,
+    const connectionUri =
+      ENV.URI.POSTGRESQL ||
+      `postgres://${ENV.SEQUELIZE.DB_USERNAME}:${ENV.SEQUELIZE.DB_PASSWORD}@${ENV.SEQUELIZE.DB_HOST}:5432/${ENV.SEQUELIZE.DB_DATABASE}`;
+
+    global.sequelize = new Sequelize(connectionUri, {
       dialect: "postgres",
+      benchmark: !IS_PRODUCTION,
       define: {
         freezeTableName: true,
       },
       logging: (sql, timing) => {
         if (IS_PRODUCTION) return false;
-
         console.log(`${sql}`.black.bgWhite);
         console.log(`${timing} ms`.bgYellow.black);
       },
     });
+
     await global.sequelize.authenticate();
   },
   async close() {

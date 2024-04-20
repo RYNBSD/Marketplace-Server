@@ -5,7 +5,7 @@ import { rateLimit } from "express-rate-limit";
 import LimiterStore from "rate-limit-mongo";
 import { ENV, KEYS, VALUES } from "../constant/index.js";
 
-const { MONGO } = ENV;
+const { URI } = ENV;
 const { COLLECTIONS } = KEYS.CACHE;
 const { TIME } = VALUES;
 
@@ -15,7 +15,7 @@ export default {
     // @ts-ignore
     return rateLimit({
       store: new LimiterStore({
-        uri: MONGO.URI,
+        uri: URI.MONGO,
         collectionName: COLLECTIONS.RATE_LIMIT,
         user: "",
         password: "",
@@ -28,7 +28,7 @@ export default {
   },
   initSession() {
     const store = SessionStore.create({
-      mongoUrl: MONGO.URI,
+      mongoUrl: URI.MONGO,
       collectionName: COLLECTIONS.SESSION,
     });
 

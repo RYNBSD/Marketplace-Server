@@ -44,7 +44,7 @@ export const ORDER_STATUS = ["wait", "process", "done", "canceled"] as const;
 export const QUALITY = ["low", "medium", "high"] as const;
 
 export const EXTENSIONS = {
-  IMAGES: [
+  IMAGE: [
     "ase",
     "art",
     "bmp",

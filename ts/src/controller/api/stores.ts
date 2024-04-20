@@ -23,7 +23,7 @@ export default {
 
     const [products, categories, stores] = await Promise.all([
       Product.findAll({
-        attributes: ["id", "title", "titleAr", "description", "descriptionAr"],
+        attributes: ["id", "title", "titleAr", "description", "descriptionAr", "categoryId"],
         where: {
           [Op.or]: [
             ...keys.map((key) => ({ title: key })),
@@ -39,11 +39,12 @@ export default {
           required: true,
           limit: 1,
         },
+
         order: [["createdAt", "DESC"]],
         limit,
       }),
       Category.findAll({
-        attributes: ["id", "name", "nameAr", "image"],
+        attributes: ["id", "name", "nameAr", "image", "storeId"],
         where: {
           [Op.or]: [...keys.map((key) => ({ nameAr: key })), ...keys.map((key) => ({ name: key }))],
         },
@@ -80,30 +81,45 @@ export default {
     // };
     //   const [] = new Fuse()
 
+    const p = await Promise.all(
+      products.map(async (product) => {
+        const { dataValues } = product;
+
+        const category = await Category.findOne({
+          attributes: ["storeId"],
+          where: { id: product.dataValues.categoryId },
+          limit: 1,
+          plain: true,
+        });
+
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        dataValues.storeId = category!.dataValues.storeId;
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        dataValues.image = dataValues[DB.MODELS.PRODUCT.IMAGE][0].image;
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        delete dataValues[DB.MODELS.PRODUCT.IMAGE];
+
+        return dataValues;
+      }),
+    );
+
     res.status(StatusCodes.OK).json({
       success: true,
       data: {
         stores,
         categories,
-        products: products.map((product) => {
-          const { dataValues } = product;
-
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          dataValues.image = dataValues[DB.MODELS.PRODUCT.IMAGE][0].image;
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          delete dataValues[DB.MODELS.PRODUCT.IMAGE];
-          return dataValues;
-        }),
+        products: p,
       },
     });
   },
   async all(_req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
     const { Store } = model.db;
-    const stores = Store.findAll({
+    const stores = await Store.findAll({
       attributes: ["id", "name", "image"],
-      limit: 25,
+      // limit: 25,
       raw: true,
       order: [["createdAt", "DESC"]],
     });
@@ -115,9 +131,9 @@ export default {
   },
   async categories(_req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
     const { Category } = model.db;
-    const categories = Category.findAll({
+    const categories = await Category.findAll({
       attributes: ["id", "name", "nameAr", "image"],
-      limit: 25,
+      // limit: 25,
       raw: true,
       order: [["createdAr", "DESC"]],
     });
@@ -141,7 +157,7 @@ export default {
         limit: 1,
       },
       order: [["createdAt", "DESC"]],
-      limit: 25,
+      // limit: 25,
     });
 
     res.status(StatusCodes.OK).json({
@@ -228,7 +244,7 @@ export default {
     _next: NextFunction,
     transaction: Transaction,
   ) {
-    const { category } = res.locals;
+    const category = res.locals.category!;
     const { user } = req;
     if (user !== undefined) {
       const { CategoryViewer } = model.db;
@@ -241,8 +257,8 @@ export default {
     const { Product, ProductImage } = model.db;
     const products = await Product.findAll({
       attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
-      where: { categoryId: category!.dataValues.id },
-      order: ["createdAt", "DESC"],
+      where: { categoryId: category.dataValues.id },
+      order: [["createdAt", "DESC"]],
       include: {
         attributes: ["image"],
         model: ProductImage,
@@ -255,6 +271,7 @@ export default {
     res.status(StatusCodes.OK).json({
       success: true,
       data: {
+        category: category.dataValues,
         products: products.map((product) => product.dataValues),
       },
     });

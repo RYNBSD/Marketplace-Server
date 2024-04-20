@@ -1,5 +1,5 @@
-// import * as packageJson from "../../../package.json" with { type: "json" };
-const { default: packageJson } = await import("../../../package.json", { with: { type: "json" } });
+import packageJson from "../../../package.json" with { type: "json" };
+// const { default: packageJson } = await import("../../../package.json", { with: { type: "json" } });
 
 export default {
   TIME: {

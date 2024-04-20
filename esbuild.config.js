@@ -15,7 +15,7 @@ buildSync({
     packages: "external",
     outdir: BUILD,
     logLevel: "info",
-    target: "node16",
+    target: "node20",
     platform: "node",
     splitting: true,
     format: "esm",

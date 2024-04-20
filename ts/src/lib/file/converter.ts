@@ -123,7 +123,7 @@ export default class FileConverter extends FileTmp {
     const ext = await this.format(buffer);
     let type: SupportedFileTypes;
 
-    if (EXTENSIONS.IMAGES.includes(ext)) type = "image";
+    if (EXTENSIONS.IMAGE.includes(ext)) type = "image";
     else if (ext === "glb") type = "model";
     else if (EXTENSIONS.VIDEO.includes(ext)) {
       type = "video";
