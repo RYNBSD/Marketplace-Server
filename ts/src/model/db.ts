@@ -194,7 +194,7 @@ export const StoreViewer = sequelize.define<Tables["StoreViewer"]>(
     },
     [ID.FOREIGN_KEY.USER]: {
       type: DataTypes.UUID,
-      allowNull: false,
+      allowNull: true,
       references: {
         model: User,
         key: "id",
@@ -269,7 +269,7 @@ export const CategoryViewer = sequelize.define<Tables["CategoryViewer"]>(
     },
     [ID.FOREIGN_KEY.USER]: {
       type: DataTypes.UUID,
-      allowNull: false,
+      allowNull: true,
       references: {
         model: User,
         key: "id",
@@ -542,7 +542,7 @@ export const ProductViewer = sequelize.define<Tables["ProductViewer"]>(
     },
     [ID.FOREIGN_KEY.USER]: {
       type: DataTypes.UUID,
-      allowNull: false,
+      allowNull: true,
       references: {
         model: User,
         key: "id",

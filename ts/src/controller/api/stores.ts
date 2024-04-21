@@ -6,6 +6,7 @@ import { StatusCodes } from "http-status-codes";
 import { schema } from "../../schema/index.js";
 import { model } from "../../model/index.js";
 import { KEYS } from "../../constant/index.js";
+import { service } from "../../service/index.js";
 
 const { Search, Home } = schema.req.api.store;
 const { DB } = KEYS;
@@ -190,7 +191,7 @@ export default {
     const { StoreViewer } = model.db;
     await StoreViewer.create(
       { ip: req.clientIp, userId: user?.dataValues.id, storeId },
-      { fields: ["userId", "storeId"], transaction },
+      { fields: ["ip", "userId", "storeId"], transaction },
     );
 
     const store = res.locals.store!;
@@ -262,11 +263,10 @@ export default {
   ) {
     const category = res.locals.category!;
     const { user } = req;
-
     const { CategoryViewer, Product, ProductImage, Category } = model.db;
     await CategoryViewer.create(
       { ip: req.clientIp, userId: user?.dataValues.id, categoryId: category.dataValues.id },
-      { fields: ["userId", "categoryId"], transaction },
+      { fields: ["ip", "userId", "categoryId"], transaction },
     );
 
     const products = await Product.findAll({
@@ -275,12 +275,14 @@ export default {
       order: [["createdAt", "DESC"]],
       include: [
         {
+          as: DB.MODELS.PRODUCT.IMAGE,
           attributes: ["image"],
           model: ProductImage,
           required: true,
           limit: 1,
         },
         {
+          as: DB.MODELS.CATEGORY.MODEL,
           attributes: ["storeId"],
           model: Category,
           required: true,
@@ -292,7 +294,25 @@ export default {
       success: true,
       data: {
         category: category.dataValues,
-        products: products.map((product) => product.dataValues),
+        products: products.map((product) => {
+          const { dataValues } = product;
+
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          dataValues.image = dataValues[DB.MODELS.PRODUCT.IMAGE][0].dataValues.image;
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          delete dataValues[DB.MODELS.PRODUCT.IMAGE];
+
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          dataValues.storeId = dataValues[DB.MODELS.CATEGORY.MODEL].dataValues.storeId;
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          delete dataValues[DB.MODELS.CATEGORY.MODEL];
+
+          return dataValues;
+        }),
       },
     });
   },
@@ -302,78 +322,15 @@ export default {
     _next: NextFunction,
     transaction: Transaction,
   ) {
-    const product = res.locals.product!;
+    const localProduct = res.locals.product!;
     const { user } = req;
-    if (user !== undefined) {
-      const { ProductViewer } = model.db;
-      await ProductViewer.create(
-        { ip: req.clientIp, userId: user.dataValues.id, productId: product!.dataValues.id },
-        { fields: ["userId", "productId"], transaction },
-      );
-    }
+    const { ProductViewer } = model.db;
+    await ProductViewer.create(
+      { ip: req.clientIp, userId: user?.dataValues.id, productId: localProduct!.dataValues.id },
+      { fields: ["ip", "userId", "productId"], transaction },
+    );
 
-    const { User, Tag, Product, ProductImage, ProductColor, ProductInfo, ProductRating, ProductSize, ProductTag } =
-      model.db;
-
-    const fullProduct = await Product.findOne({
-      attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
-      where: { id: product!.dataValues.id },
-      include: [
-        {
-          attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
-          model: ProductImage,
-          separate: true,
-          required: true,
-        },
-        {
-          attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
-          model: ProductColor,
-          separate: true,
-          required: false,
-        },
-        {
-          attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
-          model: ProductInfo,
-          separate: true,
-          required: false,
-        },
-        {
-          attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
-          model: ProductSize,
-          separate: true,
-          required: false,
-        },
-        {
-          attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
-          model: ProductRating,
-          separate: true,
-          required: false,
-          include: [
-            {
-              attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
-              model: User,
-              separate: true,
-              required: true,
-            },
-          ],
-        },
-        {
-          attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
-          model: ProductTag,
-          separate: true,
-          required: false,
-          include: [
-            {
-              attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
-              model: Tag,
-              separate: true,
-              required: true,
-            },
-          ],
-        },
-      ],
-    });
-
-    res.status(StatusCodes.OK).json({ success: true, data: { product: fullProduct!.dataValues } });
+    const product = await service.product.one(localProduct.dataValues.id);
+    res.status(StatusCodes.OK).json({ success: true, data: { product } });
   },
 } as const;

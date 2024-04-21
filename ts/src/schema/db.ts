@@ -132,7 +132,7 @@ export const ProductColor = z
   .merge(ProductId)
   .strict();
 
-export const ProductViewer = z.object({}).merge(IdInt).merge(ProductId).merge(UserId).merge(Ip).strict();
+export const ProductViewer = z.object({}).merge(IdInt).merge(ProductId).merge(NullUserId).merge(Ip).strict();
 
 export const Tag = z
   .object({
