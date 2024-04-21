@@ -339,6 +339,7 @@ export const Product = sequelize.define<Tables["Product"]>(
     paranoid: true,
   },
 );
+Product.belongsTo(Category, { foreignKey: ID.FOREIGN_KEY.CATEGORY, as: MODELS.CATEGORY.MODEL });
 Category.hasMany(Product, { foreignKey: ID.FOREIGN_KEY.CATEGORY, as: MODELS.PRODUCT.MODEL });
 Product.addHook("afterDestroy", async (product) => {
   await Promise.all([

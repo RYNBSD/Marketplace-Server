@@ -32,14 +32,21 @@ export default {
             ...keys.map((key) => ({ descriptionAr: key })),
           ],
         },
-        include: {
-          as: DB.MODELS.PRODUCT.IMAGE,
-          attributes: ["image"],
-          model: ProductImage,
-          required: true,
-          limit: 1,
-        },
-
+        include: [
+          {
+            as: DB.MODELS.PRODUCT.IMAGE,
+            attributes: ["image"],
+            model: ProductImage,
+            required: true,
+            limit: 1,
+          },
+          {
+            as: DB.MODELS.CATEGORY.MODEL,
+            attributes: ["storeId"],
+            model: Category,
+            required: true,
+          },
+        ],
         order: [["createdAt", "DESC"]],
         limit,
       }),
@@ -81,37 +88,30 @@ export default {
     // };
     //   const [] = new Fuse()
 
-    const p = await Promise.all(
-      products.map(async (product) => {
-        const { dataValues } = product;
-
-        const category = await Category.findOne({
-          attributes: ["storeId"],
-          where: { id: product.dataValues.categoryId },
-          limit: 1,
-          plain: true,
-        });
-
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        dataValues.storeId = category!.dataValues.storeId;
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        dataValues.image = dataValues[DB.MODELS.PRODUCT.IMAGE][0].image;
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        delete dataValues[DB.MODELS.PRODUCT.IMAGE];
-
-        return dataValues;
-      }),
-    );
-
     res.status(StatusCodes.OK).json({
       success: true,
       data: {
         stores,
         categories,
-        products: p,
+        products: products.map((product) => {
+          const { dataValues } = product;
+
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          dataValues.image = dataValues[DB.MODELS.PRODUCT.IMAGE][0].dataValues.image;
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          delete dataValues[DB.MODELS.PRODUCT.IMAGE];
+
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          dataValues.storeId = dataValues[DB.MODELS.CATEGORY.MODEL].dataValues.storeId;
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          delete dataValues[DB.MODELS.CATEGORY.MODEL];
+
+          return dataValues;
+        }),
       },
     });
   },
@@ -193,15 +193,16 @@ export default {
       await StoreViewer.create({ userId: user.dataValues.id, storeId }, { fields: ["userId", "storeId"], transaction });
     }
 
-    const { store } = res.locals;
+    const store = res.locals.store!;
     const { Category, Product, ProductImage } = model.db;
 
     const categories = await Category.findAll({
-      attributes: ["id", "name", "nameAr", "image"],
+      attributes: ["id", "name", "nameAr", "image", "storeId"],
       order: [["createAt", "DESC"]],
+      where: { storeId: store.dataValues.id },
     });
 
-    const categoriesArr = categories.map((category) => category.dataValues.id);
+    const categoriesRaw = categories.map((category) => category.dataValues.id);
 
     const products = await Product.findAll({
       attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
@@ -209,21 +210,30 @@ export default {
         categoryId: categoriesArr,
       },
       order: [["createdAt", "DESC"]],
-      include: {
-        as: DB.MODELS.PRODUCT.IMAGE,
-        attributes: ["image"],
-        model: ProductImage,
-        separate: true,
-        required: true,
-        limit: 1,
-      },
+      include: [
+        {
+          as: DB.MODELS.PRODUCT.IMAGE,
+          attributes: ["image"],
+          model: ProductImage,
+          separate: true,
+          required: true,
+          limit: 1,
+        },
+        {
+          as: DB.MODELS.CATEGORY.MODEL,
+          attributes: ["storeId"],
+          model: Category,
+          required: true,
+          limit: 1,
+        },
+      ],
     });
 
     res.status(StatusCodes.OK).json({
       success: true,
       data: {
-        store: store!.dataValues,
-        categories: categoriesArr,
+        store: store.dataValues,
+        categories: categoriesRaw,
         products: products.map((product) => {
           const { dataValues } = product;
 
