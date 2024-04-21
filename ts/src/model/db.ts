@@ -183,9 +183,14 @@ export const StoreViewer = sequelize.define<Tables["StoreViewer"]>(
   MODELS.STORE.VIEWER,
   {
     [ID.PRIMARY_KEY.ID]: {
-      type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4,
+      type: DataTypes.BIGINT.UNSIGNED,
+      autoIncrement: true,
+      allowNull: true,
       primaryKey: true,
+    },
+    ip: {
+      type: DataTypes.STRING(32),
+      allowNull: true,
     },
     [ID.FOREIGN_KEY.USER]: {
       type: DataTypes.UUID,
@@ -253,9 +258,14 @@ export const CategoryViewer = sequelize.define<Tables["CategoryViewer"]>(
   MODELS.CATEGORY.VIEWER,
   {
     [ID.PRIMARY_KEY.ID]: {
-      type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4,
+      type: DataTypes.BIGINT.UNSIGNED,
+      autoIncrement: true,
+      allowNull: true,
       primaryKey: true,
+    },
+    ip: {
+      type: DataTypes.STRING(32),
+      allowNull: true,
     },
     [ID.FOREIGN_KEY.USER]: {
       type: DataTypes.UUID,
@@ -521,9 +531,14 @@ export const ProductViewer = sequelize.define<Tables["ProductViewer"]>(
   MODELS.PRODUCT.VIEWER,
   {
     [ID.PRIMARY_KEY.ID]: {
-      type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4,
+      type: DataTypes.BIGINT.UNSIGNED,
+      autoIncrement: true,
+      allowNull: false,
       primaryKey: true,
+    },
+    ip: {
+      type: DataTypes.STRING(32),
+      allowNull: false,
     },
     [ID.FOREIGN_KEY.USER]: {
       type: DataTypes.UUID,

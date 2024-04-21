@@ -6,10 +6,13 @@ import { ENUM, KEYS } from "../constant/index.js";
 const IdInt = z.object({ id: z.number() });
 const IdUUID = z.object({ id: z.string().uuid() }).strict();
 const UserId = z.object({ userId: z.string().uuid() }).strict();
+const NullUserId = z.object({ userId: z.string().uuid().nullable() }).strict();
 const StoreId = z.object({ storeId: z.string().uuid() }).strict();
 const CategoryId = z.object({ categoryId: z.string().uuid() }).strict();
 const ProductId = z.object({ productId: z.string().uuid() }).strict();
 const TagId = z.object({ tagId: z.string().uuid() }).strict();
+
+const Ip = z.object({ ip: z.string().nullable() }).strict();
 
 export const User = z
   .object({
@@ -57,7 +60,7 @@ export const StoreLink = z
   .merge(StoreId)
   .strict();
 
-export const StoreViewer = z.object({}).merge(IdUUID).merge(StoreId).merge(UserId).strict();
+export const StoreViewer = z.object({}).merge(IdInt).merge(StoreId).merge(NullUserId).merge(Ip).strict();
 
 export const Category = z
   .object({
@@ -69,7 +72,7 @@ export const Category = z
   .merge(StoreId)
   .strict();
 
-export const CategoryViewer = z.object({}).merge(IdUUID).merge(CategoryId).merge(UserId).strict();
+export const CategoryViewer = z.object({}).merge(IdInt).merge(CategoryId).merge(NullUserId).merge(Ip).strict();
 
 export const Product = z
   .object({
@@ -129,7 +132,7 @@ export const ProductColor = z
   .merge(ProductId)
   .strict();
 
-export const ProductViewer = z.object({}).merge(IdUUID).merge(ProductId).merge(UserId).strict();
+export const ProductViewer = z.object({}).merge(IdInt).merge(ProductId).merge(UserId).merge(Ip).strict();
 
 export const Tag = z
   .object({

@@ -13,6 +13,7 @@ import methodOverride from "method-override";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import responseTime from "response-time";
+import requestIp from "request-ip";
 import { StatusCodes } from "http-status-codes";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
@@ -139,6 +140,7 @@ app.use(
 // );
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(requestIp.mw());
 
 app.use(`/v${PACKAGE.VERSION}`, router);
 app.use(express.static(path.join(__root, KEYS.GLOBAL.PUBLIC), { etag: true }));

@@ -13,7 +13,7 @@ const {
     store: { checkStore, checkCategory, checkProduct },
   },
 } = middleware;
-const { search, all, home, category, product } = controller.api.stores;
+const { search, all, store, category, product } = controller.api.stores;
 
 export const stores = Router();
 
@@ -25,7 +25,7 @@ stores.get("/categories");
 
 stores.get("/products");
 
-stores.get(`/:${PARAMS.ID.STORE}`, handleAsync(checkStore), handleAsync(home));
+stores.get(`/:${PARAMS.ID.STORE}`, handleAsync(checkStore), handleAsync(store));
 
 stores.get(
   `/:${PARAMS.ID.STORE}/:${PARAMS.ID.CATEGORY}`,

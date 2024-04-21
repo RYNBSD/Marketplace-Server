@@ -23,7 +23,7 @@ export default {
 
     const [products, categories, stores] = await Promise.all([
       Product.findAll({
-        attributes: ["id", "title", "titleAr", "description", "descriptionAr", "categoryId"],
+        attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
         where: {
           [Op.or]: [
             ...keys.map((key) => ({ title: key })),
@@ -118,7 +118,7 @@ export default {
   async all(_req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
     const { Store } = model.db;
     const stores = await Store.findAll({
-      attributes: ["id", "name", "image"],
+      attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
       // limit: 25,
       raw: true,
       order: [["createdAt", "DESC"]],
@@ -132,7 +132,7 @@ export default {
   async categories(_req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
     const { Category } = model.db;
     const categories = await Category.findAll({
-      attributes: ["id", "name", "nameAr", "image"],
+      attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
       // limit: 25,
       raw: true,
       order: [["createdAr", "DESC"]],
@@ -148,7 +148,7 @@ export default {
   async products(_req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
     const { Product, ProductImage } = model.db;
     const products = await Product.findAll({
-      attributes: ["id", "title", "titleAr", "description", "descriptionAr"],
+      attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
       include: {
         as: DB.MODELS.PRODUCT.IMAGE,
         attributes: ["image"],
@@ -177,8 +177,7 @@ export default {
       },
     });
   },
-  /** Store home page (landing page) */
-  async home(
+  async store(
     req: Request,
     res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>,
     _next: NextFunction,
@@ -188,26 +187,27 @@ export default {
     const { storeId } = Params.parse(req.params);
 
     const { user } = req;
-    if (user !== undefined) {
-      const { StoreViewer } = model.db;
-      await StoreViewer.create({ userId: user.dataValues.id, storeId }, { fields: ["userId", "storeId"], transaction });
-    }
+    const { StoreViewer } = model.db;
+    await StoreViewer.create(
+      { ip: req.clientIp, userId: user?.dataValues.id, storeId },
+      { fields: ["userId", "storeId"], transaction },
+    );
 
     const store = res.locals.store!;
     const { Category, Product, ProductImage } = model.db;
 
     const categories = await Category.findAll({
-      attributes: ["id", "name", "nameAr", "image", "storeId"],
-      order: [["createAt", "DESC"]],
+      attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
+      order: [["createdAt", "DESC"]],
       where: { storeId: store.dataValues.id },
     });
 
-    const categoriesRaw = categories.map((category) => category.dataValues.id);
+    const categoriesId = categories.map((category) => category.dataValues.id);
 
     const products = await Product.findAll({
       attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
       where: {
-        categoryId: categoriesArr,
+        categoryId: categoriesId,
       },
       order: [["createdAt", "DESC"]],
       include: [
@@ -215,7 +215,6 @@ export default {
           as: DB.MODELS.PRODUCT.IMAGE,
           attributes: ["image"],
           model: ProductImage,
-          separate: true,
           required: true,
           limit: 1,
         },
@@ -224,7 +223,6 @@ export default {
           attributes: ["storeId"],
           model: Category,
           required: true,
-          limit: 1,
         },
       ],
     });
@@ -233,16 +231,24 @@ export default {
       success: true,
       data: {
         store: store.dataValues,
-        categories: categoriesRaw,
+        categories: categories.map((category) => category.dataValues),
         products: products.map((product) => {
           const { dataValues } = product;
 
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore
-          dataValues.image = dataValues[DB.MODELS.PRODUCT.IMAGE][0].image;
+          dataValues.image = dataValues[DB.MODELS.PRODUCT.IMAGE][0].dataValues.image;
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore
           delete dataValues[DB.MODELS.PRODUCT.IMAGE];
+
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          dataValues.storeId = dataValues[DB.MODELS.CATEGORY.MODEL].dataValues.storeId;
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          delete dataValues[DB.MODELS.CATEGORY.MODEL];
+
           return dataValues;
         }),
       },
@@ -256,26 +262,30 @@ export default {
   ) {
     const category = res.locals.category!;
     const { user } = req;
-    if (user !== undefined) {
-      const { CategoryViewer } = model.db;
-      await CategoryViewer.create(
-        { userId: user.dataValues.id, categoryId: category!.dataValues.id },
-        { fields: ["userId", "categoryId"], transaction },
-      );
-    }
 
-    const { Product, ProductImage } = model.db;
+    const { CategoryViewer, Product, ProductImage, Category } = model.db;
+    await CategoryViewer.create(
+      { ip: req.clientIp, userId: user?.dataValues.id, categoryId: category.dataValues.id },
+      { fields: ["userId", "categoryId"], transaction },
+    );
+
     const products = await Product.findAll({
       attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
       where: { categoryId: category.dataValues.id },
       order: [["createdAt", "DESC"]],
-      include: {
-        attributes: ["image"],
-        model: ProductImage,
-        required: true,
-        separate: true,
-        limit: 1,
-      },
+      include: [
+        {
+          attributes: ["image"],
+          model: ProductImage,
+          required: true,
+          limit: 1,
+        },
+        {
+          attributes: ["storeId"],
+          model: Category,
+          required: true,
+        },
+      ],
     });
 
     res.status(StatusCodes.OK).json({
@@ -292,12 +302,12 @@ export default {
     _next: NextFunction,
     transaction: Transaction,
   ) {
-    const { product } = res.locals;
+    const product = res.locals.product!;
     const { user } = req;
     if (user !== undefined) {
       const { ProductViewer } = model.db;
       await ProductViewer.create(
-        { userId: user.dataValues.id, productId: product!.dataValues.id },
+        { ip: req.clientIp, userId: user.dataValues.id, productId: product!.dataValues.id },
         { fields: ["userId", "productId"], transaction },
       );
     }

@@ -11,10 +11,10 @@ type UserSetting = z.infer<typeof schema.db.UserSetting>;
 type Store = z.infer<typeof schema.db.Store> & CreateOptionalIdString;
 type StoreSetting = z.infer<typeof schema.db.StoreSetting>;
 type StoreLink = z.infer<typeof schema.db.StoreLink> & CreateOptionalIdString;
-type StoreViewer = z.infer<typeof schema.db.StoreViewer> & CreateOptionalIdString;
+type StoreViewer = z.infer<typeof schema.db.StoreViewer> & CreateOptionalIdNumber;
 
 type Category = z.infer<typeof schema.db.Category> & CreateOptionalIdString;
-type CategoryViewer = z.infer<typeof schema.db.CategoryViewer> & CreateOptionalIdString;
+type CategoryViewer = z.infer<typeof schema.db.CategoryViewer> & CreateOptionalIdNumber;
 
 type Product = z.infer<typeof schema.db.Product> & CreateOptionalIdString;
 type ProductInfo = z.infer<typeof schema.db.ProductInfo> & CreateOptionalIdNumber;
@@ -22,7 +22,7 @@ type ProductImage = z.infer<typeof schema.db.ProductImage> & CreateOptionalIdNum
 type ProductRating = z.infer<typeof schema.db.ProductRating>;
 type ProductSizes = z.infer<typeof schema.db.ProductSize> & CreateOptionalIdNumber;
 type ProductColor = z.infer<typeof schema.db.ProductColor> & CreateOptionalIdNumber;
-type ProductViewer = z.infer<typeof schema.db.ProductViewer> & CreateOptionalIdString;
+type ProductViewer = z.infer<typeof schema.db.ProductViewer> & CreateOptionalIdNumber;
 
 type Tag = z.infer<typeof schema.db.Tag> & CreateOptionalIdString;
 type ProductTag = z.infer<typeof schema.db.ProductTag> & CreateOptionalIdNumber;
