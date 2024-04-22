@@ -102,7 +102,7 @@ export default {
     await category!.update({ name, nameAr, image: newImage }, { fields: ["name", "nameAr", "image"], transaction });
     res.status(StatusCodes.OK).json({ success: true, data: { category: category!.dataValues } });
   },
-  async delete(
+  async remove(
     _req: Request,
     res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>,
     _next: NextFunction,

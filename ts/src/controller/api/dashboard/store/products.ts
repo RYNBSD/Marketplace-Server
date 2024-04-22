@@ -355,7 +355,7 @@ export default {
 
     res.status(StatusCodes.OK).json({ success: true });
   },
-  async delete(
+  async remove(
     _req: Request,
     res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>,
     _next: NextFunction,

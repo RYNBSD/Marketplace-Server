@@ -1,11 +1,12 @@
 import type { NextFunction, Request, Response } from "express";
 import type { Transaction } from "sequelize";
-import type { TResponse } from "../../types/index.js";
+import type { TResponse } from "../../../types/index.js";
 import { StatusCodes } from "http-status-codes";
-import { APIError } from "../../error/index.js";
-import { model } from "../../model/index.js";
-import { schema } from "../../schema/index.js";
-import { lib } from "../../lib/index.js";
+import orders from "./orders.js";
+import { APIError } from "../../../error/index.js";
+import { model } from "../../../model/index.js";
+import { schema } from "../../../schema/index.js";
+import { lib } from "../../../lib/index.js";
 
 const { Setting, BecomeSeller, Update } = schema.req.api.user;
 
@@ -37,14 +38,6 @@ export default {
         store: store?.dataValues ?? null,
       },
     });
-  },
-  async orders(req: Request, res: Response<TResponse["Body"]["Success"]>) {
-    req;
-    res.status(StatusCodes.OK).json({ success: true });
-  },
-  async order(req: Request, res: Response<TResponse["Body"]["Success"]>) {
-    req;
-    res.status(StatusCodes.OK).json({ success: true });
   },
   async setting(
     req: Request,
@@ -174,7 +167,7 @@ export default {
       },
     });
   },
-  async delete(
+  async remove(
     req: Request,
     res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>,
     _next: NextFunction,
@@ -184,4 +177,5 @@ export default {
     await user.destroy({ force: false, transaction });
     res.status(StatusCodes.OK).json({ success: true });
   },
+  orders,
 } as const;

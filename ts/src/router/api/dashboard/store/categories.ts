@@ -17,7 +17,7 @@ const {
     store: { isCategoryOwner },
   },
 } = middleware;
-const { all, category, create, update, delete: deleteCategory } = controller.api.dashboard.store.categories;
+const { all, category, create, update, remove: deleteCategory } = controller.api.dashboard.store.categories;
 
 export const categories = Router();
 

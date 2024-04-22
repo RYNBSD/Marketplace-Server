@@ -10,11 +10,10 @@ const {
   api: {
     store: { isSeller },
   },
-  fn: { isAuthenticated },
 } = middleware;
 
 export const dashboard = Router();
 
-dashboard.use("/store", handleAsync(isAuthenticated), handleAsync(isSeller), store);
+dashboard.use("/store", handleAsync(isSeller), store);
 
 dashboard.use("/admin", admin);

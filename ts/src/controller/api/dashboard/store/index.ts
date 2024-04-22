@@ -74,7 +74,7 @@ export default {
     await store.update({ name, image: newImage }, { fields: ["name", "image"], transaction });
     res.status(StatusCodes.OK).json({ success: true, data: { store: store!.dataValues } });
   },
-  async delete(
+  async remove(
     _req: Request,
     res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>,
     _next: NextFunction,

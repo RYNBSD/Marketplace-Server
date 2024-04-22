@@ -12,7 +12,7 @@ const {
   UPLOAD: { IMAGE },
 } = KEYS;
 const { handleAsync } = util.fn;
-const { profile, update, delete: deleteSeller } = controller.api.dashboard.store;
+const { profile, update, remove: deleteSeller } = controller.api.dashboard.store;
 
 export const store = Router();
 

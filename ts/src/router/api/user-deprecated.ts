@@ -14,7 +14,7 @@ const { handleAsync } = util.fn;
 const {
   fn: { isAuthenticated },
 } = middleware;
-const { profile, orders, order, setting, becomeSeller, update, delete: deleteUser } = controller.api.user;
+const { profile, orders, order, setting, becomeSeller, update, remove: deleteUser } = controller.api.user;
 
 export const user = Router();
 
