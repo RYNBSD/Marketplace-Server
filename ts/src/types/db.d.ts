@@ -27,7 +27,13 @@ type ProductViewer = z.infer<typeof schema.db.ProductViewer> & CreateOptionalIdN
 type Tag = z.infer<typeof schema.db.Tag> & CreateOptionalIdString;
 type ProductTag = z.infer<typeof schema.db.ProductTag> & CreateOptionalIdNumber;
 
-type Order = z.infer<typeof schema.db.Order> & CreateOptionalIdString;
+type Order = z.infer<typeof schema.db.Order> &
+  CreateOptionalIdNumber & {
+    status: CreationOptional<string>;
+    processedAt: CreationOptional<Date>;
+    doneAt: CreationOptional<Date>;
+    canceledAt: CreationOptional<Date>;
+  };
 
 type ResponseTime = z.infer<typeof schema.db.ResponseTime> & CreateOptionalIdNumber;
 

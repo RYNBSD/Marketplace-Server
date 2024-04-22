@@ -17,3 +17,7 @@ export const CategoryId = z.object({
 export const ProductId = z.object({
   [PARAMS.ID.PRODUCT]: z.string().trim().min(MIN.REQUIRED).uuid(),
 });
+
+export const OrderId = z.object({
+  [PARAMS.ID.ORDER]: z.coerce.number().min(0),
+});

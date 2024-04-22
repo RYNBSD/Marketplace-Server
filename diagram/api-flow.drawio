@@ -1,4 +1,4 @@
-<mxfile host="Electron" modified="2024-04-22T11:07:47.599Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.2.5 Chrome/120.0.6099.109 Electron/28.1.0 Safari/537.36" etag="swq2us5dC7ohc5PKahBk" version="24.2.5" type="device" pages="2">
+<mxfile host="Electron" modified="2024-04-22T12:43:29.097Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.2.5 Chrome/120.0.6099.109 Electron/28.1.0 Safari/537.36" etag="mwhBKyT8Lw7R7neUXdGM" version="24.2.5" type="device" pages="2">
   <diagram id="hi6yGbucD_QqPNxa_KCv" name="stack">
     <mxGraphModel dx="1434" dy="836" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
@@ -260,7 +260,7 @@
     </mxGraphModel>
   </diagram>
   <diagram name="v1" id="l-5uWVbsXPdIGVEoL2Zx">
-    <mxGraphModel dx="2173" dy="1895" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="2294" dy="1967" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -672,11 +672,14 @@
         <mxCell id="7qi4g9BWE49auGnhedqW-6" value="/&lt;div&gt;!&lt;/div&gt;&lt;div&gt;(new order)&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#FFFF00;" vertex="1" parent="1">
           <mxGeometry x="2040" y="380" width="120" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="7qi4g9BWE49auGnhedqW-8" value=":id&lt;div&gt;!&lt;/div&gt;&lt;div&gt;(update order)&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#0000FF;" vertex="1" parent="1">
+        <mxCell id="7qi4g9BWE49auGnhedqW-8" value=":id&lt;div&gt;!&lt;/div&gt;&lt;div&gt;(update order quantity)&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#670069;fillColor=default;" vertex="1" parent="1">
           <mxGeometry x="2200" y="380" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="7qi4g9BWE49auGnhedqW-10" value=":id&lt;div&gt;/&lt;/div&gt;&lt;div&gt;(cancel/delete order)&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#FF0000;" vertex="1" parent="1">
           <mxGeometry x="2360" y="380" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="7qi4g9BWE49auGnhedqW-12" value="PATCH" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontColor=#670069;" vertex="1" parent="1">
+          <mxGeometry x="395" y="-190" width="60" height="30" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>

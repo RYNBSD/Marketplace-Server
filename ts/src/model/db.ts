@@ -635,8 +635,8 @@ export const Order = sequelize.define<Tables["Order"]>(
   {
     [ID.PRIMARY_KEY.ID]: {
       primaryKey: true,
-      type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4,
+      type: DataTypes.BIGINT.UNSIGNED,
+      autoIncrement: true,
     },
     quantity: {
       type: DataTypes.SMALLINT.UNSIGNED,

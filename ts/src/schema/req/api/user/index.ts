@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { ENUM, VALUES } from "../../../constant/index.js";
+import { ENUM, VALUES } from "../../../../constant/index.js";
+import orders from "./orders.js";
 
 const { MIN, MAX } = VALUES.LENGTH;
 
@@ -23,4 +24,5 @@ export default {
       username: z.string().trim().min(MIN.REQUIRED).max(MAX.USER.USERNAME),
     }),
   },
+  orders,
 } as const;

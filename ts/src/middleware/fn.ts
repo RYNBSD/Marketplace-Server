@@ -3,6 +3,9 @@ import type { TResponse } from "../types/index.js";
 import { StatusCodes } from "http-status-codes";
 import { APIError } from "../error/index.js";
 import { model } from "../model/index.js";
+import { schema } from "../schema/index.js";
+
+const { OrderId } = schema.id;
 
 /** Check if user has registered */
 export async function isAuthenticated(req: Request, _res: Response<never, TResponse["Locals"]>, next: NextFunction) {
@@ -17,6 +20,26 @@ export async function notAuthenticated(req: Request, _res: Response<never, TResp
   const authenticated = req.isAuthenticated();
   if (authenticated) throw APIError.middleware(StatusCodes.NOT_ACCEPTABLE, "User already authenticated");
 
+  return next();
+}
+
+export async function checkOrder(req: Request, res: Response<never, TResponse["Locals"]>, next: NextFunction) {
+  const user = req.user!;
+  const { orderId } = OrderId.parse(req.params);
+
+  const { Order } = model.db;
+  const order = await Order.findOne({
+    attributes: { exclude: ["createdAt", "updatedAt"] },
+    where: { id: orderId, userId: user.dataValues.id },
+    limit: 1,
+    plain: true,
+  });
+  if (order === null) throw APIError.middleware(StatusCodes.NOT_FOUND, "Order not found");
+
+  res.locals = {
+    ...res.locals,
+    order,
+  };
   return next();
 }
 

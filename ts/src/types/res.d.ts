@@ -4,6 +4,7 @@ type Locals = {
   store: Tables["Store"];
   category: Tables["Category"];
   product: Tables["Product"];
+  order: Tables["Order"];
 };
 
 type BodyData = Record<string, unknown>;

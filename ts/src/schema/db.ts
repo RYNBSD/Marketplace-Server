@@ -153,7 +153,7 @@ export const Order = z
     doneAt: z.date().nullable(),
     canceledAt: z.date().nullable(),
   })
-  .merge(IdUUID)
+  .merge(IdInt)
   .merge(UserId)
   .merge(ProductId)
   .strict();
