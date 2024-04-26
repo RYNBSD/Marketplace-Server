@@ -23,7 +23,7 @@ export default {
         limit: 1,
       }),
       Store.findOne({
-        attributes: ["id", "name", "image"],
+        attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
         where: { userId: user!.dataValues.id },
         plain: true,
         limit: 1,

@@ -16,7 +16,7 @@ export const bearerStrategy = new BearerStrategy((token, done) => {
 
   const { User } = model.db;
   User.findOne({
-    attributes: ["id", "username", "image"],
+    attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
     where: { id: parsedId.data },
     limit: 1,
     plain: true,

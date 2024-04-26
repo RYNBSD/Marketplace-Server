@@ -96,7 +96,14 @@ app.use(
     );
   }),
 );
-app.use(cors({ credentials: true }));
+
+app.use(
+  cors({
+    credentials: true,
+    exposedHeaders: [HTTP.HEADERS.ACCESS_TOKEN, "Set-Cookie"],
+    origin: (origin, callback) => callback(null, origin),
+  }),
+);
 app.use(initLimiter() as RateLimitRequestHandler);
 app.use(
   compression({

@@ -10,14 +10,15 @@ global.__filename = fileURLToPath(import.meta.url);
 global.__dirname = path.dirname(__filename);
 global.__root = process.cwd();
 
-if (!IS_PRODUCTION) {
-  await import("colors");
-}
-
 const PUBLIC = "public";
 const PUBLIC_PATH = path.join(__root, PUBLIC);
+
+if (!IS_PRODUCTION) {
+  await import("colors");
+  if (existsSync(PUBLIC_PATH)) rmSync(PUBLIC_PATH, { recursive: true, force: true });
+}
+
 if (!existsSync(PUBLIC_PATH)) {
-  if (!IS_PRODUCTION) rmSync(PUBLIC_PATH, { recursive: true, force: true });
   mkdirSync(PUBLIC_PATH);
 }
 

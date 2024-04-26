@@ -10,7 +10,7 @@ export const localStrategy = new LocalStrategy(
     const { User } = model.db;
 
     User.findOne({
-      attributes: ["id", "password", "image", "username"],
+      attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
       where: { email },
       limit: 1,
     })

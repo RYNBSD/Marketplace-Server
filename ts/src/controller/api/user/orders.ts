@@ -62,7 +62,7 @@ export default {
     const { quantity } = Query.parse(req.query);
 
     await order.update({ quantity }, { fields: ["quantity"], transaction });
-    res.status(StatusCodes.OK).json({ success: true });
+    res.status(StatusCodes.OK).json({ success: true, data: { order: order.dataValues } });
   },
   async remove(
     _req: Request,
