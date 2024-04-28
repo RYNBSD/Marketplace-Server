@@ -168,7 +168,7 @@ process.on("unhandledRejection", (error) => {
 });
 
 process.on("uncaughtException", async (error) => {
-  await Promise.all([BaseError.handleError(error), sequelize.close()]);
+  await BaseError.handleError(error);
   process.exit(1);
 });
 

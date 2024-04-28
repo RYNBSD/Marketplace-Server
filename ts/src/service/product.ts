@@ -1,21 +1,23 @@
 import { QueryTypes } from "sequelize";
-import { VALUES } from "../constant/index.js";
 
-const { NULL } = VALUES;
-
-export async function all({ storeId, categoryId }: { storeId?: string; categoryId?: string }) {
+export async function all(storeId: string) {
   return sequelize.query(
     `
-    SELECT "P"."id", "P"."title", "P"."description", "P"."titleAr","P"."descriptionAr", ARRAY_AGG(DISTINCT "PI"."image") AS "images"
-    FROM "Product" AS "P"
-    INNER JOIN "ProductImage" AS "PI" ON "PI"."productId" = "P"."id"
-    INNER JOIN "Category" AS "C" ON "C"."id" = "P"."categoryId"
-    WHERE "C"."storeId" = $storeId OR "C"."id" = $categoryId  AND "P"."deletedAt" IS NULL AND "PI"."deletedAt" IS NULL AND "C"."deletedAt" IS NULL
+    SELECT "P"."id", "P"."title", "P"."titleAr",
+    ARRAY_AGG(DISTINCT "PI"."image") AS "images", COUNT("PV"."id") as "views", COUNT("O"."id") AS "orders"
+    FROM "Product" "P"
+    INNER JOIN "ProductImage" "PI" ON "PI"."productId" = "P"."id"
+    INNER JOIN "Category" "C" ON "C"."id" = "P"."categoryId"
+    LEFT JOIN "ProductViewer" "PV" ON "PV"."productId" = "P"."id"
+    LEFT JOIN "Order" "O" ON "O"."productId" = "P"."id"
+    WHERE "P"."deletedAt" IS NULL AND "PI"."deletedAt" IS NULL AND "C"."deletedAt" IS NULL AND
+    "C"."storeId" = $storeId
     GROUP BY "P"."id"
+    ORDER BY "P"."createdAt" DESC
   `,
     {
       type: QueryTypes.SELECT,
-      bind: { storeId: storeId ?? NULL.UUID, categoryId: categoryId ?? NULL.UUID },
+      bind: { storeId: storeId },
       raw: true,
     },
   );

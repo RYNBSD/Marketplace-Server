@@ -14,7 +14,7 @@ const { Create, Update } = schema.req.api.dashboard.store.products;
 export default {
   async all(_req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
     const store = res.locals.store!;
-    const products = await product.all({ storeId: store.dataValues.id });
+    const products = await product.all(store.dataValues.id);
     res.status(StatusCodes.OK).json({
       success: true,
       data: {

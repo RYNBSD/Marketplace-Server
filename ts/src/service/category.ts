@@ -2,9 +2,16 @@ import { QueryTypes } from "sequelize";
 
 export async function all(storeId: string) {
   return sequelize.query(
-    `SELECT "C"."id", "C"."name", "C"."nameAr", "C"."image"
-    FROM "Category" AS "C"
-    WHERE "C"."storeId" = $storeId AND "C"."deletedAt" IS NULL`,
+    `
+    SELECT "C"."id", "C"."name", "C"."nameAr", "C"."image",
+    COUNT("P"."id") AS "products", COUNT("CV"."id") AS "views"
+    FROM "Category" "C"
+    LEFT JOIN "CategoryViewer" "CV" ON "CV"."categoryId" = "C"."id"
+    LEFT JOIN "Product" "P" ON "P"."categoryId" = "C"."id"
+    WHERE "C"."storeId" = $storeId AND "C"."deletedAt" IS NULL AND "P"."deletedAt" IS NULL
+    GROUP BY "C"."id"
+    ORDER BY "C"."createdAt" DESC
+    `,
     {
       type: QueryTypes.SELECT,
       raw: true,
@@ -15,10 +22,16 @@ export async function all(storeId: string) {
 
 export async function one(id: string) {
   return sequelize.query(
-    `SELECT "C"."id", "C"."name", "C"."nameAr", "C"."image"
-    FROM "Category" AS "C"
-    WHERE "C"."id" = $id AND "C"."deletedAt" IS NULL
-    LIMIT 1`,
+    `
+    SELECT "C"."id", "C"."name", "C"."nameAr", "C"."image",
+    COUNT("P"."id") AS "products", COUNT("CV"."id") AS "views"
+    FROM "Category" "C"
+    LEFT JOIN "CategoryViewer" "CV" ON "CV"."categoryId" = "C"."id"
+    LEFT JOIN "Product" "P" ON "P"."categoryId" = "C"."id"
+    WHERE "C"."id" = $id AND "C"."deletedAt" IS NULL AND "P"."deletedAt" IS NULL
+    GROUP BY "C"."id"
+    LIMIT 1
+    `,
     {
       type: QueryTypes.SELECT,
       raw: true,
@@ -30,11 +43,17 @@ export async function one(id: string) {
 
 export async function products(categoryId: string) {
   return sequelize.query(
-    `SELECT "P"."id", "P"."title", "P"."description", "P"."titleAr","P"."descriptionAr", ARRAY_AGG("PI"."image") AS "images"
-    FROM "Product" AS "P"
-    INNER JOIN "ProductImage" AS "PI" ON "PI"."productId" = "P"."id"
-    WHERE "P"."categoryId" = $categoryId AND "P"."deletedAt" IS NULL AND "PI"."deletedAt" IS NULL
-    GROUP BY "P"."id"`,
+    `
+    SELECT "P"."id", "P"."title", "P"."titleAr",
+    ARRAY_AGG(DISTINCT "PI"."image") AS "images", COUNT("PV"."id") as "views", COUNT("O"."id") AS "orders"
+    FROM "Product" "P"
+    INNER JOIN "ProductImage" "PI" ON "PI"."productId" = "P"."id"
+    LEFT JOIN "ProductViewer" "PV" ON "PV"."productId" = "P"."id"
+    LEFT JOIN "Order" "O" ON "O"."productId" = "P"."id"
+    WHERE "P"."deletedAt" IS NULL AND "PI"."deletedAt" IS NULL AND "P"."categoryId" = $categoryId
+    GROUP BY "P"."id"
+    ORDER BY "P"."createdAt" DESC
+    `,
     {
       type: QueryTypes.SELECT,
       raw: true,
