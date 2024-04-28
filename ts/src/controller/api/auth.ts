@@ -186,15 +186,18 @@ export default {
     _next: NextFunction,
     transaction: Transaction,
   ) {
-    const { user } = req;
+    const user = req.user!;
     const { Body } = ForgotPassword;
     const { password } = Body.parse(req.body);
 
     const { hash } = util.bcrypt;
-    await user!.update({ password: hash(password) });
-
-    if (user!.dataValues.emailVerified === null)
-      await user!.update({ emailVerified: new Date() }, { fields: ["emailVerified"], transaction });
+    await user.update(
+      {
+        password: hash(password),
+        emailVerified: user.dataValues.emailVerified === null ? new Date() : user.dataValues.emailVerified,
+      },
+      { fields: ["password", "emailVerified"], transaction },
+    );
 
     res.status(StatusCodes.OK).json({ success: true });
   },

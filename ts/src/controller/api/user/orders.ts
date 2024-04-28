@@ -71,7 +71,10 @@ export default {
     transaction: Transaction,
   ) {
     const order = res.locals.order!;
-    await order.update({ status: ORDER_STATUS[3], canceledAt: new Date() }, { transaction });
+    await order.update(
+      { status: ORDER_STATUS[3], canceledAt: new Date() },
+      { fields: ["status", "canceledAt"], transaction },
+    );
     res.status(StatusCodes.OK).json({ success: true });
   },
 } as const;

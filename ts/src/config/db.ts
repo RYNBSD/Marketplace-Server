@@ -28,7 +28,7 @@ export default {
     await global.sequelize?.close();
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    global.sequelize = undefined;
+    delete global.sequelize;
   },
   async init() {
     if (global.sequelize instanceof Sequelize) await global.sequelize.sync({ force: !IS_PRODUCTION });
