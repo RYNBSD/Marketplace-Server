@@ -1,4 +1,5 @@
-import type { Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
+import type { Transaction } from "sequelize";
 import type { TResponse } from "../../../types/index.js";
 import { StatusCodes } from "http-status-codes";
 import { schema } from "../../../schema/index.js";
@@ -8,7 +9,12 @@ import { APIError } from "../../../error/index.js";
 const { Name, Category: CategorySchema, Product: ProductSchema } = schema.req.security.validate.store;
 
 export default {
-  async name(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
+  async name(
+    req: Request,
+    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>,
+    _next: NextFunction,
+    transaction: Transaction,
+  ) {
     const { Body } = Name;
     const { name } = Body.parse(req.body);
     const { Store } = model.db;
@@ -19,30 +25,40 @@ export default {
       limit: 1,
       plain: true,
       paranoid: false,
+      transaction,
     });
     if (store !== null) throw APIError.controller(StatusCodes.CONFLICT, "Store name already exists");
 
     res.status(StatusCodes.OK).json({ success: true });
   },
-  async category(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
+  async category(
+    req: Request,
+    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>,
+    _next: NextFunction,
+    transaction: Transaction,
+  ) {
     const { Body } = CategorySchema;
     const { name, nameAr } = Body.parse(req.body);
+
+    const store = res.locals.store!;
     const { Category } = model.db;
 
     const [category, categoryAr] = await Promise.all([
       Category.findOne({
         attributes: ["name"],
-        where: { name },
+        where: { name, storeId: store.dataValues.id },
         limit: 1,
         plain: true,
         paranoid: false,
+        transaction,
       }),
       Category.findOne({
         attributes: ["nameAr"],
-        where: { nameAr },
+        where: { nameAr, storeId: store.dataValues.id },
         limit: 1,
         plain: true,
         paranoid: false,
+        transaction,
       }),
     ]);
 
@@ -52,9 +68,15 @@ export default {
 
     res.status(StatusCodes.OK).json({ success: true });
   },
-  async product(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
+  async product(
+    req: Request,
+    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>,
+    _next: NextFunction,
+    transaction: Transaction,
+  ) {
     const { Body } = ProductSchema;
     const { title, titleAr } = Body.parse(req.body);
+
     const { Product } = model.db;
 
     const [product, productAr] = await Promise.all([
@@ -64,6 +86,7 @@ export default {
         limit: 1,
         plain: true,
         paranoid: false,
+        transaction,
       }),
       Product.findOne({
         attributes: ["titleAr"],
@@ -71,6 +94,7 @@ export default {
         limit: 1,
         plain: true,
         paranoid: false,
+        transaction,
       }),
     ]);
 

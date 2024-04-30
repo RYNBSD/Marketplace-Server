@@ -1,4 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
+import type { Transaction } from "sequelize";
 import type { TResponse } from "../types/index.js";
 import { StatusCodes } from "http-status-codes";
 import { APIError } from "../error/index.js";
@@ -23,7 +24,12 @@ export async function notAuthenticated(req: Request, _res: Response<never, TResp
   return next();
 }
 
-export async function checkOrder(req: Request, res: Response<never, TResponse["Locals"]>, next: NextFunction) {
+export async function checkOrder(
+  req: Request,
+  res: Response<never, TResponse["Locals"]>,
+  next: NextFunction,
+  transaction: Transaction,
+) {
   const user = req.user!;
   const { orderId } = OrderId.parse(req.params);
 
@@ -33,6 +39,7 @@ export async function checkOrder(req: Request, res: Response<never, TResponse["L
     where: { id: orderId, userId: user.dataValues.id },
     limit: 1,
     plain: true,
+    transaction,
   });
   if (order === null) throw APIError.middleware(StatusCodes.NOT_FOUND, "Order not found");
 
@@ -44,7 +51,12 @@ export async function checkOrder(req: Request, res: Response<never, TResponse["L
 }
 
 /** Check if user is seller @deprecated */
-export async function isSeller(req: Request, res: Response<never, TResponse["Locals"]>, next: NextFunction) {
+export async function isSeller(
+  req: Request,
+  res: Response<never, TResponse["Locals"]>,
+  next: NextFunction,
+  transaction: Transaction,
+) {
   const { user } = req;
 
   const { Store } = model.db;
@@ -53,6 +65,7 @@ export async function isSeller(req: Request, res: Response<never, TResponse["Loc
     where: { userId: user!.dataValues.id },
     limit: 1,
     plain: true,
+    transaction,
   });
   if (store === null) throw APIError.middleware(StatusCodes.NOT_FOUND, "Seller not found");
 

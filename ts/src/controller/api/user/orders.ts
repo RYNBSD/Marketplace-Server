@@ -11,17 +11,22 @@ import { service } from "../../../service/index.js";
 const { Create, Update } = schema.req.api.user.orders;
 
 export default {
-  async all(req: Request, res: Response<TResponse["Body"]["Success"]>) {
+  async all(req: Request, res: Response<TResponse["Body"]["Success"]>, _next: NextFunction, transaction: Transaction) {
     const user = req.user!;
     const { all } = service.order.user;
-    const orders = await all(user.dataValues.id);
+    const orders = await all(user.dataValues.id, transaction);
     res.status(StatusCodes.OK).json({ success: true, data: { orders } });
   },
-  async order(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
+  async order(
+    req: Request,
+    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>,
+    _next: NextFunction,
+    transaction: Transaction,
+  ) {
     const user = req.user!;
     const localOrder = res.locals.order!;
     const { one } = service.order.user;
-    const order = await one(localOrder.dataValues.id, user.dataValues.id);
+    const order = await one(localOrder.dataValues.id, user.dataValues.id, transaction);
     res.status(StatusCodes.OK).json({ success: true, data: { order } });
   },
   async create(

@@ -1,4 +1,5 @@
-import type { Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
+import type { Transaction } from "sequelize";
 import type { TResponse } from "../../../types/res.js";
 import { StatusCodes } from "http-status-codes";
 import { model } from "../../../model/index.js";
@@ -8,7 +9,12 @@ import { APIError } from "../../../error/index.js";
 const { Email } = schema.req.security.validate.user;
 
 export default {
-  async email(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
+  async email(
+    req: Request,
+    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>,
+    _next: NextFunction,
+    transaction: Transaction,
+  ) {
     const { Body } = Email;
     const { email } = Body.parse(req.body);
     const { User } = model.db;
@@ -19,6 +25,7 @@ export default {
       limit: 1,
       plain: true,
       paranoid: false,
+      transaction,
     });
     if (user !== null) throw APIError.controller(StatusCodes.CONFLICT, "Email already exists");
 

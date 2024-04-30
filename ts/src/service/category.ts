@@ -1,14 +1,14 @@
-import { QueryTypes } from "sequelize";
+import { QueryTypes, type Transaction } from "sequelize";
 
-export async function all(storeId: string) {
+export async function all(storeId: string, transaction: Transaction) {
   return sequelize.query(
     `
     SELECT "C"."id", "C"."name", "C"."nameAr", "C"."image",
     COUNT("P"."id") AS "products", COUNT("CV"."id") AS "views"
     FROM "Category" "C"
     LEFT JOIN "CategoryViewer" "CV" ON "CV"."categoryId" = "C"."id"
-    LEFT JOIN "Product" "P" ON "P"."categoryId" = "C"."id"
-    WHERE "C"."storeId" = $storeId AND "C"."deletedAt" IS NULL AND "P"."deletedAt" IS NULL
+    LEFT JOIN "Product" "P" ON "P"."categoryId" = "C"."id" AND "P"."deletedAt" IS NULL
+    WHERE "C"."storeId" = $storeId AND "C"."deletedAt" IS NULL
     GROUP BY "C"."id"
     ORDER BY "C"."createdAt" DESC
     `,
@@ -16,19 +16,20 @@ export async function all(storeId: string) {
       type: QueryTypes.SELECT,
       raw: true,
       bind: { storeId },
+      transaction,
     },
   );
 }
 
-export async function one(id: string) {
+export async function one(id: string, transaction: Transaction) {
   return sequelize.query(
     `
     SELECT "C"."id", "C"."name", "C"."nameAr", "C"."image",
     COUNT("P"."id") AS "products", COUNT("CV"."id") AS "views"
     FROM "Category" "C"
     LEFT JOIN "CategoryViewer" "CV" ON "CV"."categoryId" = "C"."id"
-    LEFT JOIN "Product" "P" ON "P"."categoryId" = "C"."id"
-    WHERE "C"."id" = $id AND "C"."deletedAt" IS NULL AND "P"."deletedAt" IS NULL
+    LEFT JOIN "Product" "P" ON "P"."categoryId" = "C"."id" AND "P"."deletedAt" IS NULL
+    WHERE "C"."id" = $id AND "C"."deletedAt" IS NULL
     GROUP BY "C"."id"
     LIMIT 1
     `,
@@ -37,11 +38,12 @@ export async function one(id: string) {
       raw: true,
       plain: true,
       bind: { id },
+      transaction,
     },
   );
 }
 
-export async function products(categoryId: string) {
+export async function products(categoryId: string, transaction: Transaction) {
   return sequelize.query(
     `
     SELECT "P"."id", "P"."title", "P"."titleAr",
@@ -58,6 +60,7 @@ export async function products(categoryId: string) {
       type: QueryTypes.SELECT,
       raw: true,
       bind: { categoryId },
+      transaction,
     },
   );
 }

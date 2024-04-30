@@ -6,7 +6,12 @@ import { middleware } from "../../../middleware/index.js";
 
 const { upload } = config;
 const { handleAsync } = util.fn;
-const { isAuthenticated, isSeller } = middleware.fn;
+const {
+  fn: { isAuthenticated },
+  api: {
+    store: { isSeller },
+  },
+} = middleware;
 const { name, category, product } = controller.security.validate.store;
 
 export const store = Router();

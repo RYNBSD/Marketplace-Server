@@ -1,4 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
+import type { Transaction } from "sequelize";
 import type { TResponse } from "../../types/index.js";
 import { StatusCodes } from "http-status-codes";
 import { util } from "../../util/index.js";
@@ -8,7 +9,7 @@ import { schema } from "../../schema/index.js";
 import { APIError } from "../../error/index.js";
 
 export default {
-  async access(req: Request, _res: Response<never, TResponse["Locals"]>, next: NextFunction) {
+  async access(req: Request, _res: Response<never, TResponse["Locals"]>, next: NextFunction, transaction: Transaction) {
     const { getHeader } = util.fn;
 
     const token = getHeader(req.headers, KEYS.HTTP.HEADERS.ACCESS_TOKEN);
@@ -39,6 +40,7 @@ export default {
       where: { id: hasAccess.id },
       plain: true,
       limit: 1,
+      transaction,
     });
     if (user === null) throw APIError.middleware(StatusCodes.NOT_FOUND, "User not found");
 

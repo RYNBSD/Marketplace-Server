@@ -1,4 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
+import type { Transaction } from "sequelize";
 import type { TResponse } from "../../types/index.js";
 import { StatusCodes } from "http-status-codes";
 import { model } from "../../model/index.js";
@@ -8,7 +9,12 @@ import { schema } from "../../schema/index.js";
 const { StoreId, CategoryId, ProductId } = schema.id;
 
 export default {
-  async checkStore(req: Request, res: Response<never, TResponse["Locals"]>, next: NextFunction) {
+  async checkStore(
+    req: Request,
+    res: Response<never, TResponse["Locals"]>,
+    next: NextFunction,
+    transaction: Transaction,
+  ) {
     const { storeId } = StoreId.parse(req.params);
     const { Store } = model.db;
 
@@ -17,6 +23,7 @@ export default {
       where: { id: storeId },
       limit: 1,
       plain: true,
+      transaction,
     });
     if (store === null) throw APIError.middleware(StatusCodes.NOT_FOUND, "Store not found");
 
@@ -26,7 +33,12 @@ export default {
     };
     return next();
   },
-  async checkCategory(req: Request, res: Response<never, TResponse["Locals"]>, next: NextFunction) {
+  async checkCategory(
+    req: Request,
+    res: Response<never, TResponse["Locals"]>,
+    next: NextFunction,
+    transaction: Transaction,
+  ) {
     const { categoryId } = CategoryId.parse(req.params);
     const { store } = res.locals;
 
@@ -36,6 +48,7 @@ export default {
       where: { id: categoryId, storeId: store!.dataValues.id },
       limit: 1,
       plain: true,
+      transaction,
     });
     if (category === null) throw APIError.middleware(StatusCodes.NOT_FOUND, "Category not found");
 
@@ -45,7 +58,12 @@ export default {
     };
     return next();
   },
-  async checkProduct(req: Request, res: Response<never, TResponse["Locals"]>, next: NextFunction) {
+  async checkProduct(
+    req: Request,
+    res: Response<never, TResponse["Locals"]>,
+    next: NextFunction,
+    transaction: Transaction,
+  ) {
     const { productId } = ProductId.parse(req.params);
     const { category } = res.locals;
 
@@ -55,6 +73,7 @@ export default {
       where: { id: productId, categoryId: category!.dataValues.id },
       limit: 1,
       plain: true,
+      transaction,
     });
     if (product === null) throw APIError.middleware(StatusCodes.NOT_FOUND, "Product not found");
 
@@ -64,7 +83,12 @@ export default {
     };
     return next();
   },
-  async isSeller(req: Request, res: Response<never, TResponse["Locals"]>, next: NextFunction) {
+  async isSeller(
+    req: Request,
+    res: Response<never, TResponse["Locals"]>,
+    next: NextFunction,
+    transaction: Transaction,
+  ) {
     const { user } = req;
     if (user === undefined) throw APIError.middleware(StatusCodes.UNAUTHORIZED, "Unauthorized user");
 
@@ -74,6 +98,7 @@ export default {
       where: { userId: user.dataValues.id },
       limit: 1,
       plain: true,
+      transaction,
     });
     if (store === null) throw APIError.middleware(StatusCodes.NOT_FOUND, "Store not found, you can become seller");
 
@@ -83,7 +108,12 @@ export default {
     };
     return next();
   },
-  async isCategoryOwner(req: Request, res: Response<never, TResponse["Locals"]>, next: NextFunction) {
+  async isCategoryOwner(
+    req: Request,
+    res: Response<never, TResponse["Locals"]>,
+    next: NextFunction,
+    transaction: Transaction,
+  ) {
     const { categoryId } = CategoryId.parse(req.params);
     const { store } = res.locals;
     const { Category } = model.db;
@@ -93,6 +123,7 @@ export default {
       where: { storeId: store!.dataValues.id, id: categoryId },
       plain: true,
       limit: 1,
+      transaction,
     });
     if (category === null) throw APIError.middleware(StatusCodes.NOT_FOUND, "Category not found");
 
@@ -102,7 +133,12 @@ export default {
     };
     return next();
   },
-  async isProductOwner(req: Request, res: Response<never, TResponse["Locals"]>, next: NextFunction) {
+  async isProductOwner(
+    req: Request,
+    res: Response<never, TResponse["Locals"]>,
+    next: NextFunction,
+    transaction: Transaction,
+  ) {
     const { productId } = ProductId.parse(req.params);
     const { store } = res.locals;
     const { Category } = model.db;
@@ -110,6 +146,7 @@ export default {
     const categories = await Category.findAll({
       attributes: ["id"],
       where: { storeId: store!.dataValues.id },
+      transaction,
     });
     if (categories.length === 0)
       throw APIError.middleware(StatusCodes.FORBIDDEN, "This store don't have any categories");
@@ -125,6 +162,7 @@ export default {
       },
       limit: 1,
       plain: true,
+      transaction,
     });
     if (product === null) throw APIError.middleware(StatusCodes.NOT_FOUND, "Product not found");
 

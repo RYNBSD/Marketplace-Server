@@ -12,7 +12,12 @@ const { /* All, */ Create, Update } = schema.req.api.dashboard.store.categories;
 const { category } = service;
 
 export default {
-  async all(_req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
+  async all(
+    _req: Request,
+    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>,
+    _next: NextFunction,
+    transaction: Transaction,
+  ) {
     const store = res.locals.store!;
     // const { Query } = All;
     // const { page, limit } = Query.parse(req.query);
@@ -27,7 +32,7 @@ export default {
     //   order: [["createdAt", "DESC"]],
     // });
 
-    const categories = await category.all(store.dataValues.id);
+    const categories = await category.all(store.dataValues.id, transaction);
     res.status(StatusCodes.OK).json({
       success: true,
       data: {
@@ -35,11 +40,16 @@ export default {
       },
     });
   },
-  async category(_req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
+  async category(
+    _req: Request,
+    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>,
+    _next: NextFunction,
+    transaction: Transaction,
+  ) {
     const localCategory = res.locals.category!;
     const [products, one] = await Promise.all([
-      category.products(localCategory.dataValues.id),
-      category.one(localCategory.dataValues.id),
+      category.products(localCategory.dataValues.id, transaction),
+      category.one(localCategory.dataValues.id, transaction),
     ]);
     res.status(StatusCodes.OK).json({ success: true, data: { category: one, products } });
   },

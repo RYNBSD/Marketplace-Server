@@ -1,4 +1,5 @@
-import type { Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
+import type { Transaction } from "sequelize";
 import type { TResponse } from "../../types/index.js";
 import { StatusCodes } from "http-status-codes";
 import { schema } from "../../schema/index.js";
@@ -12,7 +13,12 @@ const { HTTP } = KEYS;
 const { Email } = schema.req.security.access;
 
 export default {
-  async email(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
+  async email(
+    req: Request,
+    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>,
+    _next: NextFunction,
+    transaction: Transaction,
+  ) {
     const { Body } = Email;
     const { User } = model.db;
     const { email } = Body.parse(req.body);
@@ -21,6 +27,7 @@ export default {
       attributes: ["id"],
       where: { email },
       limit: 1,
+      transaction,
     });
     if (user === null) throw APIError.controller(StatusCodes.NOT_FOUND, "user not found");
 

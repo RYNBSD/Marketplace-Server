@@ -1,6 +1,6 @@
-import { QueryTypes } from "sequelize";
+import { QueryTypes, type Transaction } from "sequelize";
 
-export async function all(userId: string) {
+export async function all(userId: string, transaction: Transaction) {
   return sequelize.query(
     `
     SELECT "O"."id" AS "order.id", "O"."quantity" AS "order.quantity",
@@ -20,11 +20,12 @@ export async function all(userId: string) {
       raw: true,
       nest: true,
       bind: { userId },
+      transaction,
     },
   );
 }
 
-export async function one(id: number, userId: string) {
+export async function one(id: number, userId: string, transaction: Transaction) {
   return sequelize.query(
     `
     SELECT "O"."id" AS "order.id", "O"."quantity" AS "order.quantity",
@@ -45,6 +46,7 @@ export async function one(id: number, userId: string) {
       plain: true,
       nest: true,
       bind: { id, userId },
+      transaction,
     },
   );
 }

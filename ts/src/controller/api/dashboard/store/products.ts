@@ -12,9 +12,14 @@ const { product } = service;
 const { Create, Update } = schema.req.api.dashboard.store.products;
 
 export default {
-  async all(_req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
+  async all(
+    _req: Request,
+    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>,
+    _next: NextFunction,
+    transaction: Transaction,
+  ) {
     const store = res.locals.store!;
-    const products = await product.all(store.dataValues.id);
+    const products = await product.all(store.dataValues.id, transaction);
     res.status(StatusCodes.OK).json({
       success: true,
       data: {
@@ -22,9 +27,14 @@ export default {
       },
     });
   },
-  async product(_req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
+  async product(
+    _req: Request,
+    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>,
+    _next: NextFunction,
+    transaction: Transaction,
+  ) {
     const localProduct = res.locals.product!;
-    const one = await product.one(localProduct.dataValues.id);
+    const one = await product.one(localProduct.dataValues.id, transaction);
     res.status(StatusCodes.OK).json({ success: true, data: { ...one } });
   },
   async create(

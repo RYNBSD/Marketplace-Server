@@ -12,7 +12,12 @@ const { Search, Home } = schema.req.api.store;
 const { DB } = KEYS;
 
 export default {
-  async search(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
+  async search(
+    req: Request,
+    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>,
+    _next: NextFunction,
+    transaction: Transaction,
+  ) {
     const { Query } = Search;
     const { s, limit } = Query.parse(req.query);
     const { Store, Category, Product, ProductImage } = model.db;
@@ -50,6 +55,7 @@ export default {
         ],
         order: [["createdAt", "DESC"]],
         limit,
+        transaction,
       }),
       Category.findAll({
         attributes: ["id", "name", "nameAr", "image", "storeId"],
@@ -59,6 +65,7 @@ export default {
         order: [["createdAt", "DESC"]],
         raw: true,
         limit,
+        transaction,
       }),
       Store.findAll({
         attributes: ["id", "image", "name"],
@@ -66,6 +73,7 @@ export default {
         order: [["createdAt", "DESC"]],
         raw: true,
         limit,
+        transaction,
       }),
     ]);
 
@@ -116,13 +124,19 @@ export default {
       },
     });
   },
-  async all(_req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
+  async all(
+    _req: Request,
+    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>,
+    _next: NextFunction,
+    transaction: Transaction,
+  ) {
     const { Store } = model.db;
     const stores = await Store.findAll({
       attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
       // limit: 25,
       raw: true,
       order: [["createdAt", "DESC"]],
+      transaction,
     });
 
     res.status(StatusCodes.OK).json({
@@ -130,13 +144,19 @@ export default {
       data: { stores },
     });
   },
-  async categories(_req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
+  async categories(
+    _req: Request,
+    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>,
+    _next: NextFunction,
+    transaction: Transaction,
+  ) {
     const { Category } = model.db;
     const categories = await Category.findAll({
       attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
       // limit: 25,
       raw: true,
       order: [["createdAr", "DESC"]],
+      transaction,
     });
 
     res.status(StatusCodes.OK).json({
@@ -146,7 +166,12 @@ export default {
       },
     });
   },
-  async products(_req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
+  async products(
+    _req: Request,
+    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>,
+    _next: NextFunction,
+    transaction: Transaction,
+  ) {
     const { Product, ProductImage } = model.db;
     const products = await Product.findAll({
       attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
@@ -158,6 +183,7 @@ export default {
         limit: 1,
       },
       order: [["createdAt", "DESC"]],
+      transaction,
       // limit: 25,
     });
 
@@ -201,6 +227,7 @@ export default {
       attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
       order: [["createdAt", "DESC"]],
       where: { storeId: store.dataValues.id },
+      transaction,
     });
 
     const categoriesId = categories.map((category) => category.dataValues.id);
@@ -211,6 +238,7 @@ export default {
         categoryId: categoriesId,
       },
       order: [["createdAt", "DESC"]],
+      transaction,
       include: [
         {
           as: DB.MODELS.PRODUCT.IMAGE,
@@ -273,6 +301,7 @@ export default {
       attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
       where: { categoryId: category.dataValues.id },
       order: [["createdAt", "DESC"]],
+      transaction,
       include: [
         {
           as: DB.MODELS.PRODUCT.IMAGE,
@@ -330,7 +359,7 @@ export default {
       { fields: ["ip", "userId", "productId"], transaction },
     );
 
-    const product = await service.product.one(localProduct.dataValues.id);
+    const product = await service.product.one(localProduct.dataValues.id, transaction);
     res.status(StatusCodes.OK).json({ success: true, data: { product } });
   },
 } as const;

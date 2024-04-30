@@ -11,7 +11,12 @@ import { lib } from "../../../lib/index.js";
 const { Setting, BecomeSeller, Update } = schema.req.api.user;
 
 export default {
-  async profile(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
+  async profile(
+    req: Request,
+    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>,
+    _next: NextFunction,
+    transaction: Transaction,
+  ) {
     const { user } = req;
     const { UserSetting, Store } = model.db;
 
@@ -21,12 +26,14 @@ export default {
         where: { userId: user!.dataValues.id },
         plain: true,
         limit: 1,
+        transaction,
       }),
       Store.findOne({
         attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
         where: { userId: user!.dataValues.id },
         plain: true,
         limit: 1,
+        transaction,
       }),
     ]);
 
@@ -81,6 +88,7 @@ export default {
       paranoid: false,
       plain: true,
       limit: 1,
+      transaction,
     });
     if (checkStoreName !== null) throw APIError.controller(StatusCodes.BAD_REQUEST, "Store name already exists");
 
@@ -92,6 +100,7 @@ export default {
       paranoid: false,
       plain: true,
       limit: 1,
+      transaction,
     });
     if (checkUserStore !== null) throw APIError.controller(StatusCodes.BAD_REQUEST, "You have a store already");
 

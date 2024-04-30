@@ -1,6 +1,6 @@
-import { QueryTypes } from "sequelize";
+import { QueryTypes, type Transaction } from "sequelize";
 
-export async function all(storeId: string) {
+export async function all(storeId: string, transaction: Transaction) {
   return sequelize.query(
     `
     SELECT "P"."id", "P"."title", "P"."titleAr",
@@ -19,11 +19,12 @@ export async function all(storeId: string) {
       type: QueryTypes.SELECT,
       bind: { storeId: storeId },
       raw: true,
+      transaction,
     },
   );
 }
 
-export async function one(id: string) {
+export async function one(id: string, transaction: Transaction) {
   return sequelize.query(
     `SELECT "P"."id" AS "product.id", "P"."title" AS "product.title", "P"."titleAr" AS "product.titleAr",
     "P"."description" AS "product.description", "P"."descriptionAr" AS "product.descriptionAr",
@@ -51,18 +52,19 @@ export async function one(id: string) {
       raw: true,
       nest: true,
       plain: true,
+      transaction,
     },
   );
 }
 
-export async function viewers(productId: string) {
+export async function viewers(productId: string, transaction: Transaction) {
   return sequelize.query(
     `SELECT "U"."id", "U"."username", "U"."image", COUNT("U"."id") AS "views"
     FROM "User" AS "U"
     INNER JOIN "ProductViewer" AS "PV" ON "PV"."userId" = "U"."id"
     WHERE "PV"."productId" = $productId AND "U"."deletedAt" IS NULL
     GROUP BY "U"."id"`,
-    { type: QueryTypes.SELECT, bind: { productId }, raw: true },
+    { type: QueryTypes.SELECT, bind: { productId }, raw: true, transaction },
   );
 }
 

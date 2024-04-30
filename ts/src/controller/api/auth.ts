@@ -31,6 +31,7 @@ export default {
       where: { email },
       limit: 1,
       plain: true,
+      transaction,
     });
     if (checkEmail !== null) throw APIError.controller(StatusCodes.BAD_REQUEST, "Email already exist");
 
@@ -48,6 +49,7 @@ export default {
 
     const { hash } = util.bcrypt;
 
+    // TODO: add rollback for uploaded files
     const user = await User.create(
       {
         username,
@@ -73,27 +75,35 @@ export default {
 
     res.status(StatusCodes.CREATED).json({ success: true });
   },
-  async signIn(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>, next: NextFunction) {
+  async signIn(
+    req: Request,
+    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>,
+    next: NextFunction,
+    transaction: Transaction,
+  ) {
     const user = (await authenticate("local", req, res, next)) as Tables["User"];
 
     const { sign } = util.jwt;
     const { UserSetting, Store } = model.db;
 
-    const setting = await UserSetting.findOne({
-      attributes: {
-        exclude: ["userId"],
-      },
-      where: { userId: user.dataValues.id },
-      plain: true,
-      limit: 1,
-    });
-
-    const store = await Store.findOne({
-      attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
-      where: { userId: user.dataValues.id },
-      plain: true,
-      limit: 1,
-    });
+    const [setting, store] = await Promise.all([
+      UserSetting.findOne({
+        attributes: {
+          exclude: ["userId"],
+        },
+        where: { userId: user.dataValues.id },
+        plain: true,
+        limit: 1,
+        transaction,
+      }),
+      Store.findOne({
+        attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
+        where: { userId: user.dataValues.id },
+        plain: true,
+        limit: 1,
+        transaction,
+      }),
+    ]);
 
     const { options } = config;
 
@@ -119,27 +129,35 @@ export default {
       res.status(StatusCodes.OK).json({ success: true });
     });
   },
-  async me(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>, next: NextFunction) {
+  async me(
+    req: Request,
+    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>,
+    next: NextFunction,
+    transaction: Transaction,
+  ) {
     const user = (await authenticate("bearer", req, res, next)) as Tables["User"];
 
     const { sign } = util.jwt;
     const { UserSetting, Store } = model.db;
 
-    const setting = await UserSetting.findOne({
-      attributes: {
-        exclude: ["userId"],
-      },
-      where: { userId: user.dataValues.id },
-      plain: true,
-      limit: 1,
-    });
-
-    const store = await Store.findOne({
-      attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
-      where: { userId: user.dataValues.id },
-      plain: true,
-      limit: 1,
-    });
+    const [setting, store] = await Promise.all([
+      UserSetting.findOne({
+        attributes: {
+          exclude: ["userId"],
+        },
+        where: { userId: user.dataValues.id },
+        plain: true,
+        limit: 1,
+        transaction,
+      }),
+      Store.findOne({
+        attributes: { exclude: ["createdAt", "updatedAt", "deletedAt"] },
+        where: { userId: user.dataValues.id },
+        plain: true,
+        limit: 1,
+        transaction,
+      }),
+    ]);
 
     const { options } = config;
 
@@ -155,7 +173,12 @@ export default {
         },
       });
   },
-  async verifyEmail(req: Request, res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>) {
+  async verifyEmail(
+    req: Request,
+    res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>,
+    _next: NextFunction,
+    transaction: Transaction,
+  ) {
     const { Query } = VerifyEmail;
     const { token } = Query.parse(req.query);
     const { verify } = util.jwt;
@@ -174,6 +197,7 @@ export default {
         where: { id: parsedId },
         limit: 1,
         returning: true,
+        transaction,
       },
     );
     if (user.length === 0) throw APIError.controller(StatusCodes.NOT_FOUND, "User not found");
