@@ -19,7 +19,6 @@ import { StatusCodes } from "http-status-codes";
 // @ts-ignore
 import cookieEncrypt from "cookie-encrypter";
 import path from "path";
-import { randomUUID } from "crypto";
 import { ENV, KEYS, VALUES } from "./src/constant/index.js";
 import { util } from "./src/util/index.js";
 import { schema } from "./src/schema/index.js";
@@ -38,7 +37,7 @@ import { passport } from "./src/passport/index.js";
  *  - HPP
  *  - Error Handling
  *  - Linting
- *  - End-To-End Type Safety
+ *  - Run Time Type Safety
  *  - Cookie
  *  - Session
  *
@@ -72,7 +71,7 @@ const {
 await tmp.initTmpDir();
 const docs = swagger.init();
 
-app.use(timeout(TIME.MINUTE));
+app.use(timeout(TIME.MINUTE * 5)); // 5 minutes
 app.use(
   responseTime(async (req: Request, res: Response, time: number) => {
     const { RESPONSE_TIME } = HTTP.HEADERS;
@@ -130,7 +129,6 @@ app.use(helmet());
 app.use(hpp());
 app.use(
   session({
-    genid: () => randomUUID(),
     store: initSession(),
     name: COOKIE.SESSION,
     secret: ENV.SESSION.SECRET,
@@ -153,7 +151,7 @@ app.use(requestIp.mw());
 app.use(`/v${PACKAGE.VERSION}`, router);
 app.use(express.static(path.join(__root, KEYS.GLOBAL.PUBLIC), { etag: true }));
 app.use("/docs", docs.serve, docs.ui);
-app.all("*", async (_, res: Response<TResponse["Body"]["Fail"]>) =>
+app.all("*", async (_req, res: Response<TResponse["Body"]["Fail"]>) =>
   res.status(StatusCodes.NOT_FOUND).json({ success: false }),
 );
 app.use(async (error: unknown, _req: Request, res: Response<TResponse["Body"]["Fail"]>, _next: NextFunction) => {

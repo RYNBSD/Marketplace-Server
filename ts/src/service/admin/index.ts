@@ -1,4 +1,4 @@
-import stats from "./stats.js";
+import * as stats from "./stats.js";
 
 export default {
   stats,

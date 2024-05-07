@@ -1,6 +1,6 @@
 import type { ConvertedFile, SupportedFileTypes } from "../../types/index.js";
 import { readFile, writeFile } from "fs/promises";
-import path from "path";
+import path from "node:path";
 import ffmpeg, { type FfprobeData } from "fluent-ffmpeg";
 import sharp from "sharp";
 import fileType, { type FileExtension } from "file-type";
@@ -174,7 +174,7 @@ export default class FileConverter extends FileTmp {
   async convert() {
     const typePromises = this.files.map((file) => this.fileType(file));
     const types = await Promise.all(typePromises);
-    const filterTypes = types.filter((file) => file !== null) as ConvertedFile[];
+    const filterTypes = types.filter((file) => file !== null);
 
     const converted = await this.fileConvert(filterTypes);
     if (this.cleanTmp) await tmp.cleanup();

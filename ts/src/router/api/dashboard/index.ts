@@ -9,6 +9,7 @@ const { handleAsync } = util.fn;
 const {
   api: {
     store: { isSeller },
+    admin: { isAdmin },
   },
 } = middleware;
 
@@ -16,4 +17,4 @@ export const dashboard = Router();
 
 dashboard.use("/store", handleAsync(isSeller), store);
 
-dashboard.use("/admin", admin);
+dashboard.use("/admin", handleAsync(isAdmin), admin);
