@@ -6,15 +6,9 @@ import { middleware } from "../../../middleware/index.js";
 import { config } from "../../../config/index.js";
 
 const { upload } = config;
-const {
-  REQUEST: { PARAMS },
-} = KEYS;
-const {
-  fn: { checkOrder },
-} = middleware;
-const {
-  fn: { handleAsync },
-} = util;
+const { PARAMS } = KEYS.REQUEST;
+const { checkOrder } = middleware.fn;
+const { handleAsync } = util.fn;
 const { all, order, create, patch, remove } = controller.api.user.orders;
 
 export const orders = Router();

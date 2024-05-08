@@ -5,12 +5,10 @@ import { config } from "../../../config/index.js";
 import { KEYS } from "../../../constant/index.js";
 import { orders } from "./orders.js";
 
-const {
-  UPLOAD: { IMAGE },
-} = KEYS;
+const { IMAGE } = KEYS.UPLOAD;
 const { upload } = config;
 const { handleAsync } = util.fn;
-const { profile, setting, becomeSeller, update, remove: deleteUser } = controller.api.user;
+const { profile, setting, becomeSeller, update, remove } = controller.api.user;
 
 export const user = Router();
 
@@ -22,6 +20,6 @@ user.post("/become-seller", handleAsync(upload.single(IMAGE)), handleAsync(becom
 
 user.put("/", handleAsync(upload.single(IMAGE)), handleAsync(update));
 
-user.delete("/", handleAsync(deleteUser));
+user.delete("/", handleAsync(remove));
 
 user.use("/orders", orders);

@@ -11,33 +11,22 @@ const {
   REQUEST: { PARAMS },
   UPLOAD: { IMAGE },
 } = KEYS;
-const {
-  fn: { isSeller },
-  api: {
-    store: { isCategoryOwner },
-  },
-} = middleware;
-const { all, category, create, update, remove: deleteCategory } = controller.api.dashboard.store.categories;
+const { isCategoryOwner } = middleware.api.store;
+const { all, category, create, update, remove } = controller.api.dashboard.store.categories;
 
 export const categories = Router();
 
-categories.get("/", handleAsync(isSeller), handleAsync(all));
+categories.get("/", handleAsync(all));
 
-categories.get(`/:${PARAMS.ID.CATEGORY}`, handleAsync(isSeller), handleAsync(isCategoryOwner), handleAsync(category));
+categories.get(`/:${PARAMS.ID.CATEGORY}`, handleAsync(isCategoryOwner), handleAsync(category));
 
-categories.post("/", handleAsync(isSeller), handleAsync(upload.single(IMAGE)), handleAsync(create));
+categories.post("/", handleAsync(upload.single(IMAGE)), handleAsync(create));
 
 categories.put(
   `/:${PARAMS.ID.CATEGORY}`,
-  handleAsync(isSeller),
   handleAsync(isCategoryOwner),
   handleAsync(upload.single(IMAGE)),
   handleAsync(update),
 );
 
-categories.delete(
-  `/:${PARAMS.ID.CATEGORY}`,
-  handleAsync(isSeller),
-  handleAsync(isCategoryOwner),
-  handleAsync(deleteCategory),
-);
+categories.delete(`/:${PARAMS.ID.CATEGORY}`, handleAsync(isCategoryOwner), handleAsync(remove));

@@ -8,12 +8,8 @@ import { dashboard } from "./dashboard/index.js";
 import { util } from "../../util/index.js";
 import { middleware } from "../../middleware/index.js";
 
-const {
-  fn: { isAuthenticated },
-} = middleware;
-const {
-  fn: { handleAsync },
-} = util;
+const { isAuthenticated } = middleware.fn;
+const { handleAsync } = util.fn;
 
 export const api = Router();
 

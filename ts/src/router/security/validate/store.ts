@@ -6,30 +6,13 @@ import { middleware } from "../../../middleware/index.js";
 
 const { upload } = config;
 const { handleAsync } = util.fn;
-const {
-  fn: { isAuthenticated },
-  api: {
-    store: { isSeller },
-  },
-} = middleware;
+const { isSeller } = middleware.api.store;
 const { name, category, product } = controller.security.validate.store;
 
 export const store = Router();
 
-store.post("/name", handleAsync(isAuthenticated), handleAsync(upload.none()), handleAsync(name));
+store.post("/name", handleAsync(upload.none()), handleAsync(name));
 
-store.post(
-  "/category",
-  handleAsync(isAuthenticated),
-  handleAsync(isSeller),
-  handleAsync(upload.none()),
-  handleAsync(category),
-);
+store.post("/category", handleAsync(isSeller), handleAsync(upload.none()), handleAsync(category));
 
-store.post(
-  "/product",
-  handleAsync(isAuthenticated),
-  handleAsync(isSeller),
-  handleAsync(upload.none()),
-  handleAsync(product),
-);
+store.post("/product", handleAsync(isSeller), handleAsync(upload.none()), handleAsync(product));

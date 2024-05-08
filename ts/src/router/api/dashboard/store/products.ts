@@ -9,7 +9,7 @@ const { REQUEST } = KEYS;
 const { upload } = config;
 const { handleAsync } = util.fn;
 const { isProductOwner } = middleware.api.store;
-const { all, product, create, update, remove: deleteProduct } = controller.api.dashboard.store.products;
+const { all, product, create, update, remove } = controller.api.dashboard.store.products;
 
 export const products = Router();
 
@@ -25,4 +25,4 @@ products.post(
 
 products.put(`/:${REQUEST.PARAMS.ID.PRODUCT}`, handleAsync(isProductOwner), handleAsync(update));
 
-products.delete(`/:${REQUEST.PARAMS.ID.PRODUCT}`, handleAsync(isProductOwner), handleAsync(deleteProduct));
+products.delete(`/:${REQUEST.PARAMS.ID.PRODUCT}`, handleAsync(isProductOwner), handleAsync(remove));

@@ -4,15 +4,9 @@ import { middleware } from "../../middleware/index.js";
 import { KEYS } from "../../constant/index.js";
 import { controller } from "../../controller/index.js";
 
-const {
-  REQUEST: { PARAMS },
-} = KEYS;
+const { PARAMS } = KEYS.REQUEST;
 const { handleAsync } = util.fn;
-const {
-  api: {
-    store: { checkStore, checkCategory, checkProduct },
-  },
-} = middleware;
+const { checkStore, checkCategory, checkProduct } = middleware.api.store;
 const { search, all, store, category, product } = controller.api.stores;
 
 export const stores = Router();

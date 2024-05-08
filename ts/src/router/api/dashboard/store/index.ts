@@ -8,19 +8,17 @@ import { controller } from "../../../../controller/index.js";
 import { KEYS } from "../../../../constant/index.js";
 
 const { upload } = config;
-const {
-  UPLOAD: { IMAGE },
-} = KEYS;
+const { IMAGE } = KEYS.UPLOAD;
 const { handleAsync } = util.fn;
-const { profile, update, remove: deleteSeller } = controller.api.dashboard.store;
+const { profile, update, remove } = controller.api.dashboard.store;
 
 export const store = Router();
 
 store.get("/", handleAsync(profile));
 
-store.put("/", upload.single(IMAGE), handleAsync(update));
+store.put("/", handleAsync(upload.single(IMAGE)), handleAsync(update));
 
-store.delete("/", handleAsync(deleteSeller));
+store.delete("/", handleAsync(remove));
 
 store.use("/stats", stats);
 

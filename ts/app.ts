@@ -101,7 +101,6 @@ app.use(
     credentials: true,
     // exposedHeaders: [HTTP.HEADERS.ACCESS_TOKEN, "Set-Cookie"],
     origin: (origin, callback) => callback(null, origin),
-    optionsSuccessStatus: StatusCodes.OK,
   }),
 );
 app.use(initLimiter() as RateLimitRequestHandler);
