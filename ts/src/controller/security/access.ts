@@ -8,8 +8,9 @@ import { APIError } from "../../error/index.js";
 import { util } from "../../util/index.js";
 import { KEYS } from "../../constant/index.js";
 import { lib } from "../../lib/index.js";
+import { config } from "../../config/index.js";
 
-const { HTTP } = KEYS;
+const { COOKIE } = KEYS;
 const { Email } = schema.req.security.access;
 
 export default {
@@ -35,7 +36,9 @@ export default {
     const { token, code, key, iv } = access.token(user.dataValues.id);
 
     req.session.access = { key, iv };
-    res.setHeader(HTTP.HEADERS.ACCESS_TOKEN, token);
+    // res.setHeader(HTTP.HEADERS.ACCESS_TOKEN, token);
+    const { cookieOptions } = config.options;
+    res.cookie(COOKIE.TOKEN, token, cookieOptions);
 
     //TODO: Send code in email (template)
     const { Mail } = lib;

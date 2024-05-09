@@ -12,6 +12,7 @@ export default {
   COOKIE: {
     AUTHORIZATION: "authorization",
     SESSION: "session",
+    TOKEN: "token",
   },
   GLOBAL: {
     PUBLIC: "public",

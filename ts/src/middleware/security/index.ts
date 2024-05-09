@@ -8,19 +8,18 @@ import { model } from "../../model/index.js";
 import { schema } from "../../schema/index.js";
 import { APIError } from "../../error/index.js";
 
+const { COOKIE } = KEYS;
+
 export default {
   async access(req: Request, _res: Response<never, TResponse["Locals"]>, next: NextFunction, transaction: Transaction) {
-    const { getHeader } = util.fn;
-
-    const token = getHeader(req.headers, KEYS.HTTP.HEADERS.ACCESS_TOKEN);
-    if (token instanceof Array) throw APIError.middleware(StatusCodes.CONFLICT, "Too many access token");
+    const token = `${req.cookies[COOKIE.TOKEN] ?? ""}`;
     if (token.length === 0) throw APIError.middleware(StatusCodes.BAD_REQUEST, "Access token not send");
 
     const key = req.session.access?.key ?? "";
-    if (key.length === 0) throw APIError.server(StatusCodes.FORBIDDEN, "Unsaved access key");
+    if (key.length === 0) throw APIError.server(StatusCodes.FORBIDDEN, "Invalid access key");
 
     const iv = req.session.access?.iv ?? "";
-    if (iv.length === 0) throw APIError.server(StatusCodes.FORBIDDEN, "Unsaved access iv");
+    if (iv.length === 0) throw APIError.server(StatusCodes.FORBIDDEN, "Invalid access iv");
 
     const { Body } = schema.req.security.access.Email.Middleware;
     const { code, password, confirmPassword } = Body.parse(req.body);

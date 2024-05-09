@@ -174,8 +174,7 @@ export default class FileConverter extends FileTmp {
   async convert() {
     const typePromises = this.files.map((file) => this.fileType(file));
     const types = await Promise.all(typePromises);
-    const filterTypes = types.filter((file) => file !== null);
-
+    const filterTypes = types.filter((file) => file !== null) as ConvertedFile[];
     const converted = await this.fileConvert(filterTypes);
     if (this.cleanTmp) await tmp.cleanup();
 
