@@ -3,7 +3,8 @@ config();
 
 export default {
   NODE: {
-    PORT: process.env.PORT,
+    // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+    PORT: process.env.PORT || 4000,
     ENV: process.env.NODE_ENV,
   },
   SEQUELIZE: {
