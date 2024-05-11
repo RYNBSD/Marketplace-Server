@@ -132,7 +132,7 @@ app.use(
     name: COOKIE.SESSION,
     secret: ENV.SESSION.SECRET,
     resave: false,
-    saveUninitialized: false,
+    saveUninitialized: true,
     cookie: configOptions.cookieOptions,
   }),
 );
