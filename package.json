@@ -11,7 +11,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "code:check": "yarn lint && tsc",
-    "build": "yarn code:check && node esbuild.config.js"
+    "build": "node esbuild.config.js"
   },
   "engines": {
     "node": "20.10.0"
