@@ -133,8 +133,8 @@ app.use(
     name: COOKIE.SESSION,
     secret: ENV.SESSION.SECRET,
     resave: false,
-    saveUninitialized: false,
-    cookie: configOptions.cookieOptions,
+    saveUninitialized: true,
+    cookie: { ...configOptions.cookieOptions, sameSite: "none" },
   }),
 );
 // app.use(
