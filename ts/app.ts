@@ -135,7 +135,7 @@ app.use(
     resave: false,
     saveUninitialized: true,
     proxy: true,
-    cookie: { ...configOptions.cookieOptions, sameSite: "none" },
+    cookie: configOptions.cookieOptions,
   }),
 );
 // app.use(
