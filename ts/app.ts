@@ -47,6 +47,7 @@ import { passport } from "./src/passport/index.js";
  */
 const app = express();
 app.set("env", ENV.NODE.ENV);
+app.set("trust proxy", 1);
 app.disable("x-powered-by");
 app.disable("trust proxy");
 app.disable("view cache");
@@ -132,7 +133,7 @@ app.use(
     name: COOKIE.SESSION,
     secret: ENV.SESSION.SECRET,
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
     cookie: configOptions.cookieOptions,
   }),
 );
