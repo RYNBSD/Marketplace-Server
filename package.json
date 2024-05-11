@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "test": "cls && cross-env NODE_ENV=\"test\" jest",
-    "start": "cross-env NODE_ENV=\"production\" node ./build/index.mjs",
+    "start": "cross-env NODE_ENV=\"production\" yarn build && node ./build/index.js",
     "dev": "cross-env NODE_ENV=\"development\" concurrently \"tsc -w\" \"nodemon ./js/index.js\"",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",

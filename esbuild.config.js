@@ -27,7 +27,4 @@ buildSync({
         // ".json": "file",
         // ".node": "file"
     },
-    outExtension: {
-        ".js": ".mjs"
-    }
 })
