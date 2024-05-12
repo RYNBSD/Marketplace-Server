@@ -14,7 +14,7 @@ declare global {
   namespace NodeJS {
     interface ProcessEnv {
       NODE_ENV: "production" | "development" | "test";
-      PORT: number | `${number}`;
+      PORT?: number | `${number}`;
 
       COOKIE_PARSER: string;
       COOKIE_SECRET: string;
@@ -22,11 +22,6 @@ declare global {
       JWT_SECRET: string;
 
       SESSION_SECRET: string;
-
-      DB_DATABASE: string;
-      DB_USERNAME: string;
-      DB_PASSWORD: string;
-      DB_HOST: string;
 
       POSTGRESQL_URI: string;
       MONGODB_URI: string;

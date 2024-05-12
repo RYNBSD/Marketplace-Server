@@ -3,19 +3,15 @@ config();
 
 export default {
   NODE: {
-    // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
-    PORT: process.env.PORT || 4000,
+    PORT: process.env.PORT ?? 4000,
     ENV: process.env.NODE_ENV,
   },
-  SEQUELIZE: {
-    DB_DATABASE: process.env.DB_DATABASE,
-    DB_USERNAME: process.env.DB_USERNAME,
-    DB_PASSWORD: process.env.DB_PASSWORD,
-    DB_HOST: process.env.DB_HOST,
-  },
   URI: {
-    POSTGRESQL: process.env.POSTGRESQL_URI,
-    MONGO: process.env.MONGODB_URI,
+    POSTGRES:
+      process.env.NODE_ENV === "production"
+        ? process.env.POSTGRESQL_URI
+        : "postgres://postgres:password@localhost:5432/marketplace",
+    MONGO: process.env.NODE_ENV === "production" ? process.env.MONGODB_URI : "mongodb://localhost:27017/marketplace",
   },
   COOKIE: {
     SECRET: process.env.COOKIE_SECRET,

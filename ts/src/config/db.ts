@@ -5,11 +5,7 @@ export default {
   async connect() {
     if (global.sequelize instanceof Sequelize) return;
 
-    const connectionUri =
-      ENV.URI.POSTGRESQL ||
-      `postgres://${ENV.SEQUELIZE.DB_USERNAME}:${ENV.SEQUELIZE.DB_PASSWORD}@${ENV.SEQUELIZE.DB_HOST}:5432/${ENV.SEQUELIZE.DB_DATABASE}`;
-
-    global.sequelize = new Sequelize(connectionUri, {
+    global.sequelize = new Sequelize(ENV.URI.POSTGRES, {
       dialect: "postgres",
       benchmark: !IS_PRODUCTION,
       define: {
