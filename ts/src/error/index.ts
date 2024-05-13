@@ -31,10 +31,10 @@ export class BaseError extends Error {
   }
 
   public static async handleError(error: unknown) {
-    if (!IS_PRODUCTION) {
-      console.error(error);
-      return;
-    }
+    // if (!IS_PRODUCTION) {
+    //   console.error(error);
+    //   return;
+    // }
 
     type NewErrorType = {
       message: string;

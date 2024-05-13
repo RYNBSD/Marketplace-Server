@@ -10,12 +10,14 @@ global.__filename = fileURLToPath(import.meta.url);
 global.__dirname = path.dirname(__filename);
 global.__root = process.cwd();
 
+// TODO: rollback dev options (after 27)
+
 const PUBLIC = "public";
 const PUBLIC_PATH = path.join(__root, PUBLIC);
 
 if (!IS_PRODUCTION) {
   await import("colors");
-  if (existsSync(PUBLIC_PATH)) rmSync(PUBLIC_PATH, { recursive: true, force: true });
+  // if (existsSync(PUBLIC_PATH)) rmSync(PUBLIC_PATH, { recursive: true, force: true });
 }
 
 if (!existsSync(PUBLIC_PATH)) {
@@ -36,7 +38,8 @@ if (!existsSync(MODEL_PATH)) mkdirSync(MODEL_PATH);
 
 await db.connect();
 const { default: app } = await import("./app.js");
-await db.init();
+// await db.init();
+await sequelize.sync();
 
 app.listen(process.env.PORT, async () => {
   if (!IS_PRODUCTION) console.log("Starting".bgGreen.white);
