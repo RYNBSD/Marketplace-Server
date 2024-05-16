@@ -9,6 +9,7 @@ import { schema } from "../../../../schema/index.js";
 import categories from "./categories.js";
 import products from "./products.js";
 import stats from "./stats.js";
+import orders from "./orders.js";
 
 const { Update } = schema.req.api.dashboard.store;
 
@@ -87,5 +88,6 @@ export default {
   },
   categories,
   products,
+  orders,
   stats,
 } as const;

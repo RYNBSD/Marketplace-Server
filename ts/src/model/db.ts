@@ -359,6 +359,10 @@ Product.addHook("afterDestroy", async (product) => {
     ProductSize.destroy({ force: false, where: { productId: product.dataValues.id } }),
     ProductRating.destroy({ force: false, where: { productId: product.dataValues.id } }),
     ProductTag.destroy({ force: false, where: { productId: product.dataValues.id } }),
+    Order.update(
+      { status: "canceled", canceledAt: new Date() },
+      { where: { status: ["wait", "process"] }, fields: ["status", "canceledAt"] },
+    ),
   ]);
 });
 

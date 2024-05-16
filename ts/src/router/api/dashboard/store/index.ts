@@ -2,6 +2,7 @@ import { Router } from "express";
 import { stats } from "./stats.js";
 import { categories } from "./categories.js";
 import { products } from "./products.js";
+import { orders } from "./orders.js";
 import { util } from "../../../../util/index.js";
 import { config } from "../../../../config/index.js";
 import { controller } from "../../../../controller/index.js";
@@ -25,3 +26,5 @@ store.use("/stats", stats);
 store.use("/categories", categories);
 
 store.use("/products", products);
+
+store.use("/orders", orders);

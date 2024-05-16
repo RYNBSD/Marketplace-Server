@@ -27,6 +27,8 @@ export default {
     delete global.sequelize;
   },
   async init() {
-    if (global.sequelize instanceof Sequelize) await global.sequelize.sync({ force: !IS_PRODUCTION });
+    if (global.sequelize instanceof Sequelize) {
+      await global.sequelize.sync(IS_PRODUCTION ? {} : { force: !IS_PRODUCTION });
+    }
   },
 } as const;

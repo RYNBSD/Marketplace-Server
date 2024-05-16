@@ -14,6 +14,7 @@ export async function all(userId: string, transaction: Transaction) {
     INNER JOIN "ProductImage" "PI" ON "PI"."productId" = "P"."id"
     WHERE "O"."userId" = $userId
     GROUP BY "O"."id", "P"."id"
+    ORDER BY "O"."createdAt" DESC
   `,
     {
       type: QueryTypes.SELECT,
@@ -39,6 +40,7 @@ export async function one(id: number, userId: string, transaction: Transaction) 
     INNER JOIN "ProductImage" "PI" ON "PI"."productId" = "P"."id"
     WHERE "O"."id" = $id AND "O"."userId" = $userId
     GROUP BY "O"."id", "P"."id"
+    LIMIT 1
   `,
     {
       type: QueryTypes.SELECT,
