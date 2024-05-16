@@ -1,8 +1,7 @@
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import process from "node:process";
-import { existsSync } from "node:fs";
-import { mkdirSync, rmSync } from "node:fs";
+import { existsSync, mkdirSync, rmSync } from "node:fs";
 import db from "./src/config/db.js";
 
 global.IS_PRODUCTION = process.env.NODE_ENV === "production";
@@ -40,6 +39,18 @@ await db.connect();
 const { default: app } = await import("./app.js");
 // await db.init();
 await sequelize.sync();
+
+// https
+//   .createServer(
+//     {
+//       key: readFileSync(path.join(__root, "certificate", "server.key")),
+//       cert: readFileSync(path.join(__root, "certificate", "server.cert")),
+//     },
+//     app,
+//   )
+//   .listen(process.env.PORT, async () => {
+//     if (!IS_PRODUCTION) console.log("Starting".bgGreen.white);
+//   });
 
 app.listen(process.env.PORT, async () => {
   if (!IS_PRODUCTION) console.log("Starting".bgGreen.white);
