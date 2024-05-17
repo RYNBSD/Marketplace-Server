@@ -7,7 +7,6 @@ import { model } from "../../../../model/index.js";
 import { APIError } from "../../../../error/index.js";
 import { schema } from "../../../../schema/index.js";
 
-const { OrderId } = schema.id;
 const { Patch } = schema.req.api.dashboard.store.orders;
 
 export default {
@@ -25,16 +24,16 @@ export default {
     res.status(StatusCodes.OK).json({ success: true, data: { orders } });
   },
   async order(
-    req: Request,
+    _req: Request,
     res: Response<TResponse["Body"]["Success"], TResponse["Locals"]>,
     _next: NextFunction,
     transaction: Transaction,
   ) {
-    const { orderId } = OrderId.parse(req.params);
-    const store = res.locals.store!;
+    const localStore = res.locals.store!;
+    const localOrder = res.locals.order!;
 
     const { orders } = service.store;
-    const order = await orders.order(store.dataValues.id, orderId, transaction);
+    const order = await orders.order(localStore.dataValues.id, localOrder.dataValues.id, transaction);
 
     res.status(StatusCodes.OK).json({ success: true, data: { order } });
   },
@@ -45,10 +44,11 @@ export default {
     transaction: Transaction,
   ) {
     const { Query } = Patch;
-    const [{ orderId }, { status }] = await Promise.all([OrderId.parseAsync(req.params), Query.parseAsync(req.query)]);
+    const { status } = Query.parse(req.query);
+    const localOrder = res.locals.order!;
 
     const { Order } = model.db;
-    const order = await Order.findOne({ where: { id: orderId }, limit: 1, plain: true, transaction });
+    const order = await Order.findOne({ where: { id: localOrder.dataValues.id }, limit: 1, plain: true, transaction });
     if (order === null) throw APIError.controller(StatusCodes.NOT_FOUND, "Order not found");
 
     if (order.dataValues.canceledAt !== null)

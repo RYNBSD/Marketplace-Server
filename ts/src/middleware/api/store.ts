@@ -6,7 +6,7 @@ import { model } from "../../model/index.js";
 import { APIError } from "../../error/index.js";
 import { schema } from "../../schema/index.js";
 
-const { StoreId, CategoryId, ProductId } = schema.id;
+const { StoreId, CategoryId, ProductId, OrderId } = schema.id;
 
 export default {
   async checkStore(
@@ -169,6 +169,43 @@ export default {
     res.locals = {
       ...res.locals,
       product,
+    };
+    return next();
+  },
+  async isOrderOwner(
+    req: Request,
+    res: Response<never, TResponse["Locals"]>,
+    next: NextFunction,
+    transaction: Transaction,
+  ) {
+    const { orderId } = OrderId.parse(req.params);
+    const store = res.locals.store!;
+
+    const { Order, Product, Category } = model.db;
+    const order = await Order.findOne({
+      where: { id: orderId },
+      limit: 1,
+      plain: true,
+      transaction,
+      include: {
+        attributes: [],
+        model: Product,
+        required: true,
+        include: [
+          {
+            attributes: [],
+            model: Category,
+            required: true,
+            where: { storeId: store.dataValues.id },
+          },
+        ],
+      },
+    });
+    if (order === null) throw APIError.middleware(StatusCodes.NOT_FOUND, "Order not found");
+
+    res.locals = {
+      ...res.locals,
+      order,
     };
     return next();
   },

@@ -11,17 +11,18 @@ const options: swaggerJsdoc.Options = {
   definition: {
     openapi: "3.1.0",
     info: {
-      title: "LogRocket Express API with Swagger",
+      title: "Marketplace API",
       version: PACKAGE.VERSION,
-      description: "This is a simple CRUD API application made with Express and documented with Swagger",
+      description:
+        "This is a swagger documentation for marketplace, this is not for testing api, if you want to test it use for eg: postman",
       license: {
         name: "MIT",
         url: "https://spdx.org/licenses/MIT.html",
       },
       contact: {
-        name: "LogRocket",
-        url: "https://logrocket.com",
-        email: "info@email.com",
+        name: "",
+        url: "",
+        email: "",
       },
     },
     servers: [

@@ -28,23 +28,6 @@ import { BaseError } from "./src/error/index.js";
 import { router } from "./src/router/index.js";
 import { passport } from "./src/passport/index.js";
 
-/**
- * Security:
- *  - XSS
- *  - DDOS
- *  - SQL injection
- *  - CSRF
- *  - HPP
- *  - Error Handling
- *  - Linting
- *  - Run Time Type Safety
- *  - Cookie
- *  - Session
- *
- * Performance:
- *
- *
- */
 const app = express();
 app.set("env", ENV.NODE.ENV);
 app.set("trust proxy", 1);

@@ -6,13 +6,16 @@ export const router = Router();
 
 /**
  * @openapi
- * /:
- *   get:
- *     description: Welcome to swagger-jsdoc!
- *     responses:
- *       200:
- *         description: Returns a mysterious string.
+ * tags:
+ *  name: Api
+ *  description: api path
  */
-
 router.use("/api", api);
+
+/**
+ * @openapi
+ * tags:
+ *  name: Security
+ *  description: security path
+ */
 router.use("/security", security);

@@ -24,7 +24,9 @@ export default {
 
     const keys = s
       .split(/\s+/)
-      .filter((s) => /^[a-zA-Z0-9،-٩]+$/.test(s))
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0)
+      // .filter((s) => /^[a-zA-Z0-9،-٩]+$/.test(s))
       .map((s) => ({ [Op.iLike]: `%${s}%` }));
 
     const [products, categories, stores] = await Promise.all([

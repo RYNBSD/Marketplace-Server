@@ -13,7 +13,17 @@ const { handleAsync } = util.fn;
 
 export const api = Router();
 
+/**
+ * @openapi
+ *
+ * tags:
+ *  name: Auth
+ *  description: Authentication path (/api/auth)
+ */
 api.use("/auth", auth);
+
 api.use("/user", handleAsync(isAuthenticated), user);
+
 api.use("/stores", stores);
+
 api.use("/dashboard", handleAsync(isAuthenticated), dashboard);
