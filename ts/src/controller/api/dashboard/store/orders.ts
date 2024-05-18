@@ -3,7 +3,6 @@ import type { Transaction } from "sequelize";
 import type { TResponse } from "../../../../types/index.js";
 import { StatusCodes } from "http-status-codes";
 import { service } from "../../../../service/index.js";
-import { model } from "../../../../model/index.js";
 import { APIError } from "../../../../error/index.js";
 import { schema } from "../../../../schema/index.js";
 
@@ -45,11 +44,7 @@ export default {
   ) {
     const { Query } = Patch;
     const { status } = Query.parse(req.query);
-    const localOrder = res.locals.order!;
-
-    const { Order } = model.db;
-    const order = await Order.findOne({ where: { id: localOrder.dataValues.id }, limit: 1, plain: true, transaction });
-    if (order === null) throw APIError.controller(StatusCodes.NOT_FOUND, "Order not found");
+    const order = res.locals.order!;
 
     if (order.dataValues.canceledAt !== null)
       throw APIError.controller(StatusCodes.FORBIDDEN, "Order already canceled");
@@ -63,9 +58,9 @@ export default {
       // @ts-ignore
       {
         status,
-        processedAt: status === "process" ? new Date() : null,
-        doneAt: status === "done" ? new Date() : null,
-        canceledAt: status === "canceled" ? new Date() : null,
+        processedAt: status === "process" ? new Date() : order.dataValues.processedAt,
+        doneAt: status === "done" ? new Date() : order.dataValues.doneAt,
+        canceledAt: status === "canceled" ? new Date() : order.dataValues.canceledAt,
       },
       { fields: ["status"], transaction },
     );

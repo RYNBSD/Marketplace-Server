@@ -6,6 +6,7 @@ export async function categories(storeId: string, transaction: Transaction) {
   SELECT COUNT("id") AS "categories", date_trunc('day', "createdAt")::date AS "createdAt" FROM "Category"
   WHERE "storeId" = $storeId
   GROUP BY date_trunc('day', "createdAt")::date
+  ORDER BY date_trunc('day', "createdAt")::date DESC
   `,
     {
       type: QueryTypes.SELECT,
@@ -22,6 +23,7 @@ export async function products(storeId: string, transaction: Transaction) {
     SELECT COUNT("P"."id") AS "products", date_trunc('day', "P"."createdAt")::date AS "createdAt" FROM "Product" "P"
     INNER JOIN "Category" "C" ON "C"."id" = "P"."categoryId" AND "C"."storeId"  = $storeId
     GROUP BY date_trunc('day', "P"."createdAt")::date
+    ORDER BY date_trunc('day', "P"."createdAt")::date DESC
   `,
     {
       type: QueryTypes.SELECT,

@@ -40,18 +40,6 @@ const { default: app } = await import("./app.js");
 // await db.init();
 await sequelize.sync();
 
-// https
-//   .createServer(
-//     {
-//       key: readFileSync(path.join(__root, "certificate", "server.key")),
-//       cert: readFileSync(path.join(__root, "certificate", "server.cert")),
-//     },
-//     app,
-//   )
-//   .listen(process.env.PORT, async () => {
-//     if (!IS_PRODUCTION) console.log("Starting".bgGreen.white);
-//   });
-
 app.listen(process.env.PORT, async () => {
   if (!IS_PRODUCTION) console.log("Starting".bgGreen.white);
 });
